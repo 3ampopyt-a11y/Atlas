@@ -1,0 +1,6 @@
+{
+  "name": "World Countries Atlas",
+  "description": "Explore all world countries with an interactive clear map, sovereign age and longevity, military power rankings, defense budgets, personnel, and comprehensive geopolitical statistics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
