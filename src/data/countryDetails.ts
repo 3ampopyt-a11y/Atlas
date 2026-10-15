@@ -623,7 +623,7 @@ export function getDetailedCountryInfo(country: CountryData): ExtendedCountryDet
 
   const defaultHeritage =
     curated?.culturalHeritageHighlights || {
-      nationalDish: `Traditional national cuisine and specialties of ${country.name}`,
+      nationalDish: `${country.name} National Dish`,
       famousHistoricalFigures: [`Historic Leaders and Pioneers of ${country.name}`],
       globalContributions: [`Cultural heritage, architecture, traditional arts, and scientific contributions`],
     };

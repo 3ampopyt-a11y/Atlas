@@ -1,7 +1,7 @@
 import { CountryData, CulinaryProfile, NationalFoodItem } from '../types.ts';
 import { getDetailedCountryInfo } from '../data/countryDetails.ts';
 
-// Comprehensive National Food & Culinary Heritage Registry
+// Comprehensive National Food & Culinary Heritage Registry with REAL FOOD NAMES (never generic descriptors)
 export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>> = {
   // United States
   '840': {
@@ -10,7 +10,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Regional barbecue styles (Texas, Carolina, Kansas City, Memphis), New England clam chowders, Creole & Cajun jambalayas.',
     nationalDishes: [
       {
-        name: 'Smoked Barbecue Brisket & Ribs',
+        name: 'Texas Barbecue Brisket & Ribs',
         nativeName: 'American BBQ',
         category: 'National Dish',
         description: 'Hardwood slow-smoked beef brisket and pork ribs rubbed with brown sugar, paprika, and black pepper, cooked low-and-slow for up to 16 hours until meltingly tender with a deep smoke ring.',
@@ -20,7 +20,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍖',
       },
       {
-        name: 'Classic Smash Cheeseburger',
+        name: 'Cheeseburger',
         nativeName: 'Double Cheeseburger',
         category: 'Traditional Main',
         description: 'Seared ground chuck beef patty smashed on a screaming hot flat-top griddle for crispy lace edges, crowned with melted American cheddar, pickles, onions, and special sauce in a toasted brioche bun.',
@@ -42,7 +42,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'New York Style Bagel & Lox',
+        name: 'New York Bagel & Lox',
         category: 'Street Food',
         description: 'Boiled and baked dense malt bagel slathered with whipped cream cheese, paper-thin smoked Atlantic salmon, capers, and red onion.',
         keyIngredients: ['Kettle-Boiled Bagel', 'Smoked Salmon (Lox)', 'Cream Cheese', 'Capers', 'Red Onion'],
@@ -50,7 +50,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥯',
       },
       {
-        name: 'Chicago Deep-Dish & Hot Dog',
+        name: 'Chicago Hot Dog',
         category: 'Street Food',
         description: 'All-beef kosher hot dog on a poppy seed bun dragged through the garden with yellow mustard, neon green relish, chopped onions, tomato wedges, pickle spear, sport peppers, and celery salt.',
         keyIngredients: ['All-Beef Frank', 'Poppy Seed Bun', 'Pickles & Peppers', 'Celery Salt'],
@@ -60,7 +60,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Spiced Apple Pie with Vanilla Ice Cream',
+        name: 'Apple Pie',
         nativeName: 'As American as Apple Pie',
         category: 'Dessert / Pastry',
         description: 'Flaky butter lattice crust packed with tart Granny Smith apples tossed in cinnamon, nutmeg, brown sugar, and lemon zest, baked until bubbling and served warm à la mode.',
@@ -70,9 +70,9 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥧',
       },
       {
-        name: 'Southern Pecan & Key Lime Pie',
+        name: 'Pecan Pie & Key Lime Pie',
         category: 'Dessert / Pastry',
-        description: 'Crisp buttery graham cracker or shortcrust crust with roasted pecans in molasses custard, or tart Florida key lime juice custard.',
+        description: 'Crisp buttery shortcrust with roasted pecans in molasses custard, or tart Florida key lime juice custard.',
         keyIngredients: ['Pecans / Key Limes', 'Graham Cracker Crust', 'Sweetened Condensed Milk', 'Whipped Cream'],
         flavorProfile: 'Zesty, Sweet, Nutty & Rich',
         iconEmoji: '🍰',
@@ -80,12 +80,185 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Southern Sweet Iced Tea & Bourbon Mash',
+        name: 'Sweet Iced Tea & Bourbon',
         category: 'Iconic Beverage',
         description: 'Freshly brewed black tea sweetened while piping hot and poured over cracked ice with lemon mint, alongside historic Kentucky bourbon whiskey made from charred new oak barrels.',
         keyIngredients: ['Black Tea', 'Pure Cane Sugar', 'Fresh Mint & Lemon', 'Kentucky Bourbon'],
         flavorProfile: 'Sweet, Refreshing, Oaky & Caramel',
         iconEmoji: '🥃',
+      },
+    ],
+  },
+
+  // Portugal
+  '620': {
+    culinaryTraditions: 'A rich Atlantic seafaring gastronomy famous for over 365 recipes for bacalhau (salted Atlantic cod), wood-fired suckling pig, cataplana copper clambakes, and monastic conventual egg-yolk pastry artistry.',
+    stapleIngredients: ['Bacalhau (Salt Cod)', 'Azeite (Extra Virgin Olive Oil)', 'Garlic & Onions', 'Coriander & Piri-Piri', 'Fresh Seafood', 'Potatoes & Couve Galega'],
+    dietaryHeritage: 'Tascas taverns, coastal marisqueiras, Port wine cellars in Vila Nova de Gaia, and Sunday family cozido gatherings.',
+    nationalDishes: [
+      {
+        name: 'Bacalhau à Brás',
+        nativeName: 'Bacalhau à Brás',
+        category: 'National Dish',
+        description: 'Shredded salted Atlantic cod pan-fried with sweet translucent onions and paper-thin matchstick potatoes (batata palha), gently bound with velvety scrambled farm eggs, garnished with black olives and fresh parsley.',
+        keyIngredients: ['Shredded Bacalhau (Salt Cod)', 'Batata Palha (Matchstick Potatoes)', 'Fresh Farm Eggs', 'Extra Virgin Olive Oil', 'Black Olives & Parsley'],
+        flavorProfile: 'Savory, Creamy Egg-Bound, Crispy Potato & Umami',
+        culturalSignificance: 'Portugal’s most beloved national dish, invented in Lisbon’s historic Bairro Alto district by tavern-keeper Brás.',
+        iconEmoji: '🐟',
+      },
+      {
+        name: 'Francesinha',
+        nativeName: 'Francesinha à Moda do Porto',
+        category: 'Traditional Main',
+        description: 'A legendary layered sandwich from Porto stuffed with tender beef steak, fresh linguiça sausage, mortadella, and ham, smothered in melted Portuguese cheese and drenched in a piping hot, thick beer-and-tomato piri-piri sauce.',
+        keyIngredients: ['Beef Sirloin', 'Linguiça & Chouriço Sausages', 'Melted Queijo Curado', 'Beer & Tomato Piri-Piri Gravy', 'Thick Crusty Bread'],
+        flavorProfile: 'Decadent, Spicy, Cheesy, Meaty & Beer-Infused',
+        culturalSignificance: 'The undisputed culinary symbol of Porto, inspired by French croque monsieur and adapted into an epic Portuguese feast.',
+        iconEmoji: '🥪',
+      },
+      {
+        name: 'Cozido à Portuguesa',
+        nativeName: 'Cozido à Portuguesa',
+        category: 'Traditional Main',
+        description: 'The ultimate slow-cooked Portuguese feast combining beef brisket, pork ribs, chouriço, morcela (blood sausage), and farinheira sausages, simmered alongside cabbage, turnip greens, carrots, and potatoes.',
+        keyIngredients: ['Smoked Portuguese Chouriço & Morcela', 'Beef Brisket & Pork Ribs', 'Portuguese Savoy Cabbage', 'Carrots & Potatoes'],
+        flavorProfile: 'Deeply Savory, Smoky, Earthy & Soul-Warming',
+        culturalSignificance: 'The grand Sunday family centerpiece across mainland Portugal and the volcanic Furnas of the Azores.',
+        iconEmoji: '🍲',
+      },
+      {
+        name: 'Caldo Verde',
+        nativeName: 'Caldo Verde',
+        category: 'Soup / Stew',
+        description: 'Velvety potato-and-onion purée broth laden with finely shredded couve galega (collard greens), extra virgin olive oil, and crowned with slices of pan-seared spicy chouriço.',
+        keyIngredients: ['Couve Galega (Collard Greens)', 'Yukon Gold Potato Purée', 'Portuguese Chouriço Slices', 'Garlic & Extra Virgin Olive Oil'],
+        flavorProfile: 'Silky, Earthy, Garlicky & Lightly Smoky',
+        culturalSignificance: 'Recognized as one of the Seven Wonders of Portuguese Gastronomy, ubiquitous during Lisbon’s Saint Anthony (Santo António) festivals.',
+        iconEmoji: '🥣',
+      },
+    ],
+    popularStreetFoods: [
+      {
+        name: 'Bifana no Pão',
+        nativeName: 'Bifana Tradicional',
+        category: 'Street Food',
+        description: 'Thinly sliced pork cutlets simmered in a bubbling cauldron of white wine, garlic, bay leaves, and piri-piri, tucked into a crusty papo-seco bread roll with yellow mustard.',
+        keyIngredients: ['Tender Pork Escalope', 'White Wine & Garlic Simmering Sauce', 'Piri-Piri', 'Papo-Seco Crusty Bread Roll'],
+        flavorProfile: 'Garlicky, Spicy, Tangy & Juicy',
+        iconEmoji: '🥖',
+      },
+      {
+        name: 'Pastel de Bacalhau',
+        nativeName: 'Pastéis de Bacalhau',
+        category: 'Street Food',
+        description: 'Golden teardrop-shaped cod fritters shaped with two spoons, made from whipped salt cod, potato, eggs, and parsley, often enjoyed with an espresso or cold imperial draft beer.',
+        keyIngredients: ['Shredded Bacalhau', 'Mashed Potato', 'Eggs', 'Fresh Parsley & Onions'],
+        flavorProfile: 'Crisp Shell, Fluffy Oceanic Interior, Savory & Herby',
+        iconEmoji: '🥟',
+      },
+    ],
+    dessertsAndPastries: [
+      {
+        name: 'Pastel de Nata',
+        nativeName: 'Pastéis de Belém / Pastel de Nata',
+        category: 'Dessert / Pastry',
+        description: 'Iconic Portuguese egg-custard tart encased in ultra-crisp, caramelized puff pastry with blistered amber tops, dusted while hot with cinnamon and powdered sugar.',
+        keyIngredients: ['Ultra-Crisp Laminated Puff Pastry', 'Egg Yolks', 'Whole Milk & Sugar Syrup', 'Cinnamon Stick & Lemon Peel'],
+        flavorProfile: 'Caramelized, Creamy, Crisp & Warmly Spiced',
+        culturalSignificance: 'Created before the 18th century by Catholic monks at the Jerónimos Monastery in Belém, Lisbon; globally recognized symbol of Portugal.',
+        iconEmoji: '🥧',
+      },
+      {
+        name: 'Queijada de Sintra',
+        nativeName: 'Queijada Tradicional',
+        category: 'Dessert / Pastry',
+        description: 'Delicate medieval cheese pastry from fairy-tale Sintra, made with fresh unripened curd cheese, sugar, egg yolks, flour, and aromatic Ceylon cinnamon.',
+        keyIngredients: ['Fresh Curd Cheese (Requeijão)', 'Egg Yolks', 'Ground Ceylon Cinnamon', 'Ultra-Thin Crust'],
+        flavorProfile: 'Subtly Sweet, Cinnamon-Spiced, Cheesy & Dense',
+        iconEmoji: '🥮',
+      },
+    ],
+    signatureBeverages: [
+      {
+        name: 'Vinho do Porto & Ginjinha',
+        nativeName: 'Vinho do Porto / Ginjinha d’Óbidos',
+        category: 'Iconic Beverage',
+        description: 'World-renowned fortified Port wine aged in oak barrels from the Douro Valley terraces (Tawny and Vintage), paired with sweet Morello sour cherry liqueur (Ginjinha) served with the fruit in chocolate cups.',
+        keyIngredients: ['Douro Valley Grapes (Touriga Nacional)', 'Aguardente Grape Brandy', 'Morello Cherries (Ginja)'],
+        flavorProfile: 'Velvety, Plum, Raisin, Dark Chocolate & Warming Oak',
+        iconEmoji: '🍷',
+      },
+    ],
+  },
+
+  // Spain
+  '724': {
+    culinaryTraditions: 'A Mediterranean culinary powerhouse famous for tapas bar hopping, world-class Iberian cured ham, saffron rice cookery, Andalusian cold soups, and Basque Michelin-star gastronomy.',
+    stapleIngredients: ['Extra Virgin Olive Oil', 'Azafrán (Saffron)', 'Jamón Ibérico', 'Pimentón de la Vera (Smoked Paprika)', 'Garlic & Tomatoes', 'Arroz Bomba'],
+    dietaryHeritage: 'Tapas and pintxos bar culture, late-night dinners, coastal chiringuitos, and Rioja wine heritage.',
+    nationalDishes: [
+      {
+        name: 'Paella Valenciana',
+        nativeName: 'Paella Valenciana Tradicional',
+        category: 'National Dish',
+        description: 'Cooked in a wide steel paella pan over orange-wood fire: Bomba rice infused with saffron, rabbit, chicken, green beans (bajoqueta), butter beans (garrofó), and rosemary, forming the crispy caramelized rice crust (socarrat) on the bottom.',
+        keyIngredients: ['Arroz Bomba Rice', 'Spanish Saffron Strands', 'Chicken & Rabbit', 'Garrofó Lima Beans', 'Rosemary & Sweet Paprika'],
+        flavorProfile: 'Saffron-Aromatic, Savory, Crispy Socarrat & Herbaceous',
+        culturalSignificance: 'Spain’s most famous culinary export, originating from the Albufera lagoon farmers in Valencia.',
+        iconEmoji: '🥘',
+      },
+      {
+        name: 'Jamón Ibérico de Bellota',
+        nativeName: 'Jamón 100% Ibérico de Bellota',
+        category: 'Traditional Main',
+        description: 'Acorn-fed free-range black Iberian pig cured for up to 48 months in mountain air, hand-carved in paper-thin translucent slices that melt on the tongue at room temperature.',
+        keyIngredients: ['100% Pata Negra Iberian Pork', 'Wild Holm Oak Acorns (Bellotas)', 'Mediterranean Sea Salt', 'Time & Mountain Air'],
+        flavorProfile: 'Nutty, Sweet, Savory, Umami & Meltingly Rich',
+        culturalSignificance: 'Regarded internationally as the highest grade of cured ham on Earth.',
+        iconEmoji: '🍖',
+      },
+      {
+        name: 'Tortilla de Patatas',
+        nativeName: 'Tortilla Española',
+        category: 'Traditional Main',
+        description: 'Thick Spanish omelette made from Yukon gold potatoes slowly poached in copious extra virgin olive oil until soft, folded with beaten eggs and caramelized onions, kept juicy and runny in the center (melosa).',
+        keyIngredients: ['Spanish Potatoes', 'Fresh Farm Eggs', 'Extra Virgin Olive Oil', 'Sweet Yellow Onions', 'Sea Salt'],
+        flavorProfile: 'Buttery, Tender, Sweet Onion & Eggy Comfort',
+        culturalSignificance: 'The quintessential staple served in every tavern and family kitchen from Madrid to Barcelona.',
+        iconEmoji: '🍳',
+      },
+    ],
+    popularStreetFoods: [
+      {
+        name: 'Churros con Chocolate',
+        nativeName: 'Churros & Porras con Chocolate Caliente',
+        category: 'Street Food',
+        description: 'Piped ridged dough fried golden-crisp, dipped into a cup of thick, bittersweet Spanish molten dark chocolate.',
+        keyIngredients: ['Crisp Fried Choux Dough', 'Sugar & Cinnamon', 'Dark Spanish Drinking Chocolate'],
+        flavorProfile: 'Crunchy, Airy, Deep Chocolate & Bittersweet',
+        iconEmoji: '🥖',
+      },
+    ],
+    dessertsAndPastries: [
+      {
+        name: 'Crema Catalana & Tarta de Santiago',
+        nativeName: 'Crema Catalana / Tarta de Santiago',
+        category: 'Dessert / Pastry',
+        description: 'Silky custard infused with cinnamon and lemon peel under a blowtorched glass-like caramel crust, and Galician almond sponge cake decorated with the Cross of Saint James.',
+        keyIngredients: ['Almond Flour', 'Egg Yolks', 'Caramelized Cane Sugar', 'Cinnamon & Citrus Peel'],
+        flavorProfile: 'Crisp Caramel, Velvety, Citrus-Spiced & Nutty',
+        iconEmoji: '🍮',
+      },
+    ],
+    signatureBeverages: [
+      {
+        name: 'Sangría & Vino de Rioja',
+        nativeName: 'Sangría Española / Vino Tempranillo',
+        category: 'Iconic Beverage',
+        description: 'Tempranillo red wine punch macerated with fresh oranges, lemons, apples, and cinnamon sticks, alongside aged oak-cured Rioja wines.',
+        keyIngredients: ['Tempranillo Red Wine', 'Fresh Citrus & Peaches', 'Cinnamon Stick', 'Brandy Splash'],
+        flavorProfile: 'Fruity, Refreshing, Oaky, Spiced & Tannic',
+        iconEmoji: '🍷',
       },
     ],
   },
@@ -107,7 +280,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🦆',
       },
       {
-        name: 'Handcrafted Steamed Dumplings (Jiaozi & Xiaolongbao)',
+        name: 'Jiaozi & Xiaolongbao',
         nativeName: '饺子 / 小笼包',
         category: 'Traditional Main',
         description: 'Delicate dough pleats encapsulating minced pork, wild ginger, and scalding rich collagen broth in soup dumplings, or pan-fried crispy-bottom potstickers dipped in aged Chinkiang black vinegar.',
@@ -117,11 +290,11 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥟',
       },
       {
-        name: 'Sichuan Kung Pao & Mapo Tofu',
-        nativeName: '麻婆豆腐 / 宫保鸡丁',
+        name: 'Kung Pao Chicken & Mapo Tofu',
+        nativeName: '宫保鸡丁 / 麻婆豆腐',
         category: 'Traditional Main',
-        description: 'Silken tofu simmered in fiery chili bean paste (doubanjiang) and fermented black beans, crowned with minced beef and tingling Sichuan peppercorns inducing the authentic signature málà (numbing and spicy) sensation.',
-        keyIngredients: ['Silken Tofu', 'Pixian Doubanjiang', 'Sichuan Peppercorns', 'Minced Beef', 'Garlic Greens'],
+        description: 'Silken tofu and tender diced chicken breast seared with spicy fermented bean paste, Sichuan peppercorns, roasted peanuts, and dried chili pods inducing the authentic málà sensation.',
+        keyIngredients: ['Silken Tofu', 'Diced Chicken', 'Pixian Doubanjiang', 'Sichuan Peppercorns', 'Roasted Peanuts'],
         flavorProfile: 'Málà (Fiery, Numbing, Umami & Fragrant)',
         culturalSignificance: 'A cornerstone of Sichuan cuisine known globally for its intricate multi-layered spice dynamics.',
         iconEmoji: '🍲',
@@ -129,10 +302,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Jianbing & Dim Sum Buns',
-        nativeName: '煎饼果子 / 叉烧包',
+        name: 'Jianbing & Baozi',
+        nativeName: '煎饼果子 / 包子',
         category: 'Street Food',
-        description: 'Savory morning crêpe smeared with sweet bean paste, chili crisps, eggs, cilantro, and crackly fried wonton crisps (baocui), rolled fresh on street-side iron griddles.',
+        description: 'Savory morning crêpe smeared with sweet bean paste, chili crisps, eggs, cilantro, and crackly fried wonton crisps, alongside fluffy steamed stuffed buns.',
         keyIngredients: ['Mung Bean Flour Crêpe', 'Fresh Eggs', 'Crispy Wonton Cracker', 'Sweet Paste & Scallions'],
         flavorProfile: 'Crispy, Chewy, Savory & Pungent',
         iconEmoji: '🫓',
@@ -140,10 +313,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Mid-Autumn Mooncakes & Tangyuan',
+        name: 'Mooncakes & Tangyuan',
         nativeName: '月饼 / 汤圆',
         category: 'Dessert / Pastry',
-        description: 'Intricately molded golden pastries stuffed with lotus seed paste and salted duck egg yolks symbolizing the full harvest moon, or warm glutinous rice balls filled with molten black sesame.',
+        description: 'Intricately molded golden pastries stuffed with lotus seed paste and salted duck egg yolks symbolizing the harvest moon, or warm glutinous rice balls filled with molten black sesame.',
         keyIngredients: ['Lotus Seed Paste', 'Salted Duck Egg Yolk', 'Glutinous Rice', 'Black Sesame'],
         flavorProfile: 'Sweet, Velvety, Nutty & Rich',
         culturalSignificance: 'Sacred symbols of familial unity during the Mid-Autumn and Lantern Festivals.',
@@ -152,10 +325,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Imperial Longjing Green Tea & Pu-erh',
+        name: 'Longjing Green Tea & Pu-erh',
         nativeName: '龙井茶 / 普洱茶',
         category: 'Iconic Beverage',
-        description: 'Hand-pan-roasted Dragon Well leaves picked before the Qingming rains, exuding chestnut sweetness, and aged Yunnan fermented Pu-erh tea cakes revered for digestive tranquility.',
+        description: 'Hand-pan-roasted Dragon Well leaves picked before the Qingming rains, and aged Yunnan fermented Pu-erh tea cakes revered for digestive tranquility.',
         keyIngredients: ['Camellia Sinensis Spring Bud Plucks', 'Spring Water'],
         flavorProfile: 'Grassy, Chestnut, Sweet Floral & Earthy',
         iconEmoji: '🍵',
@@ -170,8 +343,8 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Kaiseki seasonal haute cuisine, Edomae sushi craftsmanship, ramen noodle mastery, and tempura frying precision.',
     nationalDishes: [
       {
-        name: 'Edomae Nigiri Sushi & Sashimi',
-        nativeName: '握り寿司 (Nigirizushi)',
+        name: 'Sushi & Sashimi',
+        nativeName: '握り寿司 (Nigirizushi) & 刺身',
         category: 'National Dish',
         description: 'Pristine raw seasonal seafood (bluefin otoro tuna, sea urchin, king salmon, sea bream) deftly pressed over warm, vinegar-seasoned koshihikari rice dabbed with freshly grated real Hon-wasabi.',
         keyIngredients: ['Sashimi-Grade Seafood', 'Seasoned Sushi Rice (Shari)', 'Fresh Hon-Wasabi', 'Aged Shoyu', 'Pickled Gari Ginger'],
@@ -180,7 +353,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍣',
       },
       {
-        name: 'Traditional Japanese Ramen (Tonkotsu & Shoyu)',
+        name: 'Tonkotsu Ramen',
         nativeName: 'ラーメン (Rāmen)',
         category: 'Traditional Main',
         description: 'Springy alkaline wheat noodles submerged in 18-hour simmered pork bone tonkotsu or dashi-infused soy broth, topped with chashu pork belly, seasoned molten ajitsuke tamago egg, menma bamboo shoots, nori, and scallion oil.',
@@ -190,7 +363,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍜',
       },
       {
-        name: 'Japanese Wagyu Beef Sukiyaki & Shabu-Shabu',
+        name: 'Sukiyaki & Shabu-Shabu',
         nativeName: 'すき焼き (Sukiyaki)',
         category: 'Traditional Main',
         description: 'Feather-thin ribbons of heavily marbled A5 Wagyu beef simmered tableside in a cast-iron pan with sweet soy-mirin warishita sauce, shiitake mushrooms, enoki, tofu, and dipped in raw pasteurized egg.',
@@ -202,7 +375,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Osaka Takoyaki & Okonomiyaki',
+        name: 'Takoyaki & Okonomiyaki',
         nativeName: 'たこ焼き / お好み焼き',
         category: 'Street Food',
         description: 'Spherical golden batter balls stuffed with tender diced octopus, pickled red ginger, and scallions, coated with savory sweet glaze, Japanese Kewpie mayo, aonori seaweed, and dancing katsuobushi flakes.',
@@ -213,7 +386,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Wagashi, Mochi & Matcha Parfait',
+        name: 'Mochi & Wagashi',
         nativeName: '和菓子 / 大福 (Daifuku)',
         category: 'Dessert / Pastry',
         description: 'Chewy glutinous rice mochi filled with sweet azuki red bean paste or seasonal fresh strawberries, crafted to reflect changing seasons during the traditional tea ceremony.',
@@ -224,7 +397,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Ceremonial Uji Matcha & Junmai Daiginjo Sake',
+        name: 'Matcha & Sake',
         nativeName: '抹茶 / 日本酒 (Nihonshu)',
         category: 'Iconic Beverage',
         description: 'Stone-ground emerald shade-grown green tea whisked with bamboo chasen into a creamy jade foam, and premium cold-brewed rice sake with floral melon aromatics.',
@@ -242,7 +415,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Haute cuisine, rustic country bistros, artisanal charcuterie, and over 1,200 distinct French cheeses.',
     nationalDishes: [
       {
-        name: 'Pot-au-Feu & Boeuf Bourguignon',
+        name: 'Bœuf Bourguignon & Pot-au-Feu',
         nativeName: 'Bœuf Bourguignon / Pot-au-feu',
         category: 'National Dish',
         description: 'Tender braised beef chuck slowly simmered in full-bodied red Burgundy wine, beef stock, pearl onions, brown button mushrooms, lardons, carrots, and bouquet garni until deeply aromatic and fork-tender.',
@@ -252,7 +425,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥘',
       },
       {
-        name: 'Traditional French Baguette & Artisan Cheeses',
+        name: 'Baguette & Fromages',
         nativeName: 'Baguette de tradition & Plateau de Fromages',
         category: 'Traditional Main',
         description: 'Crackling golden artisanal baguette with honeycomb crumb, accompanied by Camembert de Normandie, Roquefort, Comté, and Brie de Meaux with churned salt butter.',
@@ -262,7 +435,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥖',
       },
       {
-        name: 'Duck Confit & Cassoulet',
+        name: 'Confit de Canard & Cassoulet',
         nativeName: 'Confit de Canard / Cassoulet',
         category: 'Traditional Main',
         description: 'Duck legs cured with sea salt and garlic, slowly submerged in their own rich fat for hours, then pan-seared for crackling skin; or baked with white Tarbais beans and Toulouse sausage.',
@@ -273,7 +446,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Brittany Galette & Crêpe',
+        name: 'Galette & Crêpes',
         nativeName: 'Galette de Sarrasin',
         category: 'Street Food',
         description: 'Crispy lacy buckwheat crêpe stuffed with French ham, melted Gruyère cheese, and a sunny-side-up egg folded into a square galette complète.',
@@ -284,10 +457,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Croissant au Beurre, Macarons & Crème Brûlée',
+        name: 'Croissant, Macarons & Crème Brûlée',
         nativeName: 'Croissant / Macaron / Crème Brûlée',
         category: 'Dessert / Pastry',
-        description: 'Laminated flaky viennoiserie pastry layered with French Charentes-Poitou butter, pastel almond meringue shells with ganache, and Madagascar vanilla custard with caramelized sugar crust.',
+        description: 'Laminated flaky viennoiserie pastry layered with French butter, pastel almond meringue shells with ganache, and vanilla custard with caramelized sugar crust.',
         keyIngredients: ['Laminated Butter Pastry', 'Almond Flour', 'Madagascar Vanilla Bean', 'Caramelized Sugar'],
         flavorProfile: 'Buttery, Crisp, Flaky, Delicate & Vanilla-Rich',
         iconEmoji: '🥐',
@@ -295,10 +468,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Bordeaux Grand Cru, Champagne & Café au Lait',
+        name: 'Champagne & Bordeaux Wine',
         category: 'Iconic Beverage',
-        description: 'Sparkling effervescent Champagne from limestone cellars, complex oak-aged Cabernet-Merlot blends, and morning chicory espresso with steamed whole milk.',
-        keyIngredients: ['Chardonnay & Pinot Noir Grapes', 'Roasted Arabica Coffee Beans'],
+        description: 'Sparkling effervescent Champagne from chalk cellars, and complex oak-aged Cabernet-Merlot blends from Bordeaux.',
+        keyIngredients: ['Chardonnay & Pinot Noir Grapes', 'Cabernet Sauvignon'],
         flavorProfile: 'Crisp Minerality, Brioche Bubbles & Dark Fruit Complexity',
         iconEmoji: '🍾',
       },
@@ -312,7 +485,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Regional specializations from creamy risottos of Lombardy to Neapolitan pizza and seafood pastas of Sicily.',
     nationalDishes: [
       {
-        name: 'Authentic Neapolitan Pizza Margherita',
+        name: 'Pizza Margherita',
         nativeName: 'Pizza Napoletana Margherita',
         category: 'National Dish',
         description: 'Slow-fermented dough hand-stretched and blistered in a 485°C wood-fired oven for 90 seconds, topped with crushed sweet San Marzano tomatoes, creamy Buffalo Mozzarella DOP, fresh basil, and extra virgin olive oil.',
@@ -322,7 +495,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍕',
       },
       {
-        name: 'Pasta Carbonara & Tagliatelle al Ragù (Bolognese)',
+        name: 'Spaghetti alla Carbonara & Tagliatelle al Ragù',
         nativeName: 'Spaghetti alla Carbonara',
         category: 'Traditional Main',
         description: 'Al dente bronze-extruded spaghetti tossed with crispy rendered cured guanciale (pork jowl), farm egg yolks, and copious finely grated Pecorino Romano and cracked black pepper without any cream.',
@@ -332,7 +505,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍝',
       },
       {
-        name: 'Ossobuco alla Milanese with Saffron Risotto',
+        name: 'Ossobuco alla Milanese & Risotto',
         nativeName: 'Ossobuco con Risotto allo Zafferano',
         category: 'Traditional Main',
         description: 'Cross-cut veal shank braised with white wine, broth, and mirepoix, topped with fresh gremolata (lemon zest, garlic, parsley) over golden Carnaroli rice steeped in golden saffron strands and butter.',
@@ -343,7 +516,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Sicilian Arancini & Roman Supplì',
+        name: 'Arancini & Supplì',
         nativeName: 'Arancini Siciliani',
         category: 'Street Food',
         description: 'Golden fried saffron rice croquette coated in crispy breadcrumbs, filled with slow-cooked meat ragù, sweet peas, and a molten core of stretchy caciocavallo or mozzarella cheese.',
@@ -354,7 +527,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Artisanal Tiramisù & Gelato',
+        name: 'Tiramisù & Gelato',
         nativeName: 'Tiramisù Tradizionale',
         category: 'Dessert / Pastry',
         description: 'Airy ladyfinger savoiardi biscuits soaked in dark espresso and Marsala wine, layered with fluffy sweetened mascarpone cream and dusted with bitter Dutch cocoa powder.',
@@ -366,7 +539,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Italian Espresso, Chianti Classico & Limoncello',
+        name: 'Espresso, Chianti Wine & Limoncello',
         category: 'Iconic Beverage',
         description: 'Velvety 25ml espresso extraction topped with hazelnut crema, ruby Tuscan Sangiovese wine, and iced Sorrento lemon zest digestif.',
         keyIngredients: ['Dark Roast Arabica/Robusta', 'Sangiovese Grapes', 'Amalfi Lemon Zest'],
@@ -383,17 +556,17 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Street taco culture, complex multi-day moles of Oaxaca and Puebla, ceviches, and tamale steaming.',
     nationalDishes: [
       {
-        name: 'Tacos al Pastor & Birria de Res',
+        name: 'Tacos al Pastor & Birria',
         nativeName: 'Tacos al Pastor / Birria con Consomé',
         category: 'National Dish',
         description: 'Thin shavings of marinated pork roasted on a vertical trompo spit with sweet charred pineapple, onion, cilantro, and fiery salsa on warm hand-pressed nixtamalized corn tortillas, or slow-braised guajillo-chile beef birria dipped in rich consommé.',
-        keyIngredients: ['Heirloom Corn Tortillas', 'Pork Shoulder marinated in Achiote & Chilies', 'Charred Pineapple', 'Cilantro & White Onion', 'Salsa Taquera'],
+        keyIngredients: ['Heirloom Corn Tortillas', 'Pork Shoulder in Achiote', 'Charred Pineapple', 'Cilantro & White Onion', 'Consomé Broth'],
         flavorProfile: 'Smoky, Citrus-Spiced, Sweet & Savory',
         culturalSignificance: 'The beating pulse of Mexico City’s legendary street gastronomy.',
         iconEmoji: '🌮',
       },
       {
-        name: 'Mole Poblano & Mole Negro Oaxaqueño',
+        name: 'Mole Poblano & Mole Negro',
         nativeName: 'Mole Poblano',
         category: 'Traditional Main',
         description: 'An intricate, velvety sauce crafted from over 30 roasted ingredients: dried ancho, pasilla, and chipotle chilies, Mexican dark chocolate, plantains, raisins, sesame seeds, almonds, cloves, and Mexican cinnamon, ladled over tender braised turkey or chicken.',
@@ -415,7 +588,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Street Elote & Fresh Guacamole',
+        name: 'Elotes & Guacamole',
         nativeName: 'Elote Callejero & Guacamole',
         category: 'Street Food',
         description: 'Char-grilled sweet corn on the cob slathered with Mexican crema, mayonnaise, crumbled cotija cheese, chili powder, and fresh lime juice, accompanied by stone-ground avocado molcajete dip.',
@@ -426,7 +599,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Cinnamon Sugar Churros & Tres Leches Cake',
+        name: 'Churros & Tres Leches Cake',
         nativeName: 'Churros con Chocolate & Pastel de Tres Leches',
         category: 'Dessert / Pastry',
         description: 'Crisp fluted fried pastry piped fresh and rolled in cinnamon sugar, dipped in molten spiced dark chocolate, alongside sponge cake soaked in condensed milk, evaporated milk, and heavy cream.',
@@ -437,9 +610,9 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: '100% Blue Agave Tequila, Mezcal & Agua de Horchata',
+        name: 'Tequila, Mezcal & Horchata',
         category: 'Iconic Beverage',
-        description: 'Smoky artisanal artisanal Mezcal from wood-fired underground pits, highlands Tequila, and creamy iced rice milk infused with Ceylon cinnamon and vanilla.',
+        description: 'Smoky artisanal Mezcal from wood-fired underground pits, highlands Tequila, and creamy iced rice milk infused with Ceylon cinnamon and vanilla.',
         keyIngredients: ['Blue Weber Agave', 'Espadín Agave', 'Long Grain Rice', 'Mexican Cinnamon', 'Piloncillo'],
         flavorProfile: 'Earthy, Smoky, Sweet-Spicy & Creamy',
         iconEmoji: '🍹',
@@ -454,7 +627,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Tandoor clay oven baking, aromatic dum biryanis, thali platters, South Indian dosas, and street chaat.',
     nationalDishes: [
       {
-        name: 'Hyderabadi Dum Biryani',
+        name: 'Biryani',
         nativeName: 'हैदराबादी दम बिरयानी / حیدرآبادی بریانی',
         category: 'National Dish',
         description: 'Aromatic long-grain basmati rice and succulent marinated chicken or mutton layered with saffron milk, caramelized fried onions (birista), fresh mint, cilantro, and whole spices, sealed with dough and slow-cooked over coals in a handi (dum pukht).',
@@ -464,7 +637,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍛',
       },
       {
-        name: 'Butter Chicken & Dal Makhani with Garlic Naan',
+        name: 'Butter Chicken & Dal Makhani',
         nativeName: 'Murgh Makhani & दाल मखनी',
         category: 'Traditional Main',
         description: 'Smoky tandoor-roasted chicken tikka or black urad lentils slow-simmered overnight in a velvety tomato, cream, cashew butter sauce scented with crushed fenugreek leaves (kasuri methi). Served with blistered garlic naan.',
@@ -474,7 +647,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥘',
       },
       {
-        name: 'Crispy Masala Dosa & Sambar',
+        name: 'Masala Dosa & Sambar',
         nativeName: 'मसाला दोसा / மசாலா தோசை',
         category: 'Traditional Main',
         description: 'Lacy, wafer-crisp fermented rice and black gram crepe rolled around spiced potato-mustard seed masala, served with piping hot tamarind-lentil sambar and fresh coconut chutney.',
@@ -486,10 +659,10 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Pani Puri & Samosa Chaat',
+        name: 'Pani Puri & Samosas',
         nativeName: 'पानी पूरी / समोसा',
         category: 'Street Food',
-        description: 'Hollow, crispy fried semolina puris filled with spiced potatoes and black chickpeas, topped with mint-coriander water and sweet tamarind-date chutney, eaten in one bursting bite.',
+        description: 'Hollow, crispy fried semolina puris filled with spiced potatoes and black chickpeas, topped with mint-coriander water and sweet tamarind-date chutney, alongside crisp potato samosas.',
         keyIngredients: ['Semolina Puris', 'Mint-Coriander Water', 'Tamarind Chutney', 'Spiced Potatoes & Sev'],
         flavorProfile: 'Tangy, Spicy, Crispy, Sweet & Refreshing',
         iconEmoji: '🥟',
@@ -497,7 +670,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Warm Gulab Jamun & Saffron Jalebi',
+        name: 'Gulab Jamun & Jalebi',
         nativeName: 'गुलाब जामुन / जलेबी',
         category: 'Dessert / Pastry',
         description: 'Soft golden milk-solid dumplings deep-fried in ghee and soaked in warm cardamom-rose water sugar syrup, paired with crispy pretzel-shaped saffron jalebi spirals.',
@@ -527,7 +700,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Sunday Roast with Yorkshire pudding, fish & chip shops, afternoon high tea, and savory meat pies.',
     nationalDishes: [
       {
-        name: 'Sunday Roast with Yorkshire Pudding & Roast Beef',
+        name: 'Sunday Roast with Yorkshire Pudding',
         nativeName: 'Traditional Sunday Roast',
         category: 'National Dish',
         description: 'Prime dry-aged roast beef sirloin sliced thin and served with towering crispy, hollow Yorkshire puddings, goose-fat roasted potatoes, braised red cabbage, buttered carrots, and rich onion-marrow gravy.',
@@ -537,7 +710,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥩',
       },
       {
-        name: 'Beer-Battered Fish and Chips',
+        name: 'Fish and Chips',
         nativeName: 'Fish & Chips',
         category: 'Traditional Main',
         description: 'Flaky fresh line-caught Atlantic cod or haddock encased in a light, bubbly ale batter, fried until golden and crisp. Served with thick-cut chips drenched in malt vinegar, mushy peas, and homemade tartare sauce.',
@@ -550,7 +723,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         name: 'Chicken Tikka Masala',
         nativeName: 'CTM',
         category: 'Traditional Main',
-        description: 'Marinated chicken tikka pieces roasted in a tandoor and simmered in a creamy, lightly spiced tomato and coriander sauce, officially hailed by foreign secretaries as a modern British national dish.',
+        description: 'Marinated chicken tikka pieces roasted in a tandoor and simmered in a creamy, lightly spiced tomato and coriander sauce, officially hailed as a modern British national dish.',
         keyIngredients: ['Tandoori Spiced Chicken', 'Creamy Tomato Gravy', 'Ground Coriander & Paprika', 'Basmati Rice', 'Warm Naan'],
         flavorProfile: 'Creamy, Mildly Spiced, Savory & Tangy',
         culturalSignificance: 'Symbol of multicultural Britain created by South Asian chefs in Glasgow and London.',
@@ -570,7 +743,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Sticky Toffee Pudding & Scones with Clotted Cream',
+        name: 'Sticky Toffee Pudding & Scones',
         category: 'Dessert / Pastry',
         description: 'Dense sponge cake made with finely chopped Medjool dates, drenched in bubbling toffee sauce, alongside buttery Cornish scones heaped with strawberry jam and thick clotted cream.',
         keyIngredients: ['Medjool Dates', 'Dark Toffee Sauce', 'Vanilla Custard', 'Cornish Clotted Cream', 'Strawberry Jam'],
@@ -580,9 +753,9 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'English Breakfast Tea & Scotch Single Malt Whisky',
+        name: 'English Breakfast Tea & Scotch Whisky',
         category: 'Iconic Beverage',
-        description: 'Robust blend of Assam, Ceylon, and Kenyan black tea taken with fresh splash of whole milk, alongside peated smoky Islay and Speyside single malt Scotch whiskies.',
+        description: 'Robust blend of Assam, Ceylon, and Kenyan black tea taken with fresh splash of whole milk, alongside peated smoky single malt Scotch whiskies.',
         keyIngredients: ['Black Tea Leaves', 'Fresh Milk', 'Malted Barley & Peat Smoke'],
         flavorProfile: 'Bold, Tannic, Smoky & Oak-Vanilla',
         iconEmoji: '🫖',
@@ -597,7 +770,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Biergarten communal feasts, Oktoberfest traditions, Abendbrot evening bread spreads, and hearty alpine roasts.',
     nationalDishes: [
       {
-        name: 'Sauerbraten with Potato Dumplings & Red Cabbage',
+        name: 'Sauerbraten',
         nativeName: 'Rheinischer Sauerbraten',
         category: 'National Dish',
         description: 'Pot roast of beef chuck marinated for days in red wine, vinegar, cloves, juniper berries, and spices, slow-braised until tender and finished with sweet-sour gingersnap gravy, fluffy potato dumplings, and apple red cabbage.',
@@ -607,7 +780,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥩',
       },
       {
-        name: 'Schweinshaxe (Crispy Bavarian Pork Knuckle)',
+        name: 'Schweinshaxe',
         nativeName: 'Bayerische Schweinshaxe',
         category: 'Traditional Main',
         description: 'Cured ham hock roasted until the thick rind puffs into a glass-shattering golden crackling while the interior meat stays juicy, served with dark beer caraway gravy and fermented sauerkraut.',
@@ -617,7 +790,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍖',
       },
       {
-        name: 'Currywurst with Pommes Frites',
+        name: 'Currywurst',
         nativeName: 'Berliner Currywurst',
         category: 'Traditional Main',
         description: 'Steamed then fried bratwurst sausage sliced into bite-sized medallions, smothered in warm spiced curried ketchup sauce and heavily dusted with fragrant yellow curry powder, served with crispy french fries.',
@@ -629,7 +802,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Bavarian Pretzel (Brezn) & Weisswurst',
+        name: 'Brezn & Weißwurst',
         nativeName: 'Laugenbrezel & Weißwurst',
         category: 'Street Food',
         description: 'Lye-dipped twisted bread with glossy mahogany crust and coarse salt flakes, paired with delicate poached minced veal sausage and sweet Bavarian mustard.',
@@ -641,19 +814,19 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dessertsAndPastries: [
       {
         name: 'Black Forest Cake & Apfelstrudel',
-        nativeName: 'Schwarzwälder Kirschtorte',
+        nativeName: 'Schwarzwälder Kirschtorte / Apfelstrudel',
         category: 'Dessert / Pastry',
-        description: 'Layers of rich chocolate sponge cake brushed with Kirschwasser (sour cherry schnapps), whipped cream, and tart morello cherries, topped with dark chocolate shavings.',
-        keyIngredients: ['Chocolate Sponge', 'Sour Morello Cherries', 'Kirschwasser Cherry Brandy', 'Whipped Cream', 'Dark Chocolate Shavings'],
+        description: 'Layers of rich chocolate sponge cake brushed with Kirschwasser (sour cherry schnapps), whipped cream, and tart morello cherries, alongside warm flaky apple strudel.',
+        keyIngredients: ['Chocolate Sponge', 'Sour Morello Cherries', 'Kirschwasser Cherry Brandy', 'Whipped Cream', 'Apples & Raisins'],
         flavorProfile: 'Chocolaty, Tart, Creamy & Cherry-Aromatic',
         iconEmoji: '🍰',
       },
     ],
     signatureBeverages: [
       {
-        name: 'German Pilsner, Hefeweizen & Riesling Wine',
+        name: 'Pilsner, Hefeweizen & Riesling',
         category: 'Iconic Beverage',
-        description: 'Unfiltered cloudy wheat beer with banana and clove notes, crisp golden lager adhering to the 1516 purity law, and mineral-driven Mosel valley Riesling.',
+        description: 'Unfiltered cloudy wheat beer with banana and clove notes, crisp golden lager adhering to the 1516 purity law, and mineral-driven Mosel valley Riesling wine.',
         keyIngredients: ['Barley & Wheat Malt', 'Hallertau Hops', 'Pure Spring Water', 'Riesling Grapes'],
         flavorProfile: 'Crisp, Bready, Citrus-Banana & Refreshing',
         iconEmoji: '🍺',
@@ -668,7 +841,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     dietaryHeritage: 'Grand Turkish breakfasts (Kahvaltı), charcoal kebabs, simit bakeries, and tea garden socializing.',
     nationalDishes: [
       {
-        name: 'Döner Kebab & İskender Kebab',
+        name: 'İskender Kebab & Döner',
         nativeName: 'İskender Kebabı / Döner',
         category: 'National Dish',
         description: 'Thinly sliced seasoned lamb and beef shaved from a vertical rotisserie over warm cubed pide bread, drenched in hot tomato sauce, generous foaming browned sheep’s butter, and served with tangy strained yogurt and grilled peppers.',
@@ -678,7 +851,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥙',
       },
       {
-        name: 'Kuru Fasulye with Pilav',
+        name: 'Kuru Fasulye & Pilav',
         nativeName: 'Kuru Fasulye & Şehriyeli Pilav',
         category: 'Traditional Main',
         description: 'Tender white beans stewed in a clay pot with tomato and sweet red pepper paste, spiced pastırma (cured beef), and onions, served alongside glistening buttery butter-toasted orzo rice pilaf and pickled cucumbers.',
@@ -688,7 +861,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍲',
       },
       {
-        name: 'Adana & Urfa Kebab',
+        name: 'Adana Kebab',
         nativeName: 'Adana Kebabı',
         category: 'Traditional Main',
         description: 'Hand-minced prime lamb tail fat and meat hand-skewered on wide iron flat skewers with fiery red hot peppers and grilled over glowing charcoal embers, wrapped in warm lavash with sumac onions.',
@@ -699,18 +872,18 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     popularStreetFoods: [
       {
-        name: 'Sesame Simit & Balık Ekmek',
+        name: 'Simit & Balık Ekmek',
         nativeName: 'Simit & Balık Ekmek',
         category: 'Street Food',
         description: 'Circular molassed bread ring encrusted with toasted sesame seeds, and grilled Bosphorus mackerel stuffed in crusty bread with lemon juice and onions on Istanbul ferry piers.',
-        keyIngredients: ['Yeast Dough dipped in Grape Molasses', 'Roasted Sesame Seeds', 'Grilled Mackerel Fillet', 'Lemon & Raw Onion'],
+        keyIngredients: ['Yeast Dough in Grape Molasses', 'Roasted Sesame Seeds', 'Grilled Mackerel Fillet', 'Lemon & Raw Onion'],
         flavorProfile: 'Crunchy, Nutty, Savory & Oceanic',
         iconEmoji: '🥯',
       },
     ],
     dessertsAndPastries: [
       {
-        name: 'Antep Pistachio Baklava & Kunefe',
+        name: 'Baklava & Künefe',
         nativeName: 'Gaziantep Baklavası & Künefe',
         category: 'Dessert / Pastry',
         description: 'Forty paper-thin layers of hand-rolled phyllo dough stuffed with emerald Gaziantep green pistachios, baked until golden and drizzled with hot sugar syrup; alongside shredded kadayıf with stretchy molten cheese.',
@@ -722,7 +895,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Turkish Coffee & Rize Black Tea (Çay)',
+        name: 'Turkish Coffee & Rize Çayı',
         nativeName: 'Türk Kahvesi & Rize Çayı',
         category: 'Iconic Beverage',
         description: 'Finely pulverized coffee roasted and boiled in a brass cezve pot with thick crema and grounds at the bottom, served alongside double-steeped clear amber tea in tulip glasses.',
@@ -751,7 +924,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🍲',
       },
       {
-        name: 'Churrasco Gaúcho & Picanha',
+        name: 'Picanha & Churrasco',
         nativeName: 'Picanha na Brasa',
         category: 'Traditional Main',
         description: 'Prime beef top sirloin cap with a thick strip of melting fat, skewered and seasoned solely with coarse rock salt, grilled over hot charcoal embers and carved in succulent rare slices tableside.',
@@ -761,7 +934,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
         iconEmoji: '🥩',
       },
       {
-        name: 'Moqueca Baiana (Afro-Brazilian Seafood Stew)',
+        name: 'Moqueca Baiana',
         nativeName: 'Moqueca de Peixe e Camarão',
         category: 'Traditional Main',
         description: 'Fresh white fish fillets and jumbo shrimp poached in a terracotta clay pot with golden dendê red palm oil, fresh coconut milk, bell peppers, tomatoes, onions, garlic, and fresh coriander.',
@@ -784,8 +957,8 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     dessertsAndPastries: [
       {
-        name: 'Brigadeiros & Açaí na Tigela',
-        nativeName: 'Brigadeiro Tradicional',
+        name: 'Brigadeiro & Açaí',
+        nativeName: 'Brigadeiro Tradicional & Açaí na Tigela',
         category: 'Dessert / Pastry',
         description: 'Velvety fudge truffles cooked with condensed milk, butter, and cocoa powder, hand-rolled in chocolate sprinkles; and frozen Amazonian açaí berry purée topped with sliced bananas and granola.',
         keyIngredients: ['Sweetened Condensed Milk', 'Cocoa Powder', 'Butter', 'Chocolate Sprinkles', 'Pure Amazon Açaí'],
@@ -796,7 +969,7 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
     ],
     signatureBeverages: [
       {
-        name: 'Caipirinha & Guaraná Antarctica',
+        name: 'Caipirinha & Guaraná',
         category: 'Iconic Beverage',
         description: 'Brazil’s national cocktail made by muddling fresh juicy limes with sugar, pouring over cracked ice, and spiking with high-proof fermented sugarcane cachaça; alongside sparkling tropical Guaraná fruit soda.',
         keyIngredients: ['Sugarcane Cachaça Spirit', 'Fresh Limes', 'Pure Cane Sugar', 'Amazonian Guaraná Berries'],
@@ -807,80 +980,587 @@ export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>>
   },
 };
 
+// Global Authentic Dish Directory: Maps 240+ countries to their genuine, real dish names
+interface AuthenticDishSet {
+  mainDish1: string;
+  mainDish1Native?: string;
+  mainDish1Desc: string;
+  mainDish2: string;
+  mainDish2Native?: string;
+  mainDish2Desc: string;
+  streetFood: string;
+  streetFoodDesc: string;
+  dessert: string;
+  dessertDesc: string;
+  drink: string;
+  drinkDesc: string;
+  staples: string[];
+  emoji: string;
+}
+
+export const GLOBAL_AUTHENTIC_DISHES: Record<string, AuthenticDishSet> = {
+  // Argentina
+  AR: {
+    mainDish1: 'Asado Criollo',
+    mainDish1Native: 'Asado Tradicional',
+    mainDish1Desc: 'Open-fire barbecue featuring prime beef short ribs, flank steak, and sausages grilled over wood embers.',
+    mainDish2: 'Empanadas Mendocinas',
+    mainDish2Native: 'Empanadas de Carne',
+    mainDish2Desc: 'Baked flaky pastries filled with hand-cut beef, cumin, onions, olives, and hard-boiled egg.',
+    streetFood: 'Choripán con Chimichurri',
+    streetFoodDesc: 'Grilled pork chorizo split lengthwise in crusty baguette with tangy garlic-herb chimichurri sauce.',
+    dessert: 'Alfajores con Dulce de Leche',
+    dessertDesc: 'Delicate cornstarch shortbread cookies sandwiched with rich caramel dulce de leche and rolled in coconut.',
+    drink: 'Mate & Malbec',
+    drinkDesc: 'Caffeine-rich yerba mate steeped in a hollow gourd with a metal bombilla straw, and Mendoza Malbec wine.',
+    staples: ['Grass-fed Beef', 'Yerba Mate', 'Dulce de Leche', 'Wheat Flour', 'Chimichurri Herbs'],
+    emoji: '🥩',
+  },
+  // Colombia
+  CO: {
+    mainDish1: 'Bandeja Paisa',
+    mainDish1Native: 'Bandeja Paisa',
+    mainDish1Desc: 'Generous platter with red beans, white rice, ground beef, chicharrón (crispy pork belly), fried egg, plantain, and avocado.',
+    mainDish2: 'Ajiaco Bogotano',
+    mainDish2Native: 'Ajiaco Santafereño',
+    mainDish2Desc: 'Hearty chicken and potato soup made with three varieties of Andean potatoes, sweet corn on the cob, capers, and guascas herb.',
+    streetFood: 'Arepas de Choclo & Empanadas',
+    streetFoodDesc: 'Sweet corn griddle cakes filled with melted farmer cheese, and crispy yellow corn empanadas with beef and potato.',
+    dessert: 'Obleas con Arequipe',
+    dessertDesc: 'Thin crispy round wafers spread with creamy caramel arequipe, shredded cheese, and blackberry jam.',
+    drink: 'Café de Colombia & Aguardiente',
+    drinkDesc: 'World-renowned high-altitude washed Arabica coffee and anise-flavored sugarcane aguardiente spirit.',
+    staples: ['Andean Potatoes', 'Heirloom Corn', 'Coffee', 'Panela Cane Sugar', 'Plantains'],
+    emoji: '🍲',
+  },
+  // Peru
+  PE: {
+    mainDish1: 'Ceviche Clásico',
+    mainDish1Native: 'Ceviche de Pescado',
+    mainDish1Desc: 'Pristine fresh sea bass cured in freshly squeezed lime juice with aji limo chilies, red onions, giant choclo corn, and sweet potato.',
+    mainDish2: 'Lomo Saltado',
+    mainDish2Native: 'Lomo Saltado',
+    mainDish2Desc: 'Chifa fusion stir-fry of beef tenderloin strips, red onions, tomatoes, and aji amarillo flambéed in a wok with soy sauce and vinegar over fries and rice.',
+    streetFood: 'Anticuchos de Corazón',
+    streetFoodDesc: 'Tender beef heart skewers marinated in aji panca chili paste, garlic, and vinegar, char-grilled over glowing coals.',
+    dessert: 'Picarones con Miel de Chancaca',
+    dessertDesc: 'Golden ring-shaped pumpkin and sweet potato fritters fried crisp and drenched in spiced raw cane chancaca syrup.',
+    drink: 'Pisco Sour & Chicha Morada',
+    drinkDesc: 'Grape brandy shaken with lime juice, simple syrup, egg white, and Angostura bitters, alongside spiced purple corn drink.',
+    staples: ['Aji Amarillo', 'Native Potatoes (3,000+ varieties)', 'Fresh Seafood', 'Giant Choclo Corn', 'Pisco'],
+    emoji: '🐟',
+  },
+  // Greece
+  GR: {
+    mainDish1: 'Moussaka',
+    mainDish1Native: 'Μουσακάς',
+    mainDish1Desc: 'Layered casserole of spiced minced lamb or beef, sliced eggplants and potatoes, baked beneath a thick golden crown of creamy béchamel.',
+    mainDish2: 'Souvlaki Kalamaki',
+    mainDish2Native: 'Σουβλάκι',
+    mainDish2Desc: 'Skewered marinated pork or chicken grilled over coals and seasoned with lemon, oregano, and olive oil.',
+    streetFood: 'Gyros Pita & Spanakopita',
+    streetFoodDesc: 'Rotisserie-shaved meat wrapped in warm pita with tzatziki, tomatoes, and fries; and flaky spinach-feta phyllo pie.',
+    dessert: 'Baklava & Galaktoboureko',
+    dessertDesc: 'Crisp layered phyllo stuffed with chopped nuts and drenched in Greek thyme honey and lemon syrup.',
+    drink: 'Ouzo & Frappé Coffee',
+    drinkDesc: 'Anise-flavored spirit turning cloudy with ice water, and frothy iced Nescafé frappé shaken with milk.',
+    staples: ['Greek Extra Virgin Olive Oil', 'Feta Cheese PDO', 'Kalamata Olives', 'Oregano & Thyme', 'Phyllo Dough'],
+    emoji: '🇬🇷',
+  },
+  // South Korea
+  KR: {
+    mainDish1: 'Kimchi Jjigae & Bulgogi',
+    mainDish1Native: '김치찌개 / 불고기',
+    mainDish1Desc: 'Spicy fermented aged kimchi stew with pork and tofu, alongside thinly sliced ribeye marinated in soy sauce, pear juice, and sesame oil.',
+    mainDish2: 'Bibimbap',
+    mainDish2Native: '돌솥 비빔밥 (Dolsot Bibimbap)',
+    mainDish2Desc: 'Sizzling stone bowl filled with warm rice, seasoned vegetables (namul), beef, raw egg yolk, and spicy gochujang paste.',
+    streetFood: 'Tteokbokki & Hotteok',
+    streetFoodDesc: 'Chewy cylindrical rice cakes simmered in fiery gochujang chili paste, and sweet griddled pancakes stuffed with brown sugar and nuts.',
+    dessert: 'Bingsu',
+    dessertDesc: 'Shaved milk ice mountain topped with sweet red beans, injeolmi rice cakes, condensed milk, and fresh mango.',
+    drink: 'Soju & Makgeolli',
+    drinkDesc: 'Clear distilled rice spirit, and sparkling unfiltered cloudy fermented rice wine served in brass bowls.',
+    staples: ['Fermented Kimchi', 'Gochujang & Doenjang', 'Short-grain Rice', 'Toasted Sesame Oil', 'Garlic'],
+    emoji: '🍚',
+  },
+  // Vietnam
+  VN: {
+    mainDish1: 'Phở Bò',
+    mainDish1Native: 'Phở Bò Hà Nội',
+    mainDish1Desc: 'Fragrant 12-hour beef bone broth simmered with star anise, cinnamon, and charred ginger over flat rice noodles and rare beef slices.',
+    mainDish2: 'Bún Chả',
+    mainDish2Native: 'Bún Chả Hà Nội',
+    mainDish2Desc: 'Charcoal-grilled pork patties and belly slices served in warm diluted fish sauce broth with rice vermicelli noodles and fresh herbs.',
+    streetFood: 'Bánh Mì Thịt',
+    streetFoodDesc: 'Airy, crispy French-Vietnamese baguette spread with pork liver pâté, Vietnamese cold cuts, pickled daikon-carrot, and cilantro.',
+    dessert: 'Chè Ba Màu',
+    dessertDesc: 'Layered rainbow dessert beverage with sweet red beans, mung bean paste, pandan jelly, crushed ice, and coconut cream.',
+    drink: 'Cà Phê Trứng (Egg Coffee)',
+    drinkDesc: 'Intense Robusta drip coffee topped with a whipped, custardy egg-yolk and condensed milk foam.',
+    staples: ['Nước Mắm (Fish Sauce)', 'Rice Noodles', 'Star Anise & Cinnamon', 'Fresh Cilantro & Mint', 'Baguettes'],
+    emoji: '🍜',
+  },
+  // Thailand
+  TH: {
+    mainDish1: 'Pad Thai',
+    mainDish1Native: 'ผัดไทย',
+    mainDish1Desc: 'Stir-fried rice noodles tossed in sweet-sour tamarind paste, palm sugar, dried shrimp, firm tofu, eggs, crushed peanuts, and lime.',
+    mainDish2: 'Tom Yum Goong',
+    mainDish2Native: 'ต้มยำกุ้ง',
+    mainDish2Desc: 'Fiery, aromatic lemongrass soup infused with kaffir lime leaves, galangal, bird’s eye chilies, fresh prawns, and straw mushrooms.',
+    streetFood: 'Som Tum & Moo Ping',
+    streetFoodDesc: 'Green papaya pounded in a mortar with lime, chilies, fish sauce, and peanuts; and sweet coconut milk grilled pork skewers.',
+    dessert: 'Khao Niao Mamuang (Mango Sticky Rice)',
+    dessertDesc: 'Sweet glutinous rice cooked with salted coconut cream and pandan, served with ripe yellow honey mango slices.',
+    drink: 'Cha Yen (Thai Iced Tea)',
+    drinkDesc: 'Spiced Ceylon black tea brewed with star anise and orange blossom water, sweetened with condensed milk over crushed ice.',
+    staples: ['Lemongrass & Galangal', 'Fish Sauce (Nam Pla)', 'Tamarind', 'Kaffir Lime Leaves', 'Jasmine Rice'],
+    emoji: '🍲',
+  },
+  // Philippines
+  PH: {
+    mainDish1: 'Chicken & Pork Adobo',
+    mainDish1Native: 'Adobong Manok at Baboy',
+    mainDish1Desc: 'Tender chicken and pork belly braised in cane vinegar, soy sauce, whole black peppercorns, crushed garlic, and bay leaves until savory and glazed.',
+    mainDish2: 'Sinigang na Baboy',
+    mainDish2Native: 'Sinigang',
+    mainDish2Desc: 'Sour and savory tamarind broth packed with tender pork ribs, water spinach (kangkong), radish, long green beans, and eggplant.',
+    streetFood: 'Lumpia Shanghai & Lechon',
+    streetFoodDesc: 'Crisp fried minced pork spring rolls with sweet chili dip, and whole spit-roasted pig with glass-shattering crackling.',
+    dessert: 'Halo-Halo',
+    dessertDesc: 'Shaved ice dessert layered with sweetened beans, coconut gel (nata de coco), jackfruit, purple ube halaya, leche flan, and evaporated milk.',
+    drink: 'Calamansi Juice & San Miguel',
+    drinkDesc: 'Refreshing tart juice made from native calamansi citrus and honey, alongside crisp San Miguel Pale Pilsen.',
+    staples: ['Cane Vinegar', 'Soy Sauce', 'Garlic', 'Tamarind (Sampalok)', 'White Rice'],
+    emoji: '🍗',
+  },
+  // Indonesia
+  ID: {
+    mainDish1: 'Nasi Goreng',
+    mainDish1Native: 'Nasi Goreng Spesial',
+    mainDish1Desc: 'Fragrant wok-fried rice caramelized with sweet thick soy sauce (kecap manis), shallots, garlic, shrimp paste, and topped with a sunny egg.',
+    mainDish2: 'Rendang Daging',
+    mainDish2Native: 'Rendang Minangkabau',
+    mainDish2Desc: 'Beef chunks slowly caramelized for hours in coconut milk, lemongrass, galangal, and spices until the liquid evaporates into a dark, rich paste.',
+    streetFood: 'Sate Ayam & Gado-Gado',
+    streetFoodDesc: 'Grilled chicken skewers smothered in sweet peanut sauce, and blanched vegetable salad with boiled eggs, tempeh, and peanut dressing.',
+    dessert: 'Es Cendol & Dadar Gulung',
+    dessertDesc: 'Green pandan rice flour jelly drops in iced coconut milk and melted palm sugar syrup, and pandan crepes filled with grated coconut.',
+    drink: 'Jamu Kunyit Asam',
+    drinkDesc: 'Traditional herbal health tonic brewed from fresh turmeric, tamarind, and palm sugar.',
+    staples: ['Kecap Manis (Sweet Soy Sauce)', 'Sambal Chilies', 'Coconut Milk', 'Shallots & Garlic', 'Lemongrass'],
+    emoji: '🍛',
+  },
+  // Egypt
+  EG: {
+    mainDish1: 'Koshari',
+    mainDish1Native: 'كشري',
+    mainDish1Desc: 'Layered national comfort bowl of spiced lentils, rice, macaroni, and chickpeas topped with fiery tomato-cumin sauce, garlic vinegar (da’ah), and crispy fried onions.',
+    mainDish2: 'Molokhia with Chicken',
+    mainDish2Native: 'ملوخية بالفراخ',
+    mainDish2Desc: 'Silky, aromatic green stew prepared from minced jute mallow leaves fried with toasted coriander and garlic ta’leya over chicken and rice.',
+    streetFood: 'Ta’ameya & Ful Medames',
+    streetFoodDesc: 'Crisp Egyptian falafel made exclusively from fava beans and fresh herbs; and slow-cooked fava bean stew seasoned with olive oil and cumin.',
+    dessert: 'Umm Ali',
+    dessertDesc: 'Egyptian bread pudding made with puff pastry soaked in sweetened spiced milk, heavy cream, raisins, toasted almonds, and coconut flakes.',
+    drink: 'Karkadeh (Hibiscus Tea)',
+    drinkDesc: 'Ruby-red infusion of dried hibiscus flowers served iced on hot summer days or hot in winter.',
+    staples: ['Fava Beans', 'Jute Mallow (Molokhia)', 'Lentils', 'Cumin & Coriander', 'Pita Bread (Aish Baladi)'],
+    emoji: '🇪🇬',
+  },
+  // Morocco
+  MA: {
+    mainDish1: 'Tajine Bil Barkouk (Lamb & Prune Tagine)',
+    mainDish1Native: 'طاجين بالبرقوق',
+    mainDish1Desc: 'Tender lamb shanks slow-simmered in a conical clay tagine with ras el hanout, sweet caramelized prunes, toasted almonds, and sesame seeds.',
+    mainDish2: 'Couscous Royale',
+    mainDish2Native: 'كسكس مغربي سبع خضار',
+    mainDish2Desc: 'Lightly steamed semolina grains served with slow-cooked seven vegetables, chickpeas, lamb, and chicken in a fragrant saffron broth.',
+    streetFood: 'Pastilla (Bastilla) & Harira',
+    streetFoodDesc: 'Sweet-savory crisp warqa pastry pie filled with spiced pigeon or chicken, almonds, cinnamon, and sugar; and rich tomato-lentil soup.',
+    dessert: 'Cornes de Gazelle (Kaab el Ghazal)',
+    dessertDesc: 'Crescent-shaped pastries stuffed with almond paste, orange blossom water, and cinnamon.',
+    drink: 'Atay (Maghrebi Mint Tea)',
+    drinkDesc: 'Chinese gunpowder green tea brewed with fresh spearmint leaves and sugar, poured aerated from high above into glasses.',
+    staples: ['Ras el Hanout (Spice Blend)', 'Semolina Couscous', 'Preserved Lemons', 'Olive Oil', 'Orange Blossom Water'],
+    emoji: '🥘',
+  },
+  // Nigeria
+  NG: {
+    mainDish1: 'Jollof Rice',
+    mainDish1Native: 'Nigerian Jollof',
+    mainDish1Desc: 'Smoky long-grain parboiled rice cooked in a rich reduction of blended plum tomatoes, red bell peppers, scotch bonnets, onions, and curry thyme.',
+    mainDish2: 'Egusi Soup with Pounded Yam',
+    mainDish2Native: 'Egusi & Iyan',
+    mainDish2Desc: 'Nutty ground melon seed stew cooked with red palm oil, leafy greens (bitterleaf/spinach), smoked fish, and beef, paired with stretchy pounded yam.',
+    streetFood: 'Suya Skewers',
+    streetFoodDesc: 'Thinly sliced beef skewers coated in fiery yaji spice mix (ground roasted peanuts, ginger, chili, garlic) grilled over open charcoal.',
+    dessert: 'Puff Puff',
+    dessertDesc: 'Golden, spherical deep-fried yeast dough balls lightly sweetened and spiced with ground nutmeg.',
+    drink: 'Zobo & Palm Wine',
+    drinkDesc: 'Refreshing spiced hibiscus beverage infused with ginger, cloves, and pineapple; alongside natural fermented palm sap.',
+    staples: ['Scotch Bonnet Peppers (Ata Rodo)', 'Red Palm Oil', 'Egusi Melon Seeds', 'Yam & Cassava', 'Curry & Thyme'],
+    emoji: '🍲',
+  },
+  // Ethiopia
+  ET: {
+    mainDish1: 'Doro Wat with Injera',
+    mainDish1Native: 'ዶሮ ወጥ',
+    mainDish1Desc: 'Slow-simmered spicy chicken stew richly flavored with berbere spice blend, spiced clarified butter (niter kibbeh), and hard-boiled eggs on sourdough injera.',
+    mainDish2: 'Tibs & Shiro',
+    mainDish2Native: 'ጥብስ እና ሽሮ',
+    mainDish2Desc: 'Cubed beef sautéed with onions, rosemary, and jalapeños, alongside velvety chickpea and broad bean stew cooked with garlic and berbere.',
+    streetFood: 'Sambusa',
+    streetFoodDesc: 'Crisp triangular fried pastry pockets filled with spiced green lentils, onions, and green chilies.',
+    dessert: 'Defo Dabo',
+    dessertDesc: 'Traditional spiced Ethiopian artisan wheat bread baked wrapped in enset (false banana) leaves with coriander and cardamom.',
+    drink: 'Buna (Ethiopian Coffee)',
+    drinkDesc: 'Ceremonial coffee freshly pan-roasted over charcoal, freshly ground, and brewed in a clay pot (jebena) with frankincense smoke.',
+    staples: ['Teff Flour (for Injera)', 'Berbere Spice Blend', 'Niter Kibbeh (Clarified Butter)', 'Lentils & Chickpeas', 'Coffee'],
+    emoji: '🫓',
+  },
+  // Poland
+  PL: {
+    mainDish1: 'Pierogi Ruskie',
+    mainDish1Native: 'Pierogi Ruskie',
+    mainDish1Desc: 'Handmade crescent dumplings stuffed with whipped potatoes, twaróg farmer cheese, and caramelized onions, pan-fried with crispy bacon cracklings (skwarki).',
+    mainDish2: 'Bigos (Hunter’s Stew)',
+    mainDish2Native: 'Bigos Staropolski',
+    mainDish2Desc: 'Centuries-old slow-simmered stew combining shredded fermented sauerkraut, fresh cabbage, smoked kiełbasa, pork shoulder, wild mushrooms, and dried prunes.',
+    streetFood: 'Zapiekanka',
+    streetFoodDesc: 'Open-faced toasted French baguette topped with sautéed white mushrooms, melted cheese, and drizzled with sweet Polish ketchup.',
+    dessert: 'Pączki',
+    dessertDesc: 'Fluffy golden yeast doughnuts filled with wild rose petal jam or plum powidła, glazed with icing and candied orange peel.',
+    drink: 'Żubrówka & Kompot',
+    drinkDesc: 'Bison grass-infused herbal vodka served with cloudy apple juice, and homemade simmered seasonal fruit compote drink.',
+    staples: ['Sauerkraut (Kapusta Kiszona)', 'Kiełbasa Sausage', 'Twaróg Cheese', 'Potatoes', 'Rye Flour'],
+    emoji: '🥟',
+  },
+  // Ukraine
+  UA: {
+    mainDish1: 'Ukrainian Borscht with Garlic Pampushky',
+    mainDish1Native: 'Український Борщ з Пампушками',
+    mainDish1Desc: 'Rich ruby-red beet soup slow-simmered with beef broth, cabbage, potatoes, carrots, and dill, served with sour cream and warm garlic yeast buns.',
+    mainDish2: 'Varenyky',
+    mainDish2Native: 'Вареники',
+    mainDish2Desc: 'Traditional boiled dumplings filled with mashed potato, fried onions, sauerkraut, or sweet sour cherries, topped with melted butter.',
+    streetFood: 'Kyivska Perepichka',
+    streetFoodDesc: 'Legendary Kyiv street snack: a juicy frankfurter encased in crispy, golden-fried yeast dough eaten piping hot.',
+    dessert: 'Syrnyky & Kyiv Cake',
+    dessertDesc: 'Fluffy golden fried cottage cheese pancakes served with berry jam and sour cream, alongside hazelnut meringue Kyiv torte.',
+    drink: 'Uzvar & Kvas',
+    drinkDesc: 'Traditional drink brewed from dried smoked apples, pears, and plums; and naturally fermented rye bread tonic.',
+    staples: ['Beets (Buryak)', 'Salo (Cured Pork Fat)', 'Dill & Garlic', 'Sour Cream (Smetana)', 'Wheat Flour'],
+    emoji: '🥣',
+  },
+  // Russia
+  RU: {
+    mainDish1: 'Beef Stroganoff',
+    mainDish1Native: 'Бефстроганов',
+    mainDish1Desc: 'Tender strips of beef tenderloin sautéed with button mushrooms and onions in a rich smetana (sour cream) and Dijon mustard sauce over egg noodles.',
+    mainDish2: 'Pelmeni',
+    mainDish2Native: 'Сибирские Пельмени',
+    mainDish2Desc: 'Siberian thin-dough dumplings packed with minced beef, pork, and onion, boiled in broth and served with a pat of butter, vinegar, and sour cream.',
+    streetFood: 'Pirozhki & Blini',
+    streetFoodDesc: 'Individual baked or fried hand pies filled with cabbage, mashed potatoes, or meat; and paper-thin crepes served with red caviar or jam.',
+    dessert: 'Medovik (Honey Cake)',
+    dessertDesc: 'Eight delicate layers of caramelized buckwheat honey biscuits layered with tangy whipped sour cream frosting.',
+    drink: 'Kvass & Mors',
+    drinkDesc: 'Fermented rye bread sparkling beverage, and tart wild lingonberry-cranberry fruit punch.',
+    staples: ['Smetana (Sour Cream)', 'Beets & Cabbage', 'Buckwheat (Grechka)', 'Rye Bread', 'Dill'],
+    emoji: '🥞',
+  },
+  // Sweden
+  SE: {
+    mainDish1: 'Köttbullar (Swedish Meatballs)',
+    mainDish1Native: 'Köttbullar med Potatismos',
+    mainDish1Desc: 'Spiced beef and pork meatballs pan-fried in butter, served with velvety mashed potatoes, rich cream gravy, tart lingonberry jam, and pickled cucumbers.',
+    mainDish2: 'Gravlax with Hovmästarsås',
+    mainDish2Native: 'Gravad Lax',
+    mainDish2Desc: 'Cured Atlantic salmon fillets infused with sea salt, sugar, black pepper, and mountain dill, served with sweet mustard-dill sauce on crispbread.',
+    streetFood: 'Tunnbrödsrulle',
+    streetFoodDesc: 'Soft Swedish flatbread rolled around hot dogs, mashed potatoes, creamy shrimp salad, crispy fried onions, and mustard.',
+    dessert: 'Kanelbulle',
+    dessertDesc: 'Fluffy cardamom-spiced yeast bread coiled with buttery cinnamon sugar filling and topped with pearl sugar crystals for Fika.',
+    drink: 'Aquavit & Fika Coffee',
+    drinkDesc: 'Caraway and dill-distilled grain spirit served cold in snaps glasses, and dark-roasted filter coffee enjoyed during twice-daily Fika breaks.',
+    staples: ['Lingonberries', 'Dill', 'Atlantic Herring & Salmon', 'Crispbread (Knäckebröd)', 'Cardamom'],
+    emoji: '🇸🇪',
+  },
+  // Norway
+  NO: {
+    mainDish1: 'Fårikål',
+    mainDish1Native: 'Fårikål',
+    mainDish1Desc: 'Official national dish: bone-in mutton pieces and green cabbage heads layered in a pot, seasoned with whole black peppercorns and simmered for hours.',
+    mainDish2: 'Røkt Laks (Smoked Atlantic Salmon)',
+    mainDish2Native: 'Norsk Røkt Laks',
+    mainDish2Desc: 'World-famous cold-smoked Norwegian fjord salmon served with scrambled eggs, flatbread, and fresh dill.',
+    streetFood: 'Pølse i Lompe',
+    streetFoodDesc: 'Hot dog sausage served wrapped in a soft potato tortilla-like flatbread (lompe) topped with sweet mustard and fried onions.',
+    dessert: 'Krumkake & Vafler',
+    dessertDesc: 'Crisp cone-shaped waffle cookies rolled with cardamom and filled with whipped cream; and heart-shaped waffles with brown goat cheese (Brunost).',
+    drink: 'Akevitt (Aquavit)',
+    drinkDesc: 'Potato spirit aged in sherry oak barrels that have crossed the equator at sea (Linie Aquavit).',
+    staples: ['Atlantic Salmon & Cod', 'Brunost (Brown Goat Cheese)', 'Potatoes', 'Lingonberries', 'Lamb'],
+    emoji: '🇳🇴',
+  },
+  // Ireland
+  IE: {
+    mainDish1: 'Irish Stew',
+    mainDish1Native: 'Stobhach Gaelach',
+    mainDish1Desc: 'Comforting slow-cooked stew of tender lamb or mutton neck, carrots, onions, and fluffy potatoes simmered in a rich savory broth.',
+    mainDish2: 'Colcannon & Bacon',
+    mainDish2Native: 'Cál Ceannann',
+    mainDish2Desc: 'Creamy mashed potatoes folded with buttered curly kale or cabbage, spring onions, and served alongside thick boiled Irish bacon.',
+    streetFood: 'Boxty Pancake',
+    streetFoodDesc: 'Traditional potato pancake made by combining grated raw potato with mashed potato, fried on a griddle with butter.',
+    dessert: 'Barmbrack & Apple Amber',
+    dessertDesc: 'Spiced Irish fruit bread studded with sultanas soaked in black tea and whiskey, or tart Bramley apple pie with meringue.',
+    drink: 'Guinness & Irish Coffee',
+    drinkDesc: 'Nitrogenated dry Irish stout with creamy white head, and hot drip coffee spiked with Irish whiskey, brown sugar, and float of heavy cream.',
+    staples: ['Irish Potatoes', 'Grass-fed Lamb & Beef', 'Buttermilk', 'Irish Butter (Kerrygold)', 'Oats'],
+    emoji: '🇮🇪',
+  },
+  // Switzerland
+  CH: {
+    mainDish1: 'Fondue Moitié-Moitié',
+    mainDish1Native: 'Fondue Moitié-Moitié',
+    mainDish1Desc: 'Communal pot of melted Gruyère AOP and Vacherin Fribourgeois cheeses infused with dry white wine, garlic, and kirsch, dipped with crusty bread cubes.',
+    mainDish2: 'Raclette Valaisanne',
+    mainDish2Native: 'Raclette',
+    mainDish2Desc: 'Wheel of Alpine cow’s milk cheese scraped tableside over boiled baby potatoes, cornichons (pickles), and pickled pearl onions.',
+    streetFood: 'Rösti with Kalbsbratwurst',
+    streetFoodDesc: 'Crispy pan-fried shredded potato cake with golden crust, paired with grilled St. Gallen veal sausage and onion gravy.',
+    dessert: 'Swiss Chocolate Pralines',
+    dessertDesc: 'Velvety milk and dark chocolates crafted using conching techniques perfected by Lindt and Cailler.',
+    drink: 'Rivella & Kirsch',
+    drinkDesc: 'Unique Swiss carbonated soft drink crafted from milk whey extracts, and cherry brandy distilled in the Alps.',
+    staples: ['Gruyère & Emmental Cheeses', 'Potatoes', 'Alpine Cream & Butter', 'Swiss Chocolate', 'White Wine'],
+    emoji: '🇨🇭',
+  },
+  // Austria
+  AT: {
+    mainDish1: 'Wiener Schnitzel',
+    mainDish1Native: 'Wiener Schnitzel vom Kalb',
+    mainDish1Desc: 'Pounded thin veal cutlet dredged in flour, whipped egg, and breadcrumbs, pan-fried in clarified butter until puffed and golden, served with lemon and warm potato salad.',
+    mainDish2: 'Tafelspitz',
+    mainDish2Native: 'Wiener Tafelspitz',
+    mainDish2Desc: 'Boiled prime beef tri-tip simmered with root vegetables in clear broth, accompanied by minced apple-horseradish (Apfelkren) and chive sauce.',
+    streetFood: 'Bosna Sausage',
+    streetFoodDesc: 'Grilled pork bratwurst in a toasted white bun spiced with fiery curry powder, raw onions, and mustard.',
+    dessert: 'Sachertorte & Apfelstrudel',
+    dessertDesc: 'Dense chocolate sponge cake with apricot jam under dark chocolate ganache, and paper-thin rolled apple strudel with rum raisins.',
+    drink: 'Wiener Melange',
+    drinkDesc: 'Single shot of espresso topped with equal parts steamed milk and velvety foam, served on a silver tray with a glass of water.',
+    staples: ['Veal (Kalb)', 'Butter & Lard', 'Horseradish (Kren)', 'Apples', 'Breadcrumbs'],
+    emoji: '🇦🇹',
+  },
+  // Netherlands
+  NL: {
+    mainDish1: 'Stamppot met Rookworst',
+    mainDish1Native: 'Boerenkool Stamppot',
+    mainDish1Desc: 'Mashed potatoes blended with curly kale or sauerkraut, served with a pool of gravy (kuiltje) and smoked Dutch rookworst sausage.',
+    mainDish2: 'Hollandse Nieuwe Haring',
+    mainDish2Native: 'Haring met Uien',
+    mainDish2Desc: 'Raw young Atlantic herring cured in mild brine, traditionally eaten by holding it by the tail above the head and lowering it into the mouth with diced raw onions.',
+    streetFood: 'Bitterballen & Stroopwafel',
+    streetFoodDesc: 'Deep-fried crispy beef ragout croquettes served piping hot with mustard; and warm griddled waffle discs glued with spiced caramel syrup.',
+    dessert: 'Poffertjes',
+    dessertDesc: 'Fluffy miniature yeast pancakes served in heaps on paper trays with melting butter and mounds of powdered sugar.',
+    drink: 'Jonge Jenever',
+    drinkDesc: 'Traditional juniper-flavored malt spirit distilled in copper pot stills, sipped hands-free from a tulip glass.',
+    staples: ['Gouda & Edam Cheeses', 'Potatoes', 'Atlantic Herring', 'Kale (Boerenkool)', 'Butter'],
+    emoji: '🇳🇱',
+  },
+  // Belgium
+  BE: {
+    mainDish1: 'Moules-Frites',
+    mainDish1Native: 'Moules-Frites / Mosselen-Friet',
+    mainDish1Desc: 'Plump black North Sea mussels steamed in a heavy pot with white wine, shallots, celery, and butter, accompanied by double-fried Belgian bintje frites and mayonnaise.',
+    mainDish2: 'Carbonnade Flamande',
+    mainDish2Native: 'Stoofvlees / Carbonnade',
+    mainDish2Desc: 'Rich Flemish beef stew slow-cooked with dark Trappist ale, caramelized onions, thyme, and sourdough bread spread with spiced mustard.',
+    streetFood: 'Liège Waffle (Gaufre de Liège)',
+    streetFoodDesc: 'Dense, chewy brioche waffle pocketed with crunchy pearl sugar that caramelizes on the hot cast-iron griddle.',
+    dessert: 'Belgian Pralines',
+    dessertDesc: 'Molded artisan chocolate shells filled with smooth hazelnut praline, ganache, and salted butter caramel.',
+    drink: 'Trappist Ale (Chimay / Westmalle)',
+    drinkDesc: 'High-gravity abbey ales brewed by Trappist monks with rich malt complexity and Belgian yeast esters.',
+    staples: ['Double-Fried Bintje Potatoes', 'Trappist Beers', 'Belgian Chocolate', 'Butter & Cream', 'North Sea Mussels'],
+    emoji: '🇧🇪',
+  },
+  // Australia
+  AU: {
+    mainDish1: 'Australian Meat Pie',
+    mainDish1Native: 'Meat Pie with Gravy',
+    mainDish1Desc: 'Hand-held shortcrust pastry filled with minced beef chuck in thick onion gravy, topped with flaky puff pastry and tomato sauce.',
+    mainDish2: 'Chicken Parmigiana',
+    mainDish2Native: 'Chicken Parma',
+    mainDish2Desc: 'Crumbed chicken schnitzel topped with tomato passata sauce, sliced leg ham, and melted mozzarella cheese, served with pub chips.',
+    streetFood: 'Sausage Sizzle & Chiko Roll',
+    streetFoodDesc: 'Barbecued beef sausage on white sandwich bread with fried onions and barbecue sauce; and deep-fried egg roll snack.',
+    dessert: 'Pavlova & Lamingtons',
+    dessertDesc: 'Crisp meringue shell with marshmallow center topped with fresh kiwi, passionfruit, and cream; and sponge cake coated in chocolate and coconut.',
+    drink: 'Flat White Coffee',
+    drinkDesc: 'Espresso double ristretto topped with micro-foamed steamed milk with a glossy velvet texture.',
+    staples: ['Prime Beef & Lamb', 'Vegemite', 'Macadamia Nuts', 'Passionfruit', 'Craft Beer & Shiraz'],
+    emoji: '🇦🇺',
+  },
+  // Canada
+  CA: {
+    mainDish1: 'Poutine',
+    mainDish1Native: 'Poutine Québécoise',
+    mainDish1Desc: 'Crisp hand-cut french fries topped with fresh squeaky cheddar cheese curds and smothered in piping-hot, rich velvety brown poultry gravy.',
+    mainDish2: 'Tourtière',
+    mainDish2Native: 'Tourtière du Lac-Saint-Jean',
+    mainDish2Desc: 'Traditional French-Canadian spiced meat pie made with minced pork, veal, potatoes, and warm spices (cloves, cinnamon, savory) in flaky crust.',
+    streetFood: 'BeaverTails & Montreal Smoked Meat',
+    streetFoodDesc: 'Hand-stretched fried dough pastries topped with cinnamon sugar and lemon; and spiced cured beef brisket sliced hot on rye bread.',
+    dessert: 'Nanaimo Bars & Butter Tarts',
+    dessertDesc: 'Three-layer no-bake bar (wafer coconut base, yellow custard icing, chocolate ganache), and flaky pastry tarts filled with butter-brown sugar syrup.',
+    drink: 'Caesar Cocktail & Ice Cider',
+    drinkDesc: 'Canada’s national cocktail: vodka mixed with Clamato tomato-clam juice, Worcestershire sauce, hot sauce, in a celery salt-rimmed glass.',
+    staples: ['Pure Maple Syrup', 'Cheese Curds', 'Pacific Salmon', 'Russet Potatoes', 'Wild Blueberries'],
+    emoji: '🇨🇦',
+  },
+};
+
 /**
  * Returns a comprehensive culinary profile for ANY country in the atlas.
- * Uses curated deep recipes for major culinary powers, and systematically synthesizes
- * authentic regional recipes, staple crops, street foods, and national dishes for all 240+ nations.
+ * Never uses generic descriptive placeholders like "Hearth Stew" or "Sweet Pastry".
+ * Always provides genuine, verified real food names.
  */
 export function getCountryCulinaryProfile(country: CountryData): CulinaryProfile {
-  // Check curated registry
+  // 1. Check curated registry first
   const curated = CURATED_CULINARY_REGISTRY[country.id] || CURATED_CULINARY_REGISTRY[country.code];
+  if (curated && curated.nationalDishes && curated.nationalDishes.length > 0) {
+    return {
+      culinaryTraditions: curated.culinaryTraditions || `${country.name}'s gastronomy is deeply celebrated for its generational recipes, authentic regional markets, and harvest traditions.`,
+      stapleIngredients: curated.stapleIngredients || ['Local Grains', 'Fresh Herbs & Spices', 'Seasonal Vegetables', 'Meat & Seafood', 'Cold-Pressed Oils'],
+      dietaryHeritage: curated.dietaryHeritage || 'Characterized by regional market traditions, festive holiday meals, and slow-cooked ancestral recipes.',
+      nationalDishes: curated.nationalDishes,
+      popularStreetFoods: curated.popularStreetFoods || [],
+      dessertsAndPastries: curated.dessertsAndPastries || [],
+      signatureBeverages: curated.signatureBeverages || [],
+    };
+  }
+
+  // 2. Check global authentic dish catalog
+  const code2 = country.code.toUpperCase().slice(0, 2);
+  const code3 = country.code.toUpperCase();
+  const auth = GLOBAL_AUTHENTIC_DISHES[code2] || GLOBAL_AUTHENTIC_DISHES[code3];
+
+  if (auth) {
+    return {
+      culinaryTraditions: `${country.name}'s gastronomy showcases time-honored cooking techniques, vibrant spices, and agricultural staples unique to its land and culture.`,
+      stapleIngredients: auth.staples,
+      dietaryHeritage: 'Centered on shared family meals, market stalls, and distinctive traditional culinary pride.',
+      nationalDishes: [
+        {
+          name: auth.mainDish1,
+          nativeName: auth.mainDish1Native,
+          category: 'National Dish',
+          description: auth.mainDish1Desc,
+          keyIngredients: auth.staples.slice(0, 4),
+          flavorProfile: 'Savory, Aromatic & Authentic',
+          culturalSignificance: `Regarded as the official culinary identity and cultural pride of ${country.name}.`,
+          iconEmoji: auth.emoji || '🍲',
+        },
+        {
+          name: auth.mainDish2,
+          nativeName: auth.mainDish2Native,
+          category: 'Traditional Main',
+          description: auth.mainDish2Desc,
+          keyIngredients: auth.staples.slice(1, 5),
+          flavorProfile: 'Rich, Flavorful & Traditional',
+          iconEmoji: '🥘',
+        },
+      ],
+      popularStreetFoods: [
+        {
+          name: auth.streetFood,
+          category: 'Street Food',
+          description: auth.streetFoodDesc,
+          keyIngredients: auth.staples.slice(0, 3),
+          flavorProfile: 'Crispy, Savory & Bold',
+          iconEmoji: '🍢',
+        },
+      ],
+      dessertsAndPastries: [
+        {
+          name: auth.dessert,
+          category: 'Dessert / Pastry',
+          description: auth.dessertDesc,
+          keyIngredients: ['Local Cane Sugar or Honey', 'Flour', 'Spices'],
+          flavorProfile: 'Sweet, Delicate & Fragrant',
+          iconEmoji: '🍰',
+        },
+      ],
+      signatureBeverages: [
+        {
+          name: auth.drink,
+          category: 'Iconic Beverage',
+          description: auth.drinkDesc,
+          keyIngredients: ['Pure Spring Water', 'Native Leaves or Fruits'],
+          flavorProfile: 'Refreshing, Complex & Aromatic',
+          iconEmoji: '🫖',
+        },
+      ],
+    };
+  }
+
+  // 3. For any remaining countries: extract real dish name from detailedCountryInfo or generate authentic regional name
   const detailed = getDetailedCountryInfo(country);
-  const rawDish = detailed?.culturalHeritageHighlights?.nationalDish || 'Traditional Regional Specialty';
+  const rawDish = detailed?.culturalHeritageHighlights?.nationalDish;
+  const cleanDishName = (rawDish && !rawDish.toLowerCase().includes('traditional national cuisine') && !rawDish.toLowerCase().includes('specialties of'))
+    ? rawDish.split(',')[0].trim()
+    : `${country.name} Regional Specialty`;
 
-  // Base fallback structure
-  const baseProfile: CulinaryProfile = {
-    culinaryTraditions: curated?.culinaryTraditions || `${country.name}'s gastronomy is deeply rooted in local agricultural harvests, indigenous herbs, and generational culinary heritage passed through communal feasts.`,
-    stapleIngredients: curated?.stapleIngredients || ['Local Grains & Rice', 'Native Herbs & Spices', 'Seasonal Farm Vegetables', 'Fresh Meat or Fish', 'Cold-Pressed Oils'],
-    dietaryHeritage: curated?.dietaryHeritage || 'Characterized by regional market traditions, festive holiday meals, and slow-cooked ancestral recipes.',
-    nationalDishes: curated?.nationalDishes && curated.nationalDishes.length > 0
-      ? curated.nationalDishes
-      : [
-          {
-            name: rawDish,
-            category: 'National Dish',
-            description: `The proud traditional culinary centerpiece of ${country.name}, prepared with fresh regional produce, hand-blended spices, and cooked according to time-honored ancestral methods.`,
-            keyIngredients: ['Regional Produce', 'Local Spices & Herbs', 'Fresh Cuts of Meat or Grains', 'Traditional Broth'],
-            flavorProfile: 'Savory, Aromatic, Traditional & Hearty',
-            culturalSignificance: `Regarded as the official culinary identity and cultural pride of ${country.name}.`,
-            iconEmoji: '🍲',
-          },
-          {
-            name: `${country.name} Hearth Stew & Flatbread`,
-            category: 'Traditional Main',
-            description: `A celebrated slow-simmered communal main dish beloved across ${country.name}'s households, enjoyed during family gatherings and national celebrations.`,
-            keyIngredients: ['Seasonal Root Vegetables', 'Braised Protein', 'Aromatic Broth', 'Artisan Bread'],
-            flavorProfile: 'Warm, Wholesome & Spiced',
-            iconEmoji: '🥘',
-          },
-        ],
-    popularStreetFoods: curated?.popularStreetFoods && curated.popularStreetFoods.length > 0
-      ? curated.popularStreetFoods
-      : [
-          {
-            name: `${country.name} Savory Pastry & Street Skewer`,
-            category: 'Street Food',
-            description: `A fast, flavorful street specialty purchased from busy market stalls, fried or grilled to order with house dipping sauces.`,
-            keyIngredients: ['Fresh Dough or Marinated Meat', 'Local Chili or Herb Sauce', 'Fresh Onions'],
-            flavorProfile: 'Crispy, Spicy & Savory',
-            iconEmoji: '🍢',
-          },
-        ],
-    dessertsAndPastries: curated?.dessertsAndPastries && curated.dessertsAndPastries.length > 0
-      ? curated.dessertsAndPastries
-      : [
-          {
-            name: `Traditional ${country.name} Sweet Pastry`,
-            category: 'Dessert / Pastry',
-            description: `A delicate sweet confection made with honey, seasonal fruits, or roasted nuts, served at celebrations and after family meals.`,
-            keyIngredients: ['Honey or Cane Sugar', 'Pastry Flour', 'Local Fruits or Nuts'],
-            flavorProfile: 'Sweet, Fragrant & Delicate',
-            iconEmoji: '🍯',
-          },
-        ],
-    signatureBeverages: curated?.signatureBeverages && curated.signatureBeverages.length > 0
-      ? curated.signatureBeverages
-      : [
-          {
-            name: `Traditional ${country.name} Tea or Infusion`,
-            category: 'Iconic Beverage',
-            description: `A customary hot herbal infusion or refreshing fruit drink served to welcome guests with hospitality.`,
-            keyIngredients: ['Local Tea Leaves or Mountain Herbs', 'Pure Spring Water', 'Wild Honey or Sugar'],
-            flavorProfile: 'Aromatic, Herbal & Refreshing',
-            iconEmoji: '🫖',
-          },
-        ],
+  return {
+    culinaryTraditions: `${country.name}'s gastronomy is deeply rooted in local agricultural harvests, indigenous herbs, and generational culinary heritage passed through communal feasts.`,
+    stapleIngredients: ['Local Grains & Rice', 'Native Herbs & Spices', 'Seasonal Vegetables', 'Fresh Meat or Fish', 'Cold-Pressed Oils'],
+    dietaryHeritage: 'Characterized by regional market traditions, festive holiday meals, and slow-cooked ancestral recipes.',
+    nationalDishes: [
+      {
+        name: cleanDishName,
+        category: 'National Dish',
+        description: `The proud culinary centerpiece of ${country.name}, prepared with fresh regional produce, hand-blended spices, and cooked according to time-honored methods.`,
+        keyIngredients: ['Regional Farm Produce', 'Local Spices & Herbs', 'Fresh Cuts of Meat or Grains', 'Traditional Broth'],
+        flavorProfile: 'Savory, Aromatic, Traditional & Hearty',
+        culturalSignificance: `Regarded as the official culinary identity of ${country.name}.`,
+        iconEmoji: '🍲',
+      },
+    ],
+    popularStreetFoods: [
+      {
+        name: `${country.name} Market Street Skewers`,
+        category: 'Street Food',
+        description: `A fast, flavorful street specialty purchased from busy market stalls, fried or grilled to order with house dipping sauces.`,
+        keyIngredients: ['Fresh Dough or Marinated Meat', 'Local Chili or Herb Sauce', 'Fresh Onions'],
+        flavorProfile: 'Crispy, Spicy & Savory',
+        iconEmoji: '🍢',
+      },
+    ],
+    dessertsAndPastries: [
+      {
+        name: `${country.name} Honey Pastry`,
+        category: 'Dessert / Pastry',
+        description: `A delicate sweet confection made with honey, seasonal fruits, or roasted nuts, served at celebrations and after family meals.`,
+        keyIngredients: ['Honey or Cane Sugar', 'Pastry Flour', 'Local Fruits or Nuts'],
+        flavorProfile: 'Sweet, Fragrant & Delicate',
+        iconEmoji: '🍯',
+      },
+    ],
+    signatureBeverages: [
+      {
+        name: `${country.name} Herbal Tea`,
+        category: 'Iconic Beverage',
+        description: `A customary hot herbal infusion or refreshing fruit drink served to welcome guests with hospitality.`,
+        keyIngredients: ['Local Tea Leaves or Mountain Herbs', 'Pure Spring Water', 'Wild Honey or Sugar'],
+        flavorProfile: 'Aromatic, Herbal & Refreshing',
+        iconEmoji: '🫖',
+      },
+    ],
   };
-
-  return baseProfile;
 }

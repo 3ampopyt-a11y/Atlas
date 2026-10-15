@@ -958,6 +958,353 @@ Respond strictly in valid JSON with this exact schema:
         return null;
       };
 
+      // 0. Dedicated Food & National Cuisine Handler (Instant <2ms, says the REAL NAME of the food, never generic descriptions)
+      const isFoodQuestion =
+        lower.includes('food') ||
+        lower.includes('foods') ||
+        lower.includes('dish') ||
+        lower.includes('dishes') ||
+        lower.includes('cuisine') ||
+        lower.includes('cuisines') ||
+        lower.includes('eat') ||
+        lower.includes('eating') ||
+        lower.includes('recipe') ||
+        lower.includes('culinary') ||
+        lower.includes('gastronomy') ||
+        lower.includes('national dish') ||
+        lower.includes('traditional food') ||
+        lower.includes('street food') ||
+        lower.includes('naem of the food') ||
+        lower.includes('name of the food');
+
+      if (isFoodQuestion) {
+        const countryMatch = findCountryInQuery(lower);
+
+        interface FoodProfile {
+          name: string;
+          code: string;
+          answer: string;
+          otherCountries?: string[];
+          dishes: Array<{ name: string; category: string; detail: string; badge?: string }>;
+        }
+
+        const AUTHENTIC_FOOD_PROFILES: Record<string, FoodProfile> = {
+          PT: {
+            name: 'Portugal',
+            code: 'PT',
+            answer:
+              "Portugal's most iconic foods are Bacalhau à Brás (salted Atlantic cod scrambled with matchstick potatoes, eggs, black olives, and parsley), Francesinha (Porto's hearty layered steak and linguiça sausage sandwich smothered in melted cheese and spicy beer sauce), Pastel de Nata (famous blistered egg custard tart dusted with cinnamon), Cozido à Portuguesa (rich meats and sausage boil), and Caldo Verde soup. For street food, Bifana no Pão (garlicky braised pork cutlet sandwich) and Pastéis de Bacalhau (codfish fritters) are legendary across Portuguese tascas.",
+            otherCountries: ['Spain', 'France', 'Italy', 'Brazil'],
+            dishes: [
+              { name: 'Bacalhau à Brás', category: 'National Dish', detail: 'Salted Atlantic cod scrambled with batata palha (matchstick potatoes), eggs, olives & fresh parsley.' },
+              { name: 'Francesinha', category: 'Traditional Main', detail: 'Porto’s layered steak, linguiça, and ham sandwich under melted cheese in a rich beer-piri-piri sauce.' },
+              { name: 'Pastel de Nata', category: 'Dessert / Pastry', detail: 'Caramelized egg custard tart in ultra-crisp puff pastry created by 18th-century Belém monks.' },
+              { name: 'Cozido à Portuguesa', category: 'Traditional Main', detail: 'Slow-simmered Portuguese feast of beef brisket, pork ribs, chouriço, morcela, and savoy cabbage.' },
+              { name: 'Caldo Verde', category: 'Soup', detail: 'Silky potato broth with finely shredded couve galega (collard greens) and seared chouriço slices.' },
+              { name: 'Bifana no Pão', category: 'Street Food', detail: 'Tender garlic and white wine-simmered pork cutlets inside crusty papo-seco roll with yellow mustard.' },
+              { name: 'Vinho do Porto & Ginjinha', category: 'Iconic Beverage', detail: 'Douro Valley fortified Port wine and sweet Morello sour cherry liqueur from Óbidos.' },
+            ],
+          },
+          ES: {
+            name: 'Spain',
+            code: 'ES',
+            answer:
+              "Spain's most famous foods are Paella Valenciana (saffron-infused Bomba rice cooked over wood fire with rabbit, chicken, and garrofó beans with a crispy socarrat crust), Jamón Ibérico de Bellota (acorn-fed cured Iberian ham carved paper-thin), Tortilla de Patatas (classic Spanish potato omelette), and Gazpacho Andaluz. For street food and dessert, Churros con Chocolate and Crema Catalana are universally celebrated.",
+            otherCountries: ['Portugal', 'France', 'Italy', 'Mexico'],
+            dishes: [
+              { name: 'Paella Valenciana', category: 'National Dish', detail: 'Saffron Bomba rice with rabbit, chicken, green beans, and caramelized socarrat bottom crust.' },
+              { name: 'Jamón Ibérico de Bellota', category: 'Traditional Main', detail: 'Acorn-fed free-range Iberian cured ham aged up to 48 months.' },
+              { name: 'Tortilla de Patatas', category: 'Traditional Main', detail: 'Spanish omelette of olive oil-poached potatoes, farm eggs, and caramelized onions.' },
+              { name: 'Churros con Chocolate', category: 'Street Food', detail: 'Crisp fluted fried dough served with molten bittersweet Spanish dark drinking chocolate.' },
+              { name: 'Crema Catalana', category: 'Dessert / Pastry', detail: 'Silky custard with cinnamon and lemon peel under a brittle blowtorched caramel crust.' },
+              { name: 'Sangría & Rioja Wine', category: 'Iconic Beverage', detail: 'Tempranillo red wine punch macerated with fresh citrus and cinnamon.' },
+            ],
+          },
+          IT: {
+            name: 'Italy',
+            code: 'IT',
+            answer:
+              "Italy's most celebrated foods are Pizza Margherita (wood-fired blistered dough topped with San Marzano tomatoes, buffalo mozzarella, and fresh basil), Spaghetti alla Carbonara (al dente pasta tossed with crispy cured guanciale, egg yolks, and Pecorino Romano), Tagliatelle al Ragù (Bolognese), and Ossobuco alla Milanese with saffron risotto. Iconic sweets include Artisanal Tiramisù and Gelato, followed by dark Italian Espresso.",
+            otherCountries: ['France', 'Spain', 'Greece', 'Japan'],
+            dishes: [
+              { name: 'Pizza Margherita', category: 'National Dish', detail: 'Wood-fired Neapolitan pizza with San Marzano DOP tomatoes, mozzarella di bufala & fresh basil.' },
+              { name: 'Spaghetti alla Carbonara', category: 'Traditional Main', detail: 'Roman bronze-cut pasta emulsified with guanciale, egg yolks, Pecorino Romano & black pepper.' },
+              { name: 'Tagliatelle al Ragù', category: 'Traditional Main', detail: 'Handmade egg pasta with slow-cooked minced beef, pork, wine, and mirepoix.' },
+              { name: 'Arancini & Supplì', category: 'Street Food', detail: 'Crisp golden fried saffron rice balls stuffed with meat ragù and molten mozzarella.' },
+              { name: 'Tiramisù & Gelato', category: 'Dessert / Pastry', detail: 'Espresso-soaked savoiardi ladyfingers layered with sweet mascarpone and cocoa.' },
+              { name: 'Italian Espresso', category: 'Iconic Beverage', detail: 'Velvety 25ml extraction with hazelnut crema and intense roast aromatics.' },
+            ],
+          },
+          FR: {
+            name: 'France',
+            code: 'FR',
+            answer:
+              "France's premier culinary dishes are Bœuf Bourguignon (tender beef braised in red Burgundy wine with lardons, pearl onions, and mushrooms), Pot-au-Feu, Baguette de Tradition with artisanal French cheeses (Camembert, Roquefort, Comté), and Confit de Canard. For pastries, Croissant au Beurre, Macarons, and Crème Brûlée represent the height of classical bakery art, accompanied by Champagne and Bordeaux wine.",
+            otherCountries: ['Italy', 'Spain', 'Belgium', 'Switzerland'],
+            dishes: [
+              { name: 'Bœuf Bourguignon', category: 'National Dish', detail: 'Slow-braised beef chuck in red Burgundy wine with smoked lardons and bouquet garni.' },
+              { name: 'Baguette & Fromages', category: 'Traditional Main', detail: 'Artisanal crusty baguette with AOC Camembert, Roquefort, Comté, and cultured butter.' },
+              { name: 'Confit de Canard', category: 'Traditional Main', detail: 'Duck legs slow-poached in duck fat and pan-crisped to golden crackling.' },
+              { name: 'Galette de Sarrasin', category: 'Street Food', detail: 'Crisp buckwheat crêpe with Paris ham, Gruyère cheese, and farm egg.' },
+              { name: 'Croissant au Beurre & Macarons', category: 'Dessert / Pastry', detail: 'Laminated flaky viennoiserie layered with butter, and almond meringue shells.' },
+              { name: 'Champagne & Bordeaux Wine', category: 'Iconic Beverage', detail: 'Sparkling effervescent wine and oak-cured Cabernet-Merlot blends.' },
+            ],
+          },
+          JP: {
+            name: 'Japan',
+            code: 'JP',
+            answer:
+              "Japan's most iconic foods are Edomae Sushi & Sashimi (fresh seasonal bluefin otoro, salmon, and sea urchin over seasoned sushi rice with real Hon-wasabi), Tonkotsu Ramen (rich 18-hour pork bone broth with springy noodles, chashu pork, and soft-boiled egg), and A5 Wagyu Beef Sukiyaki. Street food favorites include Osaka Takoyaki (octopus batter balls) and Okonomiyaki, with Mochi, Wagashi, and Ceremonial Matcha for dessert.",
+            otherCountries: ['South Korea', 'China', 'Thailand', 'Vietnam'],
+            dishes: [
+              { name: 'Sushi & Sashimi', category: 'National Dish', detail: 'Pristine raw seasonal seafood over seasoned koshihikari rice with real grated wasabi.' },
+              { name: 'Tonkotsu Ramen', category: 'Traditional Main', detail: 'Rich pork collagen broth, alkaline wheat noodles, chashu pork belly, ajitsuke egg & nori.' },
+              { name: 'Wagyu Sukiyaki', category: 'Traditional Main', detail: 'Marbled A5 Wagyu beef simmered tableside in sweet soy warishita sauce with raw egg dip.' },
+              { name: 'Takoyaki & Okonomiyaki', category: 'Street Food', detail: 'Golden spherical octopus batter balls topped with Kewpie mayo and bonito flakes.' },
+              { name: 'Mochi & Wagashi', category: 'Dessert / Pastry', detail: 'Glutinous rice cakes filled with sweet azuki red bean paste.' },
+              { name: 'Matcha & Junmai Sake', category: 'Iconic Beverage', detail: 'Whisked shade-grown green tea foam and cold-brewed polished rice sake.' },
+            ],
+          },
+          MX: {
+            name: 'Mexico',
+            code: 'MX',
+            answer:
+              "Mexico's most renowned foods are Tacos al Pastor (achiote-marinated pork roasted on a vertical trompo spit with charred pineapple and cilantro), Mole Poblano (velvety sauce of 30+ roasted spices, dried chilies, and dark chocolate over poultry), Chiles en Nogada, and slow-braised Beef Birria with rich consommé. Famous street foods include Elotes (grilled corn with cotija cheese and crema), accompanied by Churros and Tequila.",
+            otherCountries: ['Colombia', 'Peru', 'Spain', 'United States'],
+            dishes: [
+              { name: 'Tacos al Pastor', category: 'National Dish', detail: 'Spit-roasted achiote pork shavings on hand-pressed corn tortillas with pineapple & salsa.' },
+              { name: 'Mole Poblano', category: 'Traditional Main', detail: 'Complex velvety sauce of roasted mulato/ancho chilies, dark chocolate, seeds, and spices.' },
+              { name: 'Chiles en Nogada', category: 'Traditional Main', detail: 'Poblano chili stuffed with picadillo fruit-meat, covered in walnut cream and pomegranate.' },
+              { name: 'Elotes & Guacamole', category: 'Street Food', detail: 'Char-grilled sweet corn with cotija cheese, crema, and chili powder; and fresh avocado dip.' },
+              { name: 'Churros & Tres Leches Cake', category: 'Dessert / Pastry', detail: 'Fluted fried pastry rolled in cinnamon sugar, and sponge soaked in three milks.' },
+              { name: 'Tequila & Horchata', category: 'Iconic Beverage', detail: '100% Blue Weber agave spirit, and iced cinnamon rice milk.' },
+            ],
+          },
+          IN: {
+            name: 'India',
+            code: 'IN',
+            answer:
+              "India's most celebrated culinary dishes are Hyderabadi Biryani (aged basmati rice and marinated meat slow-cooked in a sealed handi with saffron and caramelized onions), Butter Chicken (Murgh Makhani in velvety tomato-cashew gravy with garlic naan), Dal Makhani, and Masala Dosa (lacy crisp rice crepe with spiced potatoes and sambar). Famous street snacks include Pani Puri and Samosas, paired with sweet Gulab Jamun and spiced Masala Chai.",
+            otherCountries: ['Pakistan', 'Bangladesh', 'Sri Lanka', 'United Kingdom'],
+            dishes: [
+              { name: 'Hyderabadi Biryani', category: 'National Dish', detail: 'Aromatic layered basmati rice, marinated meat, saffron milk, and fried onions in dum pukht.' },
+              { name: 'Butter Chicken & Dal Makhani', category: 'Traditional Main', detail: 'Tandoori chicken in creamy tomato-fenugreek sauce, and slow-simmered black urad lentils.' },
+              { name: 'Masala Dosa & Sambar', category: 'Traditional Main', detail: 'Crisp fermented rice crepe stuffed with spiced potato masala, coconut chutney & sambar.' },
+              { name: 'Pani Puri & Samosas', category: 'Street Food', detail: 'Hollow semolina puris filled with spiced potatoes and tangy mint-tamarind water.' },
+              { name: 'Gulab Jamun & Jalebi', category: 'Dessert / Pastry', detail: 'Warm milk-solid dumplings soaked in rose-cardamom syrup, and saffron jalebi spirals.' },
+              { name: 'Masala Chai & Mango Lassi', category: 'Iconic Beverage', detail: 'Black Assam tea brewed with ginger and cardamom; and thick mango yogurt smoothie.' },
+            ],
+          },
+          CN: {
+            name: 'China',
+            code: 'CN',
+            answer:
+              "China's top national dishes are Peking Roast Duck (fruitwood-roasted duck with glass-crisp amber skin wrapped in lotus pancakes with sweet bean sauce and scallions), Jiaozi & Xiaolongbao (steamed soup dumplings bursting with ginger collagen broth), Sichuan Kung Pao Chicken and Mapo Tofu (spicy málà peppercorn bean curd). Street foods include Jianbing crêpes and Baozi, finished with Mooncakes and Longjing Green Tea.",
+            otherCountries: ['Japan', 'Taiwan', 'Hong Kong', 'Vietnam'],
+            dishes: [
+              { name: 'Peking Roast Duck', category: 'National Dish', detail: 'Wood-fired crispy duck served with thin pancakes, sweet bean sauce, cucumber & scallion.' },
+              { name: 'Jiaozi & Xiaolongbao', category: 'Traditional Main', detail: 'Handmade steamed dumplings and soup dumplings filled with pork, ginger, and savory broth.' },
+              { name: 'Kung Pao Chicken & Mapo Tofu', category: 'Traditional Main', detail: 'Fiery Sichuan stir-fry with doubanjiang bean paste, peppercorns, peanuts, and tofu.' },
+              { name: 'Jianbing & Baozi', category: 'Street Food', detail: 'Savory street crêpe with eggs and fried wonton crisps, and fluffy steamed buns.' },
+              { name: 'Mooncakes & Tangyuan', category: 'Dessert / Pastry', detail: 'Lotus paste pastries with salted egg yolk, and glutinous rice balls in sweet broth.' },
+              { name: 'Longjing Tea & Pu-erh', category: 'Iconic Beverage', detail: 'Dragon Well pan-roasted green tea leaves, and aged fermented Yunnan tea.' },
+            ],
+          },
+          DE: {
+            name: 'Germany',
+            code: 'DE',
+            answer:
+              "Germany's most iconic foods are Sauerbraten (tender beef pot roast marinated for days in red wine and spices, served with gingersnap gravy and potato dumplings), Schweinshaxe (Bavarian roasted pork knuckle with ultra-crisp crackling rind and sauerkraut), and Currywurst (seared bratwurst in spiced curry ketchup with fries). Street foods include Brezn (lye pretzels) with Weißwurst, followed by Black Forest Cake (Schwarzwälder Kirschtorte) and Pilsner beer.",
+            otherCountries: ['Austria', 'Switzerland', 'Poland', 'Czech Republic'],
+            dishes: [
+              { name: 'Sauerbraten', category: 'National Dish', detail: 'Red wine-marinated beef roast with sweet-sour gingersnap gravy, dumplings & red cabbage.' },
+              { name: 'Schweinshaxe', category: 'Traditional Main', detail: 'Crispy crackling pork knuckle roasted with dark Bavarian beer and caraway seeds.' },
+              { name: 'Currywurst', category: 'Traditional Main', detail: 'Bratwurst sausage medallions smothered in warm curried ketchup and curry powder.' },
+              { name: 'Brezn & Weißwurst', category: 'Street Food', detail: 'Freshly baked lye pretzel with coarse salt, poached veal sausage, and sweet mustard.' },
+              { name: 'Black Forest Cake', category: 'Dessert / Pastry', detail: 'Chocolate sponge cake brushed with Kirsch cherry schnapps, sour cherries, and cream.' },
+              { name: 'Pilsner & Hefeweizen', category: 'Iconic Beverage', detail: 'Reinheitsgebot pure malt lager and cloudy wheat beer with banana-clove notes.' },
+            ],
+          },
+          BR: {
+            name: 'Brazil',
+            code: 'BR',
+            answer:
+              "Brazil's most famous national foods are Feijoada Completa (rich slow-simmered black bean stew with smoked pork ribs, paio sausage, and carne seca, served with rice, farofa, and sautéed collard greens), Picanha (prime top sirloin cap grilled over open charcoal embers with rock salt), and Moqueca Baiana (Bahian seafood stew with dendê palm oil and coconut milk). Street foods include Pão de Queijo (cassava cheese rolls) and Coxinha, accompanied by Brigadeiro truffles and Caipirinha.",
+            otherCountries: ['Portugal', 'Argentina', 'Colombia', 'Peru'],
+            dishes: [
+              { name: 'Feijoada Completa', category: 'National Dish', detail: 'Black bean stew packed with smoked ribs, sausage, sun-dried beef, farofa & greens.' },
+              { name: 'Picanha & Churrasco', category: 'Traditional Main', detail: 'Prime beef top sirloin cap grilled over coals with coarse sea salt.' },
+              { name: 'Moqueca Baiana', category: 'Traditional Main', detail: 'Fresh fish and shrimp poached in clay pot with dendê palm oil, coconut milk, and cilantro.' },
+              { name: 'Pão de Queijo & Coxinha', category: 'Street Food', detail: 'Chewy baked tapioca cheese rolls, and teardrop shredded chicken croquettes.' },
+              { name: 'Brigadeiro & Açaí', category: 'Dessert / Pastry', detail: 'Fudgy condensed milk cocoa truffles, and frozen Amazonian açaí puree bowls.' },
+              { name: 'Caipirinha & Guaraná', category: 'Iconic Beverage', detail: 'Muddled fresh lime and sugar spiked with sugarcane cachaça spirit.' },
+            ],
+          },
+          AR: {
+            name: 'Argentina',
+            code: 'AR',
+            answer:
+              "Argentina's national food culture is centered on Asado Criollo (open-fire wood-grilled beef ribs, flank steak, and sweetbreads), Empanadas Mendocinas (flaky pastries stuffed with hand-cut beef, onions, cumin, and olives), and Milanesa a la Napolitana. The most iconic street food is Choripán (grilled chorizo baguette slathered in chimichurri), finished with Alfajores con Dulce de Leche and bitter Yerba Mate.",
+            otherCountries: ['Brazil', 'Uruguay', 'Chile', 'Spain'],
+            dishes: [
+              { name: 'Asado Criollo', category: 'National Dish', detail: 'Prime beef cuts, ribs, and sausages slow-grilled over wood embers on a parrilla.' },
+              { name: 'Empanadas Mendocinas', category: 'Traditional Main', detail: 'Baked pastries filled with knife-cut beef, onions, olives, and hard-boiled egg.' },
+              { name: 'Choripán con Chimichurri', category: 'Street Food', detail: 'Grilled chorizo sausage in crusty baguette with fresh garlic-parsley chimichurri.' },
+              { name: 'Milanesa a la Napolitana', category: 'Traditional Main', detail: 'Breaded beef escalope topped with tomato ham and melted mozzarella.' },
+              { name: 'Alfajores con Dulce de Leche', category: 'Dessert / Pastry', detail: 'Cornstarch shortbread cookies sandwiched with thick caramel dulce de leche.' },
+              { name: 'Mate & Malbec Wine', category: 'Iconic Beverage', detail: 'Yerba mate steeped in a gourd with bombilla straw, and Mendoza Malbec red wine.' },
+            ],
+          },
+          CA: {
+            name: 'Canada',
+            code: 'CA',
+            answer:
+              "Canada's most iconic foods are Poutine (crisp french fries crowned with fresh squeaky cheddar cheese curds and smothered in piping-hot brown gravy), Tourtière (traditional Quebec spiced minced pork and potato pie), and Montreal Smoked Meat on rye. Famous sweets include BeaverTails pastries, Nanaimo Bars, and Butter Tarts, paired with the national Caesar cocktail (vodka with Clamato juice) and Pure Maple Syrup.",
+            otherCountries: ['United States', 'United Kingdom', 'France'],
+            dishes: [
+              { name: 'Poutine', category: 'National Dish', detail: 'Hand-cut fries, squeaky fresh cheese curds, and rich hot brown poultry gravy.' },
+              { name: 'Tourtière', category: 'Traditional Main', detail: 'Quebec flaky meat pie seasoned with cloves, cinnamon, minced pork, and potatoes.' },
+              { name: 'Montreal Smoked Meat', category: 'Street Food', detail: 'Spiced cured beef brisket steamed and sliced hot on rye bread with yellow mustard.' },
+              { name: 'BeaverTails', category: 'Street Food', detail: 'Hand-stretched fried dough pastries topped with cinnamon sugar and lemon juice.' },
+              { name: 'Nanaimo Bars & Butter Tarts', category: 'Dessert / Pastry', detail: 'Three-layer custard-chocolate bars, and flaky tarts with brown sugar butter filling.' },
+              { name: 'Caesar Cocktail & Ice Cider', category: 'Iconic Beverage', detail: 'Vodka with spicy Clamato tomato-clam juice in a celery salt-rimmed glass.' },
+            ],
+          },
+          AU: {
+            name: 'Australia',
+            code: 'AU',
+            answer:
+              "Australia's most recognizable foods are the Australian Meat Pie (individual shortcrust pastry filled with minced beef and thick gravy, topped with tomato sauce), Chicken Parmigiana ('Parma' topped with ham and melted mozzarella), and the humble Sausage Sizzle (barbecued sausage on white bread with onions). Classic desserts include Pavlova (crisp meringue with passionfruit and cream) and Lamingtons, served with an artisan Flat White coffee.",
+            otherCountries: ['New Zealand', 'United Kingdom', 'United States'],
+            dishes: [
+              { name: 'Australian Meat Pie', category: 'National Dish', detail: 'Flaky pastry pie packed with slow-cooked minced beef chuck in rich onion gravy.' },
+              { name: 'Chicken Parmigiana', category: 'Traditional Main', detail: 'Crumbed chicken schnitzel with tomato passata, leg ham, and bubbling mozzarella.' },
+              { name: 'Sausage Sizzle & Chiko Roll', category: 'Street Food', detail: 'Barbecued beef sausage on sandwich bread with grilled onions and BBQ sauce.' },
+              { name: 'Pavlova & Lamingtons', category: 'Dessert / Pastry', detail: 'Meringue cake topped with kiwi, passionfruit & cream; and chocolate coconut sponge.' },
+              { name: 'Flat White Coffee', category: 'Iconic Beverage', detail: 'Double espresso ristretto poured with velvety micro-foamed steamed milk.' },
+            ],
+          },
+          KR: {
+            name: 'South Korea',
+            code: 'KR',
+            answer:
+              "South Korea's most celebrated foods are Kimchi Jjigae (fiery fermented kimchi stew with pork belly and tofu), Bulgogi (sweet soy and pear-marinated thinly sliced ribeye), Bibimbap (warm rice bowl with seasoned namul vegetables, beef, and gochujang chili paste in a sizzling stone bowl), and Samgyeopsal (grilled pork belly). Street foods include Tteokbokki (chewy rice cakes in spicy chili paste) and Hotteok, with Bingsu (shaved milk ice) and Soju.",
+            otherCountries: ['Japan', 'China', 'Vietnam', 'Thailand'],
+            dishes: [
+              { name: 'Kimchi Jjigae & Bulgogi', category: 'National Dish', detail: 'Aged fermented kimchi stew, and sweet soy-marinated beef ribeye.' },
+              { name: 'Bibimbap', category: 'Traditional Main', detail: 'Sizzling stone bowl with warm rice, seasoned vegetables, egg yolk & gochujang.' },
+              { name: 'Samgyeopsal', category: 'Traditional Main', detail: 'Thick pork belly strips grilled tableside and wrapped in perilla leaves with ssamjang.' },
+              { name: 'Tteokbokki & Hotteok', category: 'Street Food', detail: 'Chewy cylinder rice cakes in sweet-spicy gochujang, and griddled brown sugar pancakes.' },
+              { name: 'Bingsu', category: 'Dessert / Pastry', detail: 'Shaved milk ice mountain with sweet red beans, injeolmi rice cake, and condensed milk.' },
+              { name: 'Soju & Makgeolli', category: 'Iconic Beverage', detail: 'Clear distilled rice liquor, and sparkling cloudy fermented rice brew.' },
+            ],
+          },
+          TH: {
+            name: 'Thailand',
+            code: 'TH',
+            answer:
+              "Thailand's world-famous culinary dishes are Pad Thai (stir-fried rice noodles with tamarind, palm sugar, dried shrimp, crushed peanuts, and lime), Tom Yum Goong (hot and sour lemongrass soup with prawns, kaffir lime leaves, and galangal), and Gaeng Keow Wan (aromatic green coconut curry). Renowned street foods include Som Tum (spicy green papaya salad) and Moo Ping (grilled pork skewers), followed by Khao Niao Mamuang (Mango Sticky Rice) and Thai Iced Tea.",
+            otherCountries: ['Vietnam', 'Indonesia', 'Malaysia', 'India'],
+            dishes: [
+              { name: 'Pad Thai', category: 'National Dish', detail: 'Stir-fried rice noodles with tamarind paste, tofu, eggs, shrimp, peanuts & lime.' },
+              { name: 'Tom Yum Goong', category: 'Soup', detail: 'Fiery lemongrass, galangal, kaffir lime, and chili broth packed with fresh prawns.' },
+              { name: 'Som Tum (Papaya Salad)', category: 'Street Food', detail: 'Green papaya pounded in clay mortar with chilies, garlic, fish sauce, and peanuts.' },
+              { name: 'Gaeng Keow Wan', category: 'Traditional Main', detail: 'Fragrant green curry paste simmered with coconut milk, chicken, and Thai eggplants.' },
+              { name: 'Mango Sticky Rice', category: 'Dessert / Pastry', detail: 'Warm glutinous rice cooked in salted coconut cream with sweet honey mango.' },
+              { name: 'Cha Yen (Thai Iced Tea)', category: 'Iconic Beverage', detail: 'Spiced black tea sweetened with condensed milk over crushed ice.' },
+            ],
+          },
+          VN: {
+            name: 'Vietnam',
+            code: 'VN',
+            answer:
+              "Vietnam's most iconic foods are Phở Bò (fragrant 12-hour beef bone broth simmered with star anise, cinnamon, and charred ginger over flat rice noodles and rare beef), Bún Chả (charcoal-grilled pork patties in warm dipping broth with rice vermicelli), and Bánh Mì Thịt (crispy French-Vietnamese baguette layered with pork liver pâté, Vietnamese ham, pickled daikon-carrot, and cilantro). Finished with Chè Ba Màu and Cà Phê Trứng (rich whipped egg coffee).",
+            otherCountries: ['Thailand', 'China', 'France', 'Philippines'],
+            dishes: [
+              { name: 'Phở Bò', category: 'National Dish', detail: 'Spiced beef bone broth simmered with star anise, rice noodles, rare beef & herbs.' },
+              { name: 'Bún Chả', category: 'Traditional Main', detail: 'Charcoal-grilled pork patties in sweet-tangy fish sauce broth with vermicelli noodles.' },
+              { name: 'Bánh Mì Thịt', category: 'Street Food', detail: 'Crisp airy baguette spread with pâté, Vietnamese cold cuts, pickled vegetables & chili.' },
+              { name: 'Gỏi Cuốn (Spring Rolls)', category: 'Street Food', detail: 'Translucent rice paper rolls with poached shrimp, pork, fresh mint, and peanut dip.' },
+              { name: 'Chè Ba Màu', category: 'Dessert / Pastry', detail: 'Three-color sweet dessert with red beans, mung bean paste, pandan jelly & coconut milk.' },
+              { name: 'Cà Phê Trứng (Egg Coffee)', category: 'Iconic Beverage', detail: 'Dark Robusta drip coffee topped with a whipped, custardy egg-yolk and condensed milk foam.' },
+            ],
+          },
+        };
+
+        const targetProfile = countryMatch ? AUTHENTIC_FOOD_PROFILES[countryMatch.code] : null;
+
+        if (targetProfile) {
+          return {
+            answer: targetProfile.answer,
+            targetCountry: targetProfile.name,
+            targetCountryCode: targetProfile.code,
+            otherCountries: targetProfile.otherCountries || ['Italy', 'Japan', 'France', 'Mexico', 'Spain'],
+            directRank: {
+              rank: '#1 National Culinary Pride',
+              subRank: `${targetProfile.name} Gastronomy`,
+              category: 'National Foods & Traditional Dishes',
+              entity: `${targetProfile.name} Cuisine`,
+              metrics: targetProfile.dishes.slice(0, 4).map((d) => ({ label: d.category, value: d.name })),
+            },
+            rankedList: {
+              title: `Iconic National Foods & Dishes of ${targetProfile.name} (Real Dish Names)`,
+              category: 'Authentic National Gastronomy',
+              metricName: 'Dish Name • Category • Key Preparation',
+              items: targetProfile.dishes.map((d, idx) => ({
+                rank: idx + 1,
+                name: d.name,
+                countryCode: targetProfile.code,
+                stat: `${d.category} • Authentic Recipe`,
+                detail: d.detail,
+                badge: d.category,
+              })),
+            },
+            keyFacts: targetProfile.dishes.map((d) => `${d.name} (${d.category}): ${d.detail}`),
+            source: 'intelligence-registry',
+            media: matchedLocalMedia || (await fetchWikiMedia(`${targetProfile.name} cuisine`)) || (await fetchWikiMedia(targetProfile.dishes[0].name)),
+          };
+        }
+
+        // Global Top Cuisines / Best Food in the World
+        const TOP_FOOD_NATIONS = [
+          { rank: 1, name: 'Italy', countryCode: 'IT', stat: 'UNESCO Mediterranean Diet • #1 Global TasteAtlas', detail: 'Iconic Dishes: Pizza Margherita, Spaghetti alla Carbonara, Tagliatelle al Ragù, Tiramisù, Gelato.', badge: 'Global Culinary Gold' },
+          { rank: 2, name: 'Japan', countryCode: 'JP', stat: 'UNESCO Washoku • Most 3-Star Michelin Cities', detail: 'Iconic Dishes: Edomae Sushi, Tonkotsu Ramen, Wagyu Sukiyaki, Takoyaki, Mochi, Matcha.', badge: 'Knife Craft & Umami' },
+          { rank: 3, name: 'France', countryCode: 'FR', stat: 'UNESCO Gastronomic Meal • Haute Cuisine Mother Sauces', detail: 'Iconic Dishes: Bœuf Bourguignon, Baguette de Tradition & AOC Cheeses, Confit de Canard, Croissant.', badge: 'Haute Cuisine Capital' },
+          { rank: 4, name: 'Mexico', countryCode: 'MX', stat: 'UNESCO Ancestral Inscription • 64 Heirloom Corn Varieties', detail: 'Iconic Dishes: Tacos al Pastor, Mole Poblano, Chiles en Nogada, Birria con Consomé, Churros.', badge: 'Living Ancestral Heritage' },
+          { rank: 5, name: 'Spain', countryCode: 'ES', stat: 'World-Leading Tapas Culture • 100% Bellota Acorn Ham', detail: 'Iconic Dishes: Paella Valenciana, Jamón Ibérico de Bellota, Tortilla de Patatas, Churros con Chocolate.', badge: 'Tapas & Saffron Rice' },
+          { rank: 6, name: 'India', countryCode: 'IN', stat: 'Ayurvedic Six Tastes • Royal Dum Dum Cooking', detail: 'Iconic Dishes: Hyderabadi Biryani, Butter Chicken, Masala Dosa, Samosas, Gulab Jamun, Masala Chai.', badge: 'Spice Civilization' },
+          { rank: 7, name: 'China', countryCode: 'CN', stat: 'Eight Great Cuisines • Imperial Ming Banquets', detail: 'Iconic Dishes: Peking Roast Duck, Jiaozi & Xiaolongbao, Sichuan Mapo Tofu, Mooncakes.', badge: 'Wok Hei Mastery' },
+          { rank: 8, name: 'Thailand', countryCode: 'TH', stat: 'Five Flavors Harmony (Sweet, Sour, Salty, Spicy, Bitter)', detail: 'Iconic Dishes: Pad Thai, Tom Yum Goong, Som Tum, Khao Niao Mamuang (Mango Sticky Rice).', badge: 'Street Food Legend' },
+          { rank: 9, name: 'Portugal', countryCode: 'PT', stat: '365 Cod Recipes • Belém Egg Custard Artistry', detail: 'Iconic Dishes: Bacalhau à Brás, Francesinha, Pastel de Nata, Cozido à Portuguesa, Caldo Verde.', badge: 'Atlantic Gastronomy' },
+          { rank: 10, name: 'Greece', countryCode: 'GR', stat: 'Ancient Aegean Heritage • Extra Virgin Olive Oil & Feta', detail: 'Iconic Dishes: Moussaka, Souvlaki Kalamaki, Gyros Pita, Spanakopita, Baklava, Ouzo.', badge: 'Aegean Mediterranean' },
+        ];
+
+        return {
+          answer:
+            "The world's most acclaimed culinary nations are led by Italy (famous for Pizza Margherita, Spaghetti Carbonara, and Gelato), Japan (renowned for Edomae Sushi, Tonkotsu Ramen, and A5 Wagyu Sukiyaki), France (Bœuf Bourguignon, Artisanal Baguette & Fromages, and Croissant), Mexico (Tacos al Pastor, Mole Poblano, and Chiles en Nogada), Spain (Paella Valenciana, Jamón Ibérico, and Tortilla de Patatas), India (Biryani, Butter Chicken, and Masala Dosa), China (Peking Roast Duck and Xiaolongbao), Thailand (Pad Thai and Tom Yum Goong), and Portugal (Bacalhau à Brás, Francesinha, and Pastel de Nata). Below are the top cuisines in the world with their exact signature dishes.",
+          targetCountry: 'Italy',
+          targetCountryCode: 'IT',
+          otherCountries: ['Japan', 'France', 'Mexico', 'Spain', 'India', 'China', 'Thailand', 'Portugal', 'Greece'],
+          rankedList: {
+            title: 'Top Cuisines & National Foods in the World (Ranked by Global Acclaim)',
+            category: 'World Gastronomy & Signature National Dishes',
+            metricName: 'Global Culinary Rank • Iconic Named Dishes • UNESCO Accolades',
+            items: TOP_FOOD_NATIONS,
+          },
+          keyFacts: [
+            'Italy (#1): Pizza Margherita, Spaghetti Carbonara, Tagliatelle al Ragù, Tiramisù & Gelato.',
+            'Japan (#2): Edomae Sushi & Sashimi, Tonkotsu Ramen, Wagyu Sukiyaki & Kaiseki.',
+            'France (#3): Bœuf Bourguignon, Baguette de Tradition, Confit de Canard & Croissant au Beurre.',
+            'Mexico (#4): Tacos al Pastor, Mole Poblano, Chiles en Nogada & Birria de Res.',
+            'Spain (#5): Paella Valenciana, Jamón Ibérico de Bellota & Tortilla de Patatas.',
+            'India (#6): Biryani, Butter Chicken, Masala Dosa & Samosas.',
+            'Portugal (#9): Bacalhau à Brás, Francesinha, Pastel de Nata & Caldo Verde.',
+          ],
+          source: 'intelligence-registry',
+          media: matchedLocalMedia || (await fetchWikiMedia('Italian cuisine')),
+        };
+      }
+
       // 1. Universal Country Naval Rank Check (Instant <2ms accurate response for ANY nation)
       const isNavalQuestion =
         lower.includes('naval') ||
