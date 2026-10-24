@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CountryData, AskSearchResponse, AskSearchHistoryItem, VisualMedia, RankedListItem } from '../types.ts';
 import { countryList, getCountryByName } from '../data/countriesData.ts';
 import { findVisualMedia, fetchDynamicWikiMedia } from '../utils/visualMediaRegistry.ts';
+import { answerFromLocalData } from '../utils/localSearch.ts';
 import { CountryFlag } from './CountryFlag.tsx';
 import {
   Search,
@@ -171,6 +172,44 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
     return subMatch || null;
   };
 
+  // Shows an answer right away; a photo is looked up afterwards so it never holds up the text
+  const presentResult = (data: AskSearchResponse, trimmed: string, idSuffix: string) => {
+    const matched =
+      findCountry(data.targetCountry) ||
+      findCountry(data.targetCountryCode) ||
+      findCountry(trimmed);
+
+    const matchedMedia = data.media || findVisualMedia(trimmed, data.answer);
+
+    const historyItem: AskSearchHistoryItem = {
+      id: `${Date.now()}-${idSuffix}`,
+      success: true,
+      query: trimmed,
+      answer: data.answer,
+      targetCountry: data.targetCountry || matched?.name || null,
+      targetCountryCode: data.targetCountryCode || matched?.code || null,
+      otherCountries: data.otherCountries || [],
+      keyFacts: data.keyFacts || [],
+      directRank: data.directRank || null,
+      rankedList: data.rankedList || null,
+      source: data.source || 'gemini-ai',
+      matchedCountry: matched,
+      media: matchedMedia,
+      timestamp: Date.now(),
+    };
+
+    setCurrentResult(historyItem);
+    setHistory((prev) => [historyItem, ...prev.filter((h) => h.query !== trimmed).slice(0, 8)]);
+
+    if (!matchedMedia) {
+      fetchDynamicWikiMedia(data.mediaQuery || data.targetCountry || trimmed).then((asyncMedia) => {
+        if (asyncMedia) {
+          setCurrentResult((prev) => (prev && prev.query === trimmed ? { ...prev, media: asyncMedia } : prev));
+        }
+      });
+    }
+  };
+
   const handleAsk = async (searchQuery: string) => {
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
@@ -179,40 +218,26 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
     const cacheKey = normalizeQueryStr(trimmed);
     const cachedData = CLIENT_QUERY_CACHE.get(cacheKey);
     if (cachedData) {
-      const matched =
-        findCountry(cachedData.targetCountry) ||
-        findCountry(cachedData.targetCountryCode) ||
-        findCountry(trimmed);
-
-      const matchedMedia = cachedData.media || findVisualMedia(trimmed, cachedData.answer);
-
-      const historyItem: AskSearchHistoryItem = {
-        id: `${Date.now()}-cached`,
-        success: true,
-        query: trimmed,
-        answer: cachedData.answer,
-        targetCountry: cachedData.targetCountry || matched?.name || null,
-        targetCountryCode: cachedData.targetCountryCode || matched?.code || null,
-        otherCountries: cachedData.otherCountries || [],
-        keyFacts: cachedData.keyFacts || [],
-        directRank: cachedData.directRank || null,
-        rankedList: cachedData.rankedList || null,
-        source: cachedData.source || 'intelligence-registry',
-        matchedCountry: matched,
-        media: matchedMedia,
-        timestamp: Date.now(),
-      };
-
-      setCurrentResult(historyItem);
-      setHistory((prev) => [historyItem, ...prev.filter((h) => h.query !== trimmed).slice(0, 8)]);
+      presentResult({ source: 'intelligence-registry', ...cachedData }, trimmed, 'cached');
       setLoading(false);
       setError(null);
       return;
     }
 
-    setLoading(true);
     setError(null);
     setImgLoadError(false);
+
+    // Facts the atlas already holds (capitals, leaders, populations, areas, rankings...) are
+    // answered on the spot, without a round trip to the server or Gemini
+    const localAnswer = answerFromLocalData(trimmed);
+    if (localAnswer) {
+      CLIENT_QUERY_CACHE.set(cacheKey, localAnswer);
+      setLoading(false);
+      presentResult(localAnswer, trimmed, 'local');
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch('/api/ask-search', {
@@ -238,42 +263,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
       // Store in client cache for immediate 0ms future returns
       CLIENT_QUERY_CACHE.set(cacheKey, data);
 
-      // Identify matched country and visual media
-      const matched =
-        findCountry(data.targetCountry) ||
-        findCountry(data.targetCountryCode) ||
-        findCountry(trimmed);
-
-      const matchedMedia = data.media || findVisualMedia(trimmed, data.answer);
-
-      const historyItem: AskSearchHistoryItem = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-        success: true,
-        query: trimmed,
-        answer: data.answer,
-        targetCountry: data.targetCountry || matched?.name || null,
-        targetCountryCode: data.targetCountryCode || matched?.code || null,
-        otherCountries: data.otherCountries || [],
-        keyFacts: data.keyFacts || [],
-        directRank: data.directRank || null,
-        rankedList: data.rankedList || null,
-        source: data.source || 'gemini-ai',
-        matchedCountry: matched,
-        media: matchedMedia,
-        timestamp: Date.now(),
-      };
-
-      setCurrentResult(historyItem);
-      setHistory((prev) => [historyItem, ...prev.filter((h) => h.query !== trimmed).slice(0, 8)]);
-
-      // If no media was returned yet, attempt dynamic background lookup
-      if (!matchedMedia) {
-        fetchDynamicWikiMedia(data.targetCountry || trimmed).then((asyncMedia) => {
-          if (asyncMedia) {
-            setCurrentResult((prev) => (prev && prev.query === trimmed ? { ...prev, media: asyncMedia } : prev));
-          }
-        });
-      }
+      presentResult(data, trimmed, Math.random().toString(36).substr(2, 6));
     } catch (err: any) {
       console.error('Error querying search:', err);
       // Fallback local resolution with actual intelligence

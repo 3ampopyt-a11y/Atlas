@@ -215,6 +215,8 @@ export interface AskSearchResponse {
   media?: VisualMedia | null;
   directRank?: DirectRankInfo | null;
   rankedList?: RankedList | null;
+  // Photo search term to fetch in the background, so answers don't wait on Wikipedia
+  mediaQuery?: string | null;
 }
 
 export interface AskSearchHistoryItem extends AskSearchResponse {

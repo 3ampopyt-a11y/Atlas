@@ -713,7 +713,6 @@ Respond strictly in valid JSON with this exact schema:
   };
 
   // Fast in-memory caches for sub-millisecond responses
-  const WIKI_MEDIA_CACHE = new Map<string, VisualMediaItem | null>();
   const SERVER_QUERY_CACHE = new Map<string, { timestamp: number; payload: any }>();
   const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour TTL
 
@@ -723,79 +722,6 @@ Respond strictly in valid JSON with this exact schema:
       .replace(/[^\w\s]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-
-  const fetchWikiMedia = async (subject: string): Promise<VisualMediaItem | null> => {
-    if (!subject || typeof subject !== 'string') return null;
-    const clean = subject.trim();
-    if (clean.length < 2) return null;
-
-    const cacheKey = clean.toLowerCase();
-    if (WIKI_MEDIA_CACHE.has(cacheKey)) {
-      return WIKI_MEDIA_CACHE.get(cacheKey) || null;
-    }
-
-    try {
-      // 1. Direct summary fetch with 1000ms timeout
-      const directUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`;
-      const directRes = await fetch(directUrl, {
-        headers: { 'User-Agent': 'WorldAtlasAI/1.0 (contact: info@example.com)' },
-        signal: AbortSignal.timeout(1000),
-      });
-      if (directRes.ok) {
-        const data: any = await directRes.json();
-        const img = data.originalimage?.source || data.thumbnail?.source;
-        if (img) {
-          const item: VisualMediaItem = {
-            title: data.title || clean,
-            subtitle: data.description || 'Verified Global Reference',
-            imageUrl: img,
-            category: 'Encyclopedic Visual Intelligence',
-            badge: 'Verified Photo',
-          };
-          WIKI_MEDIA_CACHE.set(cacheKey, item);
-          return item;
-        }
-      }
-
-      // 2. OpenSearch query fallback with 1000ms timeout
-      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(clean)}&utf8=&format=json`;
-      const searchRes = await fetch(searchUrl, {
-        headers: { 'User-Agent': 'WorldAtlasAI/1.0 (contact: info@example.com)' },
-        signal: AbortSignal.timeout(1000),
-      });
-      if (searchRes.ok) {
-        const searchData: any = await searchRes.json();
-        const firstHit = searchData.query?.search?.[0];
-        if (firstHit?.title) {
-          const sumUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(firstHit.title)}`;
-          const sumRes = await fetch(sumUrl, {
-            headers: { 'User-Agent': 'WorldAtlasAI/1.0 (contact: info@example.com)' },
-            signal: AbortSignal.timeout(1000),
-          });
-          if (sumRes.ok) {
-            const sumData: any = await sumRes.json();
-            const img = sumData.originalimage?.source || sumData.thumbnail?.source;
-            if (img) {
-              const item: VisualMediaItem = {
-                title: sumData.title || firstHit.title,
-                subtitle: sumData.description || 'Verified Global Reference',
-                imageUrl: img,
-                category: 'Encyclopedic Visual Intelligence',
-                badge: 'Verified Photo',
-              };
-              WIKI_MEDIA_CACHE.set(cacheKey, item);
-              return item;
-            }
-          }
-        }
-      }
-    } catch {
-      // Quiet timeout or network fail
-    }
-
-    WIKI_MEDIA_CACHE.set(cacheKey, null);
-    return null;
-  };
 
   app.post('/api/ask-search', async (req, res) => {
     const { query } = req.body;
@@ -832,6 +758,14 @@ Respond strictly in valid JSON with this exact schema:
     };
 
     const apiKey = process.env.GEMINI_API_KEY;
+
+    // Curated answers name their photo subject instead of fetching it, so they never wait on
+    // Wikipedia; the browser loads the photo (mediaQuery) once the answer is on screen
+    const deferMedia = (subject: string) => ({ deferredQuery: subject }) as unknown as VisualMediaItem;
+    const withDeferredMedia = <T extends { media?: any }>(payload: T) => {
+      const deferredQuery = payload.media?.deferredQuery;
+      return deferredQuery ? { ...payload, media: null, mediaQuery: deferredQuery } : payload;
+    };
 
     // Helper: Local fallback knowledge resolver for edge cases
     const getLocalFallback = async (q: string) => {
@@ -1261,7 +1195,7 @@ Respond strictly in valid JSON with this exact schema:
             },
             keyFacts: targetProfile.dishes.map((d) => `${d.name} (${d.category}): ${d.detail}`),
             source: 'intelligence-registry',
-            media: matchedLocalMedia || (await fetchWikiMedia(`${targetProfile.name} cuisine`)) || (await fetchWikiMedia(targetProfile.dishes[0].name)),
+            media: matchedLocalMedia || deferMedia(`${targetProfile.name} cuisine`),
           };
         }
 
@@ -1301,7 +1235,7 @@ Respond strictly in valid JSON with this exact schema:
             'Portugal (#9): Bacalhau à Brás, Francesinha, Pastel de Nata & Caldo Verde.',
           ],
           source: 'intelligence-registry',
-          media: matchedLocalMedia || (await fetchWikiMedia('Italian cuisine')),
+          media: matchedLocalMedia || deferMedia('Italian cuisine'),
         };
       }
 
@@ -1473,7 +1407,7 @@ Respond strictly in valid JSON with this exact schema:
             'Overall Military Firepower: #44 of 145 countries in Global Firepower index.',
           ],
           source: 'intelligence-registry',
-          media: findLocalMedia('portugal naval') || matchedLocalMedia || (await fetchWikiMedia('Portuguese Navy')),
+          media: findLocalMedia('portugal naval') || matchedLocalMedia || deferMedia('Portuguese Navy'),
         };
       }
 
@@ -1502,7 +1436,7 @@ Respond strictly in valid JSON with this exact schema:
             'Portugal Naval Fleet: Portugal ranks #23 in the world with 107 total naval units, 2 Tridente-class AIP attack submarines, and 5 guided missile frigates.',
           ],
           source: 'intelligence-registry',
-          media: findLocalMedia('naval frigate') || matchedLocalMedia || (await fetchWikiMedia('Naval fleet')),
+          media: findLocalMedia('naval frigate') || matchedLocalMedia || deferMedia('Naval fleet'),
         };
       }
 
@@ -1685,7 +1619,7 @@ Respond strictly in valid JSON with this exact schema:
             'Land Area: 7,692,024 km² (2,969,907 sq mi) — 6th largest country on Earth.',
           ],
           source: 'intelligence-registry',
-          media: matchedLocalMedia || (await fetchWikiMedia('Australia')),
+          media: matchedLocalMedia || deferMedia('Australia'),
         };
       }
 
@@ -1706,59 +1640,12 @@ Respond strictly in valid JSON with this exact schema:
             'Mauritania ranks 28th globally by land area, while Portugal ranks 109th.',
           ],
           source: 'intelligence-registry',
-          media: matchedLocalMedia || (await fetchWikiMedia(lower.includes('mauritania') ? 'Mauritania' : 'Portugal')),
+          media: matchedLocalMedia || deferMedia(lower.includes('mauritania') ? 'Mauritania' : 'Portugal'),
         };
       }
 
-      // General Country detection in query
-      const countryMatches = [
-        { name: 'United States', code: 'US', leader: 'Joe Biden', capital: 'Washington, D.C.', pop: '335M', rank: '1', aliases: ['usa', 'america', 'united states', 'us', 'biden', 'trump'] },
-        { name: 'Russia', code: 'RU', leader: 'Vladimir Putin', capital: 'Moscow', pop: '144M', rank: '2', aliases: ['russia', 'russian federation', 'moscow', 'putin', 'kremlin'] },
-        { name: 'China', code: 'CN', leader: 'Xi Jinping', capital: 'Beijing', pop: '1.41B', rank: '3', aliases: ['china', 'prc', 'beijing', 'xi jinping'] },
-        { name: 'Australia', code: 'AU', leader: 'Anthony Albanese', capital: 'Canberra', pop: '26M', rank: '16', aliases: ['australia', 'canberra', 'sydney', 'albanese'] },
-        { name: 'Portugal', code: 'PT', leader: 'Marcelo Rebelo de Sousa', capital: 'Lisbon', pop: '10.4M', rank: '44', aliases: ['portugal', 'lisbon'] },
-        { name: 'Mauritania', code: 'MR', leader: 'Mohamed Ould Ghazouani', capital: 'Nouakchott', pop: '4.7M', rank: '128', aliases: ['mauritania', 'nouakchott'] },
-        { name: 'United Kingdom', code: 'GB', leader: 'Keir Starmer', capital: 'London', pop: '67M', rank: '6', aliases: ['uk', 'britain', 'united kingdom', 'england', 'starmer'] },
-        { name: 'France', code: 'FR', leader: 'Emmanuel Macron', capital: 'Paris', pop: '68M', rank: '11', aliases: ['france', 'paris', 'macron'] },
-        { name: 'Germany', code: 'DE', leader: 'Olaf Scholz', capital: 'Berlin', pop: '84M', rank: '19', aliases: ['germany', 'berlin', 'scholz'] },
-        { name: 'Japan', code: 'JP', leader: 'Shigeru Ishiba', capital: 'Tokyo', pop: '124M', rank: '7', aliases: ['japan', 'tokyo', 'ishiba'] },
-        { name: 'India', code: 'IN', leader: 'Narendra Modi', capital: 'New Delhi', pop: '1.43B', rank: '4', aliases: ['india', 'new delhi', 'modi'] },
-        { name: 'Brazil', code: 'BR', leader: 'Luiz Inácio Lula da Silva', capital: 'Brasilia', pop: '216M', rank: '12', aliases: ['brazil', 'brasilia', 'lula'] },
-        { name: 'Canada', code: 'CA', leader: 'Justin Trudeau', capital: 'Ottawa', pop: '40M', rank: '27', aliases: ['canada', 'ottawa', 'trudeau'] },
-      ];
-
-      for (const c of countryMatches) {
-        if (c.aliases.some((alias) => lower.includes(alias))) {
-          let directAnswer = `Geopolitical intelligence for ${c.name}: Capital is ${c.capital}, current executive leader is ${c.leader}, with an estimated population of ${c.pop}. ${c.name} holds a Global Firepower military ranking of #${c.rank}.`;
-          let subjectWiki = c.name;
-          if (lower.includes('president') || lower.includes('leader') || lower.includes('prime minister') || lower.includes('who is')) {
-            directAnswer = `The executive leader of ${c.name} is ${c.leader}. The capital city is ${c.capital}.`;
-            subjectWiki = c.leader;
-          } else if (lower.includes('capital')) {
-            directAnswer = `The official capital city of ${c.name} is ${c.capital}.`;
-            subjectWiki = c.capital;
-          } else if (lower.includes('population') || lower.includes('how many people')) {
-            directAnswer = `The population of ${c.name} is approximately ${c.pop}.`;
-          } else if (lower.includes('where') || lower.includes('location')) {
-            directAnswer = `${c.name} (${c.code}) is located on the world map with capital at ${c.capital}. Click 'Show on World Map' to fly directly to it.`;
-          }
-
-          const photoMedia = matchedLocalMedia || (await fetchWikiMedia(subjectWiki)) || (await fetchWikiMedia(c.name));
-
-          return {
-            answer: directAnswer,
-            targetCountry: c.name,
-            targetCountryCode: c.code,
-            otherCountries: [],
-            keyFacts: [`Leader: ${c.leader}`, `Capital: ${c.capital}`, `GFP Military Rank: #${c.rank}`],
-            source: 'intelligence-registry',
-            media: photoMedia,
-          };
-        }
-      }
-
-      // Default fallback with dynamic wiki photo lookup
-      const dynamicPhoto = matchedLocalMedia || (await fetchWikiMedia(q));
+      // Default: nothing curated matched, so the route hands the question to Gemini (photo is looked up later)
+      const dynamicPhoto = matchedLocalMedia || deferMedia(q);
 
       return {
         answer: `Direct answer for "${q}": Search our global intelligence registry for specific defense assets, sovereign leaders, territorial boundaries, or geopolitical rankings.`,
@@ -1775,7 +1662,7 @@ Respond strictly in valid JSON with this exact schema:
     };
 
     // 1. Instant verified intelligence check for curated facts and rankings (zero-latency, anti-yapping, 100% verified data)
-    const instantIntelligence = await getLocalFallback(cleanQuery);
+    const instantIntelligence = withDeferredMedia(await getLocalFallback(cleanQuery));
     const isGenericDefault = instantIntelligence.answer.startsWith('Direct answer for "');
 
     if (!isGenericDefault) {
@@ -1864,8 +1751,10 @@ Respond STRICTLY in valid JSON matching this schema:
   "keyFacts": ["string"]
 }`;
 
-      // Model priority list: gemini-3.8-flash first, gemini-flash-latest as fallback
+      // Model priority list: gemini-3.8-flash first, gemini-flash-latest as fallback.
+      // Each call is capped so an overloaded model fails over quickly instead of hanging for minutes.
       const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
+      const MODEL_TIMEOUT_MS = 20000;
       let lastError: any = null;
       let rawText = '';
 
@@ -1877,6 +1766,7 @@ Respond STRICTLY in valid JSON matching this schema:
             config: {
               responseMimeType: 'application/json',
               temperature: 0.1,
+              abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
             },
           });
           rawText = response.text?.trim() || '';
@@ -1915,17 +1805,11 @@ Respond STRICTLY in valid JSON matching this schema:
         };
       }
 
-      // Resolve visual media (photo + specs)
-      let resolvedMedia: VisualMediaItem | null = findLocalMedia(cleanQuery, `${parsed.subjectTitle || ''} ${parsed.answer || ''}`);
-      if (!resolvedMedia) {
-        const lookupKey = parsed.wikiQuery || parsed.subjectTitle || cleanQuery;
-        resolvedMedia = await fetchWikiMedia(lookupKey);
-      }
-      if (!resolvedMedia && parsed.targetCountry) {
-        resolvedMedia = await fetchWikiMedia(parsed.targetCountry);
-      }
+      // Built-in photos and specs only; anything else is fetched by the browser after the answer shows
+      const resolvedMedia: VisualMediaItem | null = findLocalMedia(cleanQuery, `${parsed.subjectTitle || ''} ${parsed.answer || ''}`);
 
       return sendCachedResponse({
+        mediaQuery: resolvedMedia ? null : parsed.wikiQuery || parsed.subjectTitle || parsed.targetCountry || cleanQuery,
         answer: parsed.answer || 'Answer generated.',
         targetCountry: parsed.targetCountry || null,
         targetCountryCode: parsed.targetCountryCode || null,
@@ -1938,7 +1822,14 @@ Respond STRICTLY in valid JSON matching this schema:
       });
     } catch (err: any) {
       console.error('Error in /api/ask-search with Gemini:', err?.message || err);
-      const fallback = await getLocalFallback(cleanQuery);
+      const fallback = withDeferredMedia(await getLocalFallback(cleanQuery));
+      // Nothing curated to fall back on: say so, and don't cache it so a retry can reach Gemini again
+      if (fallback.answer.startsWith('Direct answer for "')) {
+        return res.json({
+          success: false,
+          error: 'The live AI lookup is busy right now and could not answer this question. Please try again in a moment.',
+        });
+      }
       return sendCachedResponse({
         ...fallback,
         source: 'intelligence-registry',
