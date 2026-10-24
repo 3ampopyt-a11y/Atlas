@@ -121,7 +121,7 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
     return (
       <div
         id="country-dossier-minimized"
-        className="fixed bottom-6 right-6 z-40 bg-slate-950 border border-slate-700/90 rounded-2xl p-3.5 shadow-2xl flex items-center gap-3.5 animate-in fade-in slide-in-from-bottom-3 duration-150"
+        className="fixed bottom-3 left-[88px] right-3 md:left-auto md:bottom-6 md:right-6 z-40 bg-slate-950 border border-slate-700/90 rounded-2xl p-3 md:p-3.5 shadow-2xl flex items-center gap-3 md:gap-3.5 animate-in fade-in slide-in-from-bottom-3 duration-150"
       >
         <CountryFlag
           countryCode={country.code}
@@ -129,18 +129,18 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
           flagEmoji={sovereignState.flag}
           size="md"
         />
-        <div>
-          <div className="font-bold text-sm text-slate-100 flex items-center gap-2">
-            {sovereignState.name}
-            <span className="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono font-semibold border border-cyan-500/30">
+        <div className="min-w-0 flex-1">
+          <div className="font-bold text-sm text-slate-100 flex items-center gap-2 min-w-0">
+            <span className="truncate">{sovereignState.name}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
               #{country.military.globalRank} GFP
             </span>
           </div>
-          <div className="text-xs text-slate-300 font-medium">
+          <div className="text-xs text-slate-300 font-medium truncate">
             {sovereignState.leader || sovereignState.president} • Cap: {sovereignState.capital}
           </div>
         </div>
-        <div className="flex items-center gap-1 ml-2 border-l border-slate-800 pl-2">
+        <div className="flex items-center gap-1 ml-auto md:ml-2 border-l border-slate-800 pl-2 shrink-0">
           <button
             id="btn-expand-dossier"
             onClick={() => setIsMinimized(false)}
@@ -261,7 +261,7 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
         className={
           isFullscreen
             ? 'fixed inset-0 sm:inset-2 md:inset-3 lg:inset-4 z-50 bg-slate-950 border border-slate-700/80 rounded-none sm:rounded-2xl md:rounded-3xl shadow-[0_25px_90px_rgba(0,0,0,0.95)] flex flex-col overflow-y-auto custom-scrollbar animate-in fade-in zoom-in-95 duration-200'
-            : 'fixed top-20 right-4 bottom-4 w-[480px] max-w-[calc(100vw-2rem)] z-30 bg-slate-950 border border-slate-800/95 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-right-6 duration-200'
+            : 'fixed top-[45%] left-2 right-2 bottom-2 md:top-20 md:left-auto md:right-4 md:bottom-4 md:w-[480px] md:max-w-[calc(100vw-2rem)] z-30 bg-slate-950 border border-slate-800/95 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] flex flex-col overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-right-6 duration-200'
         }
       >
         {/* 
@@ -270,19 +270,21 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
           and full screen space is dedicated to reading intelligence unobstructed.
         */}
         <header className={`bg-slate-900/95 border-b border-slate-800 select-none ${
-          isFullscreen ? 'px-4 sm:px-6 py-3' : 'px-5 pt-4 pb-3'
+          isFullscreen ? 'px-4 sm:px-6 py-3' : 'px-4 pt-3 pb-2.5 md:px-5 md:pt-4 md:pb-3'
         }`}>
           {/* Top Row: Flag, Name, Status, and Controls */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3.5 min-w-0">
-              {/* National Flag */}
-              <CountryFlag
-                countryCode={country.code}
-                countryName={country.name}
-                flagEmoji={sovereignState.flag}
-                size={isFullscreen ? "md" : "lg"}
-                className="border-2 border-slate-700/80 shadow-md shrink-0"
-              />
+              {/* National Flag (hidden in the phone bottom sheet, where the header needs the width) */}
+              <div className={isFullscreen ? 'shrink-0' : 'hidden md:block shrink-0'}>
+                <CountryFlag
+                  countryCode={country.code}
+                  countryName={country.name}
+                  flagEmoji={sovereignState.flag}
+                  size={isFullscreen ? "md" : "lg"}
+                  className="border-2 border-slate-700/80 shadow-md shrink-0"
+                />
+              </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <h2 className="text-base sm:text-lg font-bold text-slate-100 tracking-tight max-w-[150px] sm:max-w-xs md:max-w-sm truncate">

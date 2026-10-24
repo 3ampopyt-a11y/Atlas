@@ -165,11 +165,11 @@ export const MapSpotterHud: React.FC<MapSpotterHudProps> = ({
   return (
     <div
       id="map-spotter-hud"
-      className="fixed top-20 left-1/2 -translate-x-1/2 z-40 w-full max-w-xl px-4 pointer-events-none"
+      className="fixed top-[108px] md:top-20 left-1/2 -translate-x-1/2 z-40 w-full max-w-xl px-3 md:px-4 pointer-events-none"
     >
-      <div className="pointer-events-auto bg-slate-950/95 backdrop-blur-xl border border-slate-700/90 rounded-3xl p-4 shadow-2xl space-y-3 animate-in slide-in-from-top-4 duration-300">
+      <div className="pointer-events-auto bg-slate-950/95 backdrop-blur-xl border border-slate-700/90 rounded-3xl p-3 md:p-4 shadow-2xl space-y-3 animate-in slide-in-from-top-4 duration-300">
         {/* Top Status Strip */}
-        <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-1 rounded-xl bg-purple-500/20 text-purple-300 text-xs font-mono font-bold border border-purple-500/30 flex items-center gap-1.5">
               <span>🎯</span>
@@ -199,7 +199,7 @@ export const MapSpotterHud: React.FC<MapSpotterHudProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3 ml-auto">
             {/* Streak */}
             <div className="flex items-center gap-1 text-xs font-bold text-amber-400 font-mono">
               <span>🔥</span>

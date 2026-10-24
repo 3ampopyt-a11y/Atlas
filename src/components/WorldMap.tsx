@@ -7,9 +7,9 @@ import {
   geoDistance,
 } from 'd3-geo';
 import { CountryData, MapMetricMode } from '../types.ts';
-import { worldFeatures50, worldBorders50 } from '../data/worldMapData.ts';
+import { worldFeatures50, worldBorders50, worldFeaturesLite, worldBordersLite } from '../data/worldMapData.ts';
 import { countryMapPoints, isCoordOnFrontHemisphere } from '../utils/geoCentroids.ts';
-import { getCountryFillColor } from '../utils/mapColors.ts';
+import { CountryLayer } from './CountryLayer.tsx';
 import { formatLongevity, formatBudget, formatPersonnel, formatPopulation } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../utils/sovereignData.ts';
 import { getCountryAlliances } from '../utils/allianceData.ts';
@@ -62,6 +62,32 @@ interface WorldMapProps {
 const BASE_WIDTH = 960;
 const BASE_HEIGHT = 500;
 const BASE_GLOBE_SCALE = 225;
+const BASE_FLAT_SCALE = 153;
+// Portrait screens letterbox the 960x500 viewBox to the screen width, which leaves the globe at
+// under half the width of a phone. Scale it up so it spans ~90% of the width instead.
+const PORTRAIT_GLOBE_BOOST = 1.9;
+// Phone layout (below Tailwind's md breakpoint): two-row top nav, dossier sheet starting at 45% height
+const PHONE_MAX_WIDTH = 768;
+const PHONE_NAV_HEIGHT_PX = 104;
+const PHONE_SHEET_TOP = 0.45;
+// Wider screens: 480px side panel plus its 16px margin, which covers the screen center below ~1200px
+const SIDE_PANEL_WIDTH_PX = 496;
+const SIDE_PANEL_SHIFT_MAX_WIDTH = 1200;
+const MIN_ZOOM = 0.8;
+const MAX_ZOOM = 12;
+// How long the map must be still before switching back to full-detail geometry
+const SETTLE_DELAY_MS = 180;
+
+const clampZoom = (z: number) => Math.min(Math.max(z, MIN_ZOOM), MAX_ZOOM);
+
+// Pan offset that puts [lng, lat] at the center of the flat map at the given zoom
+const flatPanToCenter = (coords: [number, number], zoom: number) => {
+  const projected = geoNaturalEarth1()
+    .scale(BASE_FLAT_SCALE * zoom)
+    .translate([BASE_WIDTH / 2, BASE_HEIGHT / 2])(coords);
+  if (!projected) return null;
+  return { x: BASE_WIDTH / 2 - projected[0], y: BASE_HEIGHT / 2 - projected[1] };
+};
 
 export const WorldMap: React.FC<WorldMapProps> = ({
   selectedCountry,
@@ -71,6 +97,38 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   spotterFeedback = null,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setContainerSize({ width: el.clientWidth, height: el.clientHeight });
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const isPortrait = containerSize.height > containerSize.width;
+  const globeScale = BASE_GLOBE_SCALE * (isPortrait ? PORTRAIT_GLOBE_BOOST : 1);
+
+  // While the dossier is open, aim the map at the part of the screen it leaves uncovered (see CountryDossier):
+  // - phones: the strip between the top nav and the bottom sheet
+  // - tablets / small laptops: the area left of the side panel, which would otherwise cover the screen center
+  const { centerX, centerY } = useMemo(() => {
+    const { width, height } = containerSize;
+    const centered = { centerX: BASE_WIDTH / 2, centerY: BASE_HEIGHT / 2 };
+    if (!selectedCountry || isSpotterActive || width === 0 || height === 0) return centered;
+    const unitsPerPixel = Math.max(BASE_WIDTH / width, BASE_HEIGHT / height);
+    if (width < PHONE_MAX_WIDTH) {
+      const visibleCenterPx = (PHONE_NAV_HEIGHT_PX + height * PHONE_SHEET_TOP) / 2;
+      return { ...centered, centerY: BASE_HEIGHT / 2 - (height / 2 - visibleCenterPx) * unitsPerPixel };
+    }
+    if (width < SIDE_PANEL_SHIFT_MAX_WIDTH) {
+      const visibleCenterPx = (width - SIDE_PANEL_WIDTH_PX) / 2;
+      return { ...centered, centerX: BASE_WIDTH / 2 - (width / 2 - visibleCenterPx) * unitsPerPixel };
+    }
+    return centered;
+  }, [containerSize, selectedCountry, isSpotterActive]);
 
   // Projection Mode: 'round' (3D Round Globe - DEFAULT) vs 'flat' (2D Flat Map)
   const [projectionMode, setProjectionMode] = useState<'round' | 'flat'>('round');
@@ -96,9 +154,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     });
     return Array.from(set);
   }, []);
+  const flagCodeSet = useMemo(() => new Set(uniqueFlagCodes), [uniqueFlagCodes]);
 
   // Dragging interaction state
   const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  // Active touch/mouse pointers on the map, used for two-finger pinch zoom
+  const activePointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ startDist: number; startZoom: number } | null>(null);
   const pointerDownRef = useRef<{
     isDown: boolean;
     startX: number;
@@ -150,19 +213,46 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   const dragRafId = useRef<number | null>(null);
   const pendingRotation = useRef<{ yaw: number; pitch: number } | null>(null);
   const pendingPan = useRef<{ x: number; y: number } | null>(null);
+  const pendingZoom = useRef<number | null>(null);
+
+  // Apply whatever drag/pinch updates arrived since the last frame in a single render
+  const flushPendingView = useCallback(() => {
+    if (pendingRotation.current) setRotation(pendingRotation.current);
+    if (pendingPan.current) setPan(pendingPan.current);
+    if (pendingZoom.current !== null) setZoom(pendingZoom.current);
+    pendingRotation.current = null;
+    pendingPan.current = null;
+    pendingZoom.current = null;
+  }, []);
+
+  const scheduleViewFlush = useCallback(() => {
+    if (dragRafId.current === null) {
+      dragRafId.current = requestAnimationFrame(() => {
+        dragRafId.current = null;
+        flushPendingView();
+      });
+    }
+  }, [flushPendingView]);
 
   // Global pointer release safety
   const endDrag = useCallback(() => {
     pointerDownRef.current.isDown = false;
+    isDraggingRef.current = false;
     setIsDragging(false);
     if (dragRafId.current !== null) {
       cancelAnimationFrame(dragRafId.current);
       dragRafId.current = null;
     }
-  }, []);
+    // Keep the last drag position instead of dropping the final pending frame
+    flushPendingView();
+  }, [flushPendingView]);
 
   useEffect(() => {
-    const handleGlobalPointerUp = () => endDrag();
+    const handleGlobalPointerUp = (e: PointerEvent) => {
+      activePointersRef.current.delete(e.pointerId);
+      if (activePointersRef.current.size < 2) pinchRef.current = null;
+      if (activePointersRef.current.size === 0) endDrag();
+    };
     window.addEventListener('pointerup', handleGlobalPointerUp);
     window.addEventListener('pointercancel', handleGlobalPointerUp);
     return () => {
@@ -170,6 +260,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       window.removeEventListener('pointercancel', handleGlobalPointerUp);
     };
   }, [endDrag]);
+
+  // Lightweight geometry while the view is changing; full 50m detail once it has settled
+  const [isMoving, setIsMoving] = useState(false);
+  const settleTimerRef = useRef<number | null>(null);
+  const hasMountedViewRef = useRef(false);
+  useEffect(() => {
+    if (!hasMountedViewRef.current) {
+      hasMountedViewRef.current = true;
+      return;
+    }
+    setIsMoving(true);
+    if (settleTimerRef.current !== null) clearTimeout(settleTimerRef.current);
+    if (isDragging || isSpinning) return;
+    settleTimerRef.current = window.setTimeout(() => setIsMoving(false), SETTLE_DELAY_MS);
+  }, [rotation, zoom, pan, isDragging, isSpinning]);
+
+  useEffect(() => {
+    return () => {
+      if (settleTimerRef.current !== null) clearTimeout(settleTimerRef.current);
+    };
+  }, []);
 
   // Auto-Spin animation for 3D Globe
   useEffect(() => {
@@ -190,18 +301,18 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   const projection = useMemo(() => {
     if (projectionMode === 'round') {
       return geoOrthographic()
-        .scale(BASE_GLOBE_SCALE * zoom)
-        .translate([BASE_WIDTH / 2 + pan.x, BASE_HEIGHT / 2 + pan.y])
+        .scale(globeScale * zoom)
+        .translate([centerX + pan.x, centerY + pan.y])
         .rotate([rotation.yaw, rotation.pitch, 0])
         .clipAngle(90)
         .precision(0.8);
     } else {
       return geoNaturalEarth1()
-        .scale(153 * zoom)
-        .translate([BASE_WIDTH / 2 + pan.x, BASE_HEIGHT / 2 + pan.y])
+        .scale(BASE_FLAT_SCALE * zoom)
+        .translate([centerX + pan.x, centerY + pan.y])
         .precision(0.8);
     }
-  }, [projectionMode, zoom, pan.x, pan.y, rotation.yaw, rotation.pitch]);
+  }, [projectionMode, globeScale, centerX, centerY, zoom, pan.x, pan.y, rotation.yaw, rotation.pitch]);
 
   const pathGenerator = useMemo(() => {
     return geoPath(projection);
@@ -212,8 +323,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   }, [pathGenerator]);
 
   const bordersPath = useMemo(() => {
-    return pathGenerator(worldBorders50 as any);
-  }, [pathGenerator]);
+    return pathGenerator((isMoving ? worldBordersLite : worldBorders50) as any);
+  }, [pathGenerator, isMoving]);
 
   // Precompute country paths using the current projection
   // When a feature is a MultiPolygon (e.g. France with French Guiana & Reunion, Spain with Canaries, Portugal with Azores),
@@ -221,7 +332,9 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   // maps the national flag directly onto each visible landmass (e.g. Metropolitan France, Mainland Spain, Mainland Portugal)
   // rather than stretching across thousands of miles of ocean and leaving mainland France as an empty white stripe!
   const projectedCountryList = useMemo(() => {
-    return worldFeatures50
+    // Same feature order in both sets, so countryMapPoints[idx] lines up either way
+    const features = isMoving ? worldFeaturesLite : worldFeatures50;
+    return features
       .map((feature, idx) => {
         const paths: string[] = [];
         if (feature.geometry?.type === 'Polygon') {
@@ -242,14 +355,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           id: feature.id,
           uniqueKey: `${feature.id || 'f'}-${idx}`,
           name: feature.properties?.name || mapPoint?.name || 'Unknown',
-          pathD: paths.join(' '),
           paths,
           countryData: mapPoint?.countryData,
           centroid: mapPoint?.centroid || [0, 0],
         };
       })
       .filter((item) => item.paths.length > 0);
-  }, [pathGenerator]);
+  }, [pathGenerator, isMoving]);
 
   // Precompute projected Tectonic Plate polygonal surfaces
   const projectedPlateSurfaces = useMemo(() => {
@@ -266,8 +378,30 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   }, [metricMode, pathGenerator]);
 
   // Pointer interactions (Drag to Rotate 3D Globe or Pan Flat Map)
+  // SVG viewBox units per CSS pixel, so flat-map panning tracks the pointer exactly at any size
+  const getViewBoxUnitsPerPixel = () => {
+    const svg = containerRef.current?.querySelector('#world-map-svg');
+    const rect = svg?.getBoundingClientRect();
+    if (!rect || rect.width === 0 || rect.height === 0) return 1;
+    return Math.max(BASE_WIDTH / rect.width, BASE_HEIGHT / rect.height);
+  };
+  const unitsPerPixelRef = useRef(1);
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // Second finger down: switch from rotate/pan to pinch zoom
+    if (activePointersRef.current.size === 2) {
+      const [a, b] = Array.from(activePointersRef.current.values());
+      pinchRef.current = { startDist: Math.hypot(a.x - b.x, a.y - b.y) || 1, startZoom: zoom };
+      pointerDownRef.current.isDown = false;
+      pointerDownRef.current.hasMoved = true;
+      return;
+    }
+    if (activePointersRef.current.size > 2) return;
+
+    unitsPerPixelRef.current = getViewBoxUnitsPerPixel();
     pointerDownRef.current = {
       isDown: true,
       startX: e.clientX,
@@ -280,7 +414,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     };
   };
 
+  // Tooltip follows the cursor; batched to one update per frame
+  const tooltipRafId = useRef<number | null>(null);
+  const pendingTooltipPos = useRef<{ x: number; y: number } | null>(null);
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (activePointersRef.current.has(e.pointerId)) {
+      activePointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (pinchRef.current && activePointersRef.current.size >= 2) {
+      const [a, b] = Array.from(activePointersRef.current.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      pendingZoom.current = clampZoom(pinchRef.current.startZoom * (dist / pinchRef.current.startDist));
+      if (!isDraggingRef.current) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }
+      scheduleViewFlush();
+      return;
+    }
+
     if (pointerDownRef.current.isDown) {
       const dx = e.clientX - pointerDownRef.current.startX;
       const dy = e.clientY - pointerDownRef.current.startY;
@@ -288,8 +442,12 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
       if (dist > 3) {
         pointerDownRef.current.hasMoved = true;
-        if (!isDragging) {
+        if (!isDraggingRef.current) {
+          isDraggingRef.current = true;
           setIsDragging(true);
+          setHoveredCountry(null);
+          setHoveredName('');
+          setTooltipPos(null);
         }
 
         if (projectionMode === 'round') {
@@ -298,52 +456,72 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           const nextYaw = pointerDownRef.current.startYaw + dx * sensitivity;
           const nextPitch = Math.max(-85, Math.min(85, pointerDownRef.current.startPitch - dy * sensitivity));
           pendingRotation.current = { yaw: nextYaw, pitch: nextPitch };
-          if (dragRafId.current === null) {
-            dragRafId.current = requestAnimationFrame(() => {
-              if (pendingRotation.current) {
-                setRotation(pendingRotation.current);
-              }
-              dragRafId.current = null;
-            });
-          }
         } else {
-          // In flat mode, drag pans the map
+          // In flat mode, drag pans the map (pan is in viewBox units, independent of zoom)
           pendingPan.current = {
-            x: pointerDownRef.current.startPanX + dx / zoom,
-            y: pointerDownRef.current.startPanY + dy / zoom,
+            x: pointerDownRef.current.startPanX + dx * unitsPerPixelRef.current,
+            y: pointerDownRef.current.startPanY + dy * unitsPerPixelRef.current,
           };
-          if (dragRafId.current === null) {
-            dragRafId.current = requestAnimationFrame(() => {
-              if (pendingPan.current) {
-                setPan(pendingPan.current);
-              }
-              dragRafId.current = null;
-            });
-          }
         }
+        scheduleViewFlush();
       }
       return; // Do NOT update tooltip while dragging to ensure buttery 60-120fps motion!
     }
 
     // Only update tooltip position if a country or feature is actively hovered
-    if (hoveredCountry || hoveredFeature || hoveredName) {
+    if (e.pointerType === 'mouse' && (hoveredCountry || hoveredFeature || hoveredName)) {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect();
-        setTooltipPos({
+        pendingTooltipPos.current = {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
-        });
+        };
+        if (tooltipRafId.current === null) {
+          tooltipRafId.current = requestAnimationFrame(() => {
+            tooltipRafId.current = null;
+            setTooltipPos(pendingTooltipPos.current);
+          });
+        }
       }
     }
   };
 
-  const handlePointerUp = () => {
-    endDrag();
+  useEffect(() => {
+    return () => {
+      if (tooltipRafId.current !== null) cancelAnimationFrame(tooltipRafId.current);
+    };
+  }, []);
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    activePointersRef.current.delete(e.pointerId);
+    if (activePointersRef.current.size < 2) pinchRef.current = null;
+    if (activePointersRef.current.size === 0) endDrag();
   };
+
+  // Stable handlers for the memoized country layer
+  const handleCountryHover = useCallback((country: CountryData | null, name: string) => {
+    if (isDraggingRef.current) return;
+    setHoveredCountry(country);
+    setHoveredName(name);
+  }, []);
+
+  const handleCountryLeave = useCallback(() => {
+    setHoveredCountry(null);
+    setHoveredName('');
+  }, []);
+
+  const handleCountrySelect = useCallback(
+    (country: CountryData) => {
+      // A drag that ends over a country is not a click on it
+      if (pointerDownRef.current.hasMoved) return;
+      onSelectCountry(country);
+    },
+    [onSelectCountry]
+  );
 
   // Zoom controls
   const handleZoom = useCallback((factor: number) => {
-    setZoom((prev) => Math.min(Math.max(prev * factor, 0.8), 12));
+    setZoom((prev) => clampZoom(prev * factor));
   }, []);
 
   const handleReset = useCallback(() => {
@@ -354,12 +532,18 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     setActivePlateId(null);
   }, []);
 
-  // Wheel zoom
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.15 : 0.87;
-    setZoom((prev) => Math.min(Math.max(prev * factor, 0.8), 12));
-  };
+  // Wheel zoom (native non-passive listener so preventDefault actually stops page zoom/scroll)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.15 : 0.87;
+      setZoom((prev) => clampZoom(prev * factor));
+    };
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
+  }, []);
 
   // Focus and center on a Tectonic Plate
   const focusPlate = useCallback(
@@ -370,18 +554,16 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         setRotation({ yaw: -lng, pitch: -lat });
         setZoom((prev) => Math.max(prev, 1.45));
       } else {
-        const coords = projection([lng, lat]);
-        if (coords) {
-          setPan({
-            x: BASE_WIDTH / 2 - coords[0],
-            y: BASE_HEIGHT / 2 - coords[1],
-          });
-          setZoom((prev) => Math.max(prev, 1.8));
+        const nextZoom = Math.max(zoom, 1.8);
+        const nextPan = flatPanToCenter([lng, lat], nextZoom);
+        if (nextPan) {
+          setPan(nextPan);
+          setZoom(nextZoom);
         }
       }
       setSelectedFeature({ type: 'tectonic-plate', data: plate });
     },
-    [projectionMode, projection]
+    [projectionMode, zoom]
   );
 
   // Center on selected country
@@ -393,25 +575,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         setRotation({ yaw: -lng, pitch: -lat });
         setZoom((prev) => Math.max(prev, 1.8));
       } else {
-        const coords = projection([lng, lat]);
-        if (coords) {
-          setPan({
-            x: BASE_WIDTH / 2 - coords[0],
-            y: BASE_HEIGHT / 2 - coords[1],
-          });
-          setZoom((prev) => Math.max(prev, 2.5));
+        const nextZoom = Math.max(zoom, 2.5);
+        const nextPan = flatPanToCenter([lng, lat], nextZoom);
+        if (nextPan) {
+          setPan(nextPan);
+          setZoom(nextZoom);
         }
       }
     },
-    [projectionMode, projection]
+    [projectionMode, zoom]
   );
 
-  // Automatically center and rotate 3D globe / flat map to selected country
+  // Automatically center and rotate 3D globe / flat map to selected country.
+  // Only re-runs when the selection or projection changes; depending on the view itself
+  // made it re-fire on every rotation frame and snap the globe back mid-drag.
+  const centerOnCountryRef = useRef(centerOnCountry);
+  centerOnCountryRef.current = centerOnCountry;
   useEffect(() => {
     if (selectedCountry) {
-      centerOnCountry(selectedCountry);
+      centerOnCountryRef.current(selectedCountry);
     }
-  }, [selectedCountry, centerOnCountry]);
+  }, [selectedCountry, projectionMode]);
 
   // Focus continent presets
   const focusContinent = (continent: string) => {
@@ -491,25 +675,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     return 'stroke-slate-700/60 stroke-[0.5] pointer-events-none';
   };
 
-  const getCountryStrokeClass = (isSelected: boolean, isHovered: boolean) => {
-    if (isSelected) {
-      return 'stroke-cyan-300 stroke-[2.2] filter drop-shadow-[0_0_12px_rgba(6,182,212,0.95)]';
-    }
-    if (isHovered) {
-      return 'stroke-white stroke-[1.8] filter drop-shadow-[0_0_8px_rgba(255,255,255,0.85)] brightness-110';
-    }
-    if (metricMode === 'flags') {
-      return 'stroke-slate-950/90 stroke-[0.8]';
-    }
-    if (borderMode === 'contrast') {
-      return 'stroke-slate-950 stroke-[0.9]';
-    }
-    if (borderMode === 'sharp') {
-      return 'stroke-slate-950 stroke-[0.7]';
-    }
-    return 'stroke-slate-950/80 stroke-[0.4]';
-  };
-
   // Check if a point is currently on the front hemisphere of the globe
   const isVisibleOnMap = useCallback(
     (coords: [number, number]) => {
@@ -521,24 +686,23 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
   // Compute Globe Sphere Center and Radius
   const globeCenter = useMemo(() => {
-    return [BASE_WIDTH / 2 + pan.x, BASE_HEIGHT / 2 + pan.y];
-  }, [pan.x, pan.y]);
+    return [centerX + pan.x, centerY + pan.y];
+  }, [centerX, centerY, pan.x, pan.y]);
 
   const globeRadius = useMemo(() => {
-    return BASE_GLOBE_SCALE * zoom;
-  }, [zoom]);
+    return globeScale * zoom;
+  }, [globeScale, zoom]);
 
   return (
     <div
       id="world-map-container"
       ref={containerRef}
-      className={`relative w-full h-full min-h-[500px] overflow-hidden bg-[#030712] select-none ${
+      className={`relative w-full h-full overflow-hidden bg-[#030712] select-none touch-none ${
         isDragging ? 'cursor-grabbing' : 'cursor-grab'
       }`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onWheel={handleWheel}
     >
       {/* Deep Space Background with Star Field */}
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900/60 via-[#030712] to-black" />
@@ -688,87 +852,22 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         )}
 
         {/* Country Polygons */}
-        <g id="country-polygons">
-          {projectedCountryList.map((item) => {
-            if (!item.paths || item.paths.length === 0) return null;
-            const country = item.countryData;
-            const isSelected = selectedCountry?.id === item.id || selectedCountry?.name === item.name;
-            const isHovered = hoveredCountry?.id === item.id || hoveredName === item.name;
-
-            const code = country?.code?.toLowerCase();
-            const hasFlagPattern = Boolean(code && code.length === 2 && uniqueFlagCodes.includes(code));
-
-            // Default color calculation
-            let fillColor = getCountryFillColor(country, metricMode, isSelected, isHovered);
-            if (metricMode === 'flags' && !isSpotterActive) {
-              if (flagFillEnabled && hasFlagPattern) {
-                fillColor = `url(#flag-pat-${code})`;
-              }
-            }
-
-            // CRITICAL FOR GLOBE SPOTTER CHALLENGE:
-            // The world map MUST NEVER show flag textures or reveal country identities.
-            // Countries have a clean, blind geopolitical palette, only revealing feedback upon guess.
-            if (isSpotterActive) {
-              if (isSelected && spotterFeedback) {
-                if (spotterFeedback.status === 'correct') {
-                  fillColor = isHovered ? '#34d399' : '#059669'; // Vibrant emerald correct
-                } else if (spotterFeedback.status === 'wrong') {
-                  fillColor = isHovered ? '#fb7185' : '#e11d48'; // Rose incorrect guess
-                } else if (spotterFeedback.status === 'revealed') {
-                  fillColor = isHovered ? '#38bdf8' : '#0284c7'; // Cyan revealed
-                }
-              } else {
-                fillColor = isHovered ? '#334155' : '#1e293b';
-              }
-            }
-
-            // High-clarity stroke class for spotter mode vs normal mode
-            const strokeClass = isSpotterActive
-              ? isSelected && spotterFeedback?.status === 'correct'
-                ? 'stroke-emerald-400 stroke-2'
-                : isSelected && spotterFeedback?.status === 'wrong'
-                ? 'stroke-rose-400 stroke-2'
-                : isHovered
-                ? 'stroke-cyan-300 stroke-[1.8]'
-                : 'stroke-slate-700/80 stroke-[0.8]'
-              : getCountryStrokeClass(isSelected, isHovered);
-
-            return (
-              <g
-                key={item.uniqueKey}
-                id={`country-${item.uniqueKey}`}
-                className={isSpotterActive ? 'cursor-crosshair' : 'cursor-pointer'}
-                onPointerEnter={() => {
-                  if (!isDragging) {
-                    setHoveredCountry(country || null);
-                    setHoveredName(item.name);
-                  }
-                }}
-                onPointerLeave={() => {
-                  setHoveredCountry(null);
-                  setHoveredName('');
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (pointerDownRef.current.hasMoved) return;
-                  if (country) {
-                    onSelectCountry(country);
-                  }
-                }}
-              >
-                {item.paths.map((pD, pIdx) => (
-                  <path
-                    key={pIdx}
-                    d={pD}
-                    fill={fillColor}
-                    className={`transition-colors duration-150 ${strokeClass}`}
-                  />
-                ))}
-              </g>
-            );
-          })}
-        </g>
+        <CountryLayer
+          items={projectedCountryList}
+          selectedCountry={selectedCountry}
+          hoveredCountryId={hoveredCountry?.id ?? null}
+          hoveredName={hoveredName}
+          metricMode={metricMode}
+          borderMode={borderMode}
+          flagFillEnabled={flagFillEnabled}
+          flagCodes={flagCodeSet}
+          isSpotterActive={isSpotterActive}
+          spotterFeedback={spotterFeedback}
+          isMoving={isMoving}
+          onHover={handleCountryHover}
+          onLeave={handleCountryLeave}
+          onSelect={handleCountrySelect}
+        />
 
         {/* International Borders Overlay Line Mesh */}
         {bordersPath && (
@@ -1219,7 +1318,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       {/* Floating Map Zoom, Reset, 3D Globe & Projection Controls */}
       <div
         id="map-floating-controls"
-        className="absolute bottom-6 left-6 flex flex-col gap-1.5 z-30 bg-slate-900/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-700/80 shadow-2xl"
+        className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 flex flex-col [@media(max-height:520px)]:flex-row gap-1.5 z-30 bg-slate-900/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-700/80 shadow-2xl"
       >
         {/* Toggle 3D Round Globe / 2D Flat Map */}
         <button
@@ -1269,7 +1368,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           </button>
         )}
 
-        <div className="w-full h-px bg-slate-800 my-0.5" />
+        <div className="w-full h-px bg-slate-800 my-0.5 [@media(max-height:520px)]:w-px [@media(max-height:520px)]:h-auto [@media(max-height:520px)]:my-0 [@media(max-height:520px)]:mx-0.5" />
 
         <button
           id="btn-zoom-in"
@@ -1288,7 +1387,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           <ZoomOut className="w-5 h-5" />
         </button>
 
-        <div className="w-full h-px bg-slate-800 my-0.5" />
+        <div className="w-full h-px bg-slate-800 my-0.5 [@media(max-height:520px)]:w-px [@media(max-height:520px)]:h-auto [@media(max-height:520px)]:my-0 [@media(max-height:520px)]:mx-0.5" />
 
         <button
           id="btn-reset-view"
@@ -1310,7 +1409,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           </button>
         )}
 
-        <div className="w-full h-px bg-slate-800 my-0.5" />
+        <div className="w-full h-px bg-slate-800 my-0.5 [@media(max-height:520px)]:w-px [@media(max-height:520px)]:h-auto [@media(max-height:520px)]:my-0 [@media(max-height:520px)]:mx-0.5" />
 
         {/* Toggle Border Clarity */}
         <button
@@ -1335,7 +1434,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       {metricMode !== 'tectonic' && !isSpotterActive && (
         <div
           id="continent-jump-bar"
-          className="absolute bottom-6 left-24 hidden md:flex items-center gap-1.5 z-20 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-xl text-xs text-slate-300"
+          className="absolute bottom-6 left-24 hidden lg:flex [@media(max-height:520px)]:hidden items-center gap-1.5 z-20 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-xl text-xs text-slate-300"
         >
           <span className="flex items-center gap-1 text-slate-400 font-medium mr-1">
             <Globe className="w-3.5 h-3.5 text-cyan-400" />

@@ -121,25 +121,28 @@ export const TopNav: React.FC<TopNavProps> = ({
   return (
     <header
       id="app-top-nav"
-      className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between gap-3 pointer-events-none"
+      className="absolute top-3 left-3 right-3 sm:top-4 sm:left-4 sm:right-4 z-30 flex flex-wrap md:flex-nowrap items-center justify-between gap-2 sm:gap-3 pointer-events-none"
     >
       {/* Left Branding & Title */}
-      <div className="pointer-events-auto flex items-center gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/70 px-4 py-2 rounded-2xl shadow-xl">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/30">
-          <Globe className="w-5 h-5 animate-pulse" />
+      <div className="pointer-events-auto flex items-center gap-2.5 sm:gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/70 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl shadow-xl min-w-0">
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/30 shrink-0">
+          <Globe className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
         </div>
-        <div>
-          <h1 className="text-sm font-bold text-slate-100 tracking-tight flex items-center gap-1.5 leading-tight">
+        <div className="min-w-0">
+          <h1 className="text-xs sm:text-sm font-bold text-slate-100 tracking-tight flex items-center gap-1.5 leading-tight whitespace-nowrap">
             WORLD COUNTRIES ATLAS
             <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 font-mono">
               240+ NATIONS
             </span>
           </h1>
-          <p className="text-[10px] text-slate-400 font-medium">
+          <p className="hidden lg:block text-[10px] text-slate-400 font-medium">
             Sovereign Longevity, History & Global Firepower
           </p>
         </div>
       </div>
+
+      {/* Phones and small tablets: put the mode selector and actions on a second row under the title */}
+      <div className="basis-full h-0 md:hidden" aria-hidden="true" />
 
       {/* Center Group: Search Bar + Mode Switcher */}
       <div className="pointer-events-auto flex items-center gap-2 flex-1 max-w-xl min-w-0">
@@ -152,7 +155,7 @@ export const TopNav: React.FC<TopNavProps> = ({
               className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/80 hover:border-cyan-500/50 text-xs font-bold text-slate-200 shadow-xl transition-all hover:bg-slate-800 shrink-0"
             >
               <span>{currentModeInfo.icon}</span>
-              <span className="truncate max-w-[130px] text-cyan-200">
+              <span className="truncate max-w-[96px] sm:max-w-[130px] text-cyan-200">
                 {currentModeInfo.label.split(' (')[0]}
               </span>
               <ChevronDown
@@ -164,7 +167,7 @@ export const TopNav: React.FC<TopNavProps> = ({
 
             {/* Mode Dropdown Menu */}
             {isOpenModeMenu && (
-              <div className="absolute top-full left-0 mt-2 w-64 bg-slate-950/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 z-50 divide-y divide-slate-800/60">
+              <div className="absolute top-full left-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] max-h-[70vh] overflow-y-auto bg-slate-950/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 z-50 divide-y divide-slate-800/60">
                 <div className="px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
                   EXPLORATION MODES
                 </div>
@@ -202,7 +205,7 @@ export const TopNav: React.FC<TopNavProps> = ({
         )}
 
         {/* Search Bar with Autocomplete */}
-        <div ref={searchContainerRef} className="relative flex-1 hidden sm:block min-w-0">
+        <div ref={searchContainerRef} className="relative flex-1 hidden lg:block min-w-0">
           <div className="relative flex items-center">
             <Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
@@ -305,10 +308,10 @@ export const TopNav: React.FC<TopNavProps> = ({
           id="btn-random-country"
           onClick={handleRandomCountry}
           title="Fly to Random Country"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/70 hover:border-cyan-500/50 text-xs font-semibold text-slate-200 hover:text-cyan-300 shadow-xl transition-all"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/70 hover:border-cyan-500/50 text-xs font-semibold text-slate-200 hover:text-cyan-300 shadow-xl transition-all"
         >
           <Shuffle className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="hidden lg:inline">Random Country</span>
+          <span className="hidden xl:inline">Random Country</span>
         </button>
 
         {/* Compare Nations */}
@@ -316,10 +319,10 @@ export const TopNav: React.FC<TopNavProps> = ({
           id="btn-compare-nations"
           onClick={onOpenCompare}
           title="Compare Countries Side-by-Side"
-          className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/70 hover:border-cyan-500/50 text-xs font-semibold text-slate-200 hover:text-cyan-300 shadow-xl transition-all"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-2xl bg-slate-900/90 backdrop-blur-md border border-slate-700/70 hover:border-cyan-500/50 text-xs font-semibold text-slate-200 hover:text-cyan-300 shadow-xl transition-all"
         >
           <Scale className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden md:inline">Compare</span>
+          <span className="hidden xl:inline">Compare</span>
         </button>
 
         {/* Considered in the World (Best Food, Military, Longevity, Heritage) */}
@@ -327,10 +330,10 @@ export const TopNav: React.FC<TopNavProps> = ({
           id="btn-considered-accolades"
           onClick={onOpenConsidered}
           title="Countries Considered Best in the World (e.g. Best Food, Military, Oldest Civilizations)"
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-500/25 via-orange-500/20 to-amber-500/25 hover:from-amber-500/40 hover:to-orange-500/40 border border-amber-500/50 text-xs font-bold text-amber-200 shadow-xl shadow-amber-500/10 transition-all hover:scale-[1.02]"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-500/25 via-orange-500/20 to-amber-500/25 hover:from-amber-500/40 hover:to-orange-500/40 border border-amber-500/50 text-xs font-bold text-amber-200 shadow-xl shadow-amber-500/10 transition-all hover:scale-[1.02]"
         >
           <Award className="w-3.5 h-3.5 text-amber-300" />
-          <span>Considered</span>
+          <span className="hidden lg:inline">Considered</span>
         </button>
 
         {/* Leaderboards & Rankings */}
@@ -338,10 +341,10 @@ export const TopNav: React.FC<TopNavProps> = ({
           id="btn-rankings-leaderboard"
           onClick={onOpenRankings}
           title="Global Leaderboards & Rankings"
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-cyan-600/30 to-blue-600/30 hover:from-cyan-600/50 hover:to-blue-600/50 border border-cyan-500/40 text-xs font-bold text-cyan-200 shadow-xl transition-all"
+          className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-2 rounded-2xl bg-gradient-to-r from-cyan-600/30 to-blue-600/30 hover:from-cyan-600/50 hover:to-blue-600/50 border border-cyan-500/40 text-xs font-bold text-cyan-200 shadow-xl transition-all"
         >
           <BarChart3 className="w-3.5 h-3.5 text-cyan-300" />
-          <span>Rankings</span>
+          <span className="hidden lg:inline">Rankings</span>
         </button>
       </div>
     </header>

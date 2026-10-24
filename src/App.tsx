@@ -230,7 +230,7 @@ export default function App() {
   const spotterTarget = spotterTargets[spotterCurrentIndex] || null;
 
   return (
-    <div id="app-root" className="relative w-screen h-screen overflow-hidden bg-slate-950 font-sans text-slate-100 select-none">
+    <div id="app-root" className="relative w-screen h-dvh overflow-hidden bg-slate-950 font-sans text-slate-100 select-none">
       {/* 1. Fullscreen Interactive Map Canvas */}
       <WorldMap
         selectedCountry={selectedCountry}
@@ -335,7 +335,12 @@ export default function App() {
 
       {/* 10. Floating Corner Controls: "SEARCH" Stacked Directly Above "GAME" Mode */}
       {!isSpotterActive && (
-        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2.5 pointer-events-auto">
+        <div
+          className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 flex-col items-end gap-2 sm:gap-2.5 pointer-events-auto ${
+            // The open dossier (and its minimized pill) occupies this corner; these buttons would cover it
+            selectedCountry ? 'hidden' : 'flex'
+          }`}
+        >
           {/* Button that says "Search" above Game Mode */}
           <button
             id="btn-corner-search"
