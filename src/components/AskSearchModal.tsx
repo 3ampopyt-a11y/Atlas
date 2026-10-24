@@ -909,9 +909,11 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
                         <h4 className="text-lg font-black text-white">
                           {targetCountryData.name}
                         </h4>
-                        <span className="px-2 py-0.5 rounded-md bg-white/10 text-xs font-mono font-bold text-cyan-300 border border-white/10">
-                          {targetCountryData.code} / {targetCountryData.code3}
-                        </span>
+                        {targetCountryData.code3 && (
+                          <span className="px-2 py-0.5 rounded-md bg-white/10 text-xs font-mono font-bold text-cyan-300 border border-white/10">
+                            {targetCountryData.code} / {targetCountryData.code3}
+                          </span>
+                        )}
                       </div>
                       <p className="text-xs text-slate-400 mt-0.5">
                         {targetCountryData.continent} • Capital: <span className="text-slate-200 font-semibold">{targetCountryData.capital}</span>

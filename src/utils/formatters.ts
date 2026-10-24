@@ -43,6 +43,14 @@ export function formatArea(areaKm2: number): string {
   return `${areaKm2.toLocaleString()} km² (${Math.round(areaKm2 * 0.3861).toLocaleString()} sq mi)`;
 }
 
+// Palestine and the Holy See hold the UN's two non-member observer seats
+const UN_OBSERVER_STATES = new Set(['PS', 'VA']);
+
+export function getUnStatus(country: CountryData): string {
+  if (country.governance.unMemberSince > 0) return 'UN Member State';
+  return UN_OBSERVER_STATES.has(country.code) ? 'UN Observer State' : 'Not a UN Member';
+}
+
 export function formatLongevity(country: CountryData): string {
   const years = country.longevity.yearsAlive;
   const foundYear = country.longevity.foundationYear;

@@ -329,6 +329,16 @@ function parseFoundation(text: string) {
   return { year, event: capitalize(shorten(first, 160)) };
 }
 
+// "previous 1919; latest drafted ... 1948, approved 12 May 1949, ... entered into force 24 May 1949" -> 1949
+function parseConstitutionYear(text: string): number | null {
+  const t = clean(text);
+  if (/unwritten|no single constitution/i.test(t)) return null;
+  const latest = t.includes('latest') ? t.slice(t.indexOf('latest')) : t;
+  const inForce = latest.match(/(?:into force|effective|enacted)[^;]{0,25}?\b(1[5-9]\d\d|20\d\d)\b/);
+  const year = Number(inForce?.[1] ?? latest.match(/\b(1[5-9]\d\d|20\d\d)\b/)?.[1]);
+  return year || null;
+}
+
 function parseConscription(text: string, forces: string): CountryData['military']['conscription'] | undefined {
   const t = `${clean(text)} ${clean(forces)}`.toLowerCase();
   if (/no regular (military|armed)|no (military|armed forces)|has no military|defen[cs]e is the responsibility/.test(t)) return 'Abolished / None';
@@ -372,6 +382,7 @@ function factbookFacts(fb: any) {
     governmentType: gov['Government type']?.text && titleCase(dropNotes(clean(gov['Government type'].text)).replace(/\.$/, '')),
     nationalDay: gov['National holiday']?.text && shorten(dropNotes(clean(gov['National holiday'].text)).split(/;\s*/)[0], 120),
     foundation: gov.Independence?.text ? parseFoundation(gov.Independence.text) : undefined,
+    constitutionYear: gov.Constitution?.history?.text ? parseConstitutionYear(gov.Constitution.history.text) : null,
     industries: eco.Industries?.text ? parseList(eco.Industries.text, 5) : [],
     exports: eco['Exports - commodities']?.text ? parseList(eco['Exports - commodities'].text, 5) : [],
     activePersonnel: num(clean(mil['Military and security service personnel strengths']?.text).match(/[\d,]{3,}/)?.[0]),
@@ -533,6 +544,9 @@ const MANUAL_FACTS: Record<string, Record<string, Record<string, unknown>>> = {
   TF: UNINHABITED(['French']),
   IO: UNINHABITED(['English']),
   AQ: { ...UNINHABITED([]), culture: { officialLanguages: [], majorReligions: ['None (no permanent population)'] } },
+  // Wikidata keeps the Republic of China's 1945 UN seat, which passed to the PRC in 1971
+  TW: { governance: { unMemberSince: 0 } },
+  VN: { longevity: { foundationEvent: 'Legendary founding of Văn Lang by the Hùng kings (2879 BCE)', constitutionYear: 2013, ancientOrigin: null } },
   // Åland Statistics (ÅSUB), 2023
   AX: {
     demographics: { population: 30541, densityPerKm2: 19.6, lifeExpectancy: 0 },
@@ -630,30 +644,109 @@ const NO_MILITARY_DATA = {
   totalAircraft: 0, combatAircraft: 0, attackHelicopters: 0, tanks: 0, armoredVehicles: 0, navalFleetTotal: 0,
   aircraftCarriers: 0, submarines: 0, destroyersFrigates: 0, tier: 'Minimal / Neutral', alliances: [] as string[],
 };
+// Where the base data still has the "Declaration of Sovereignty (1960)" placeholder and the Factbook
+// lists no independence date: the event the place's current status dates from.
+type History = { year: number; event: string; era: string; constitutionYear?: number | null; notes?: string; independence?: string };
+const PLACEHOLDER_EVENT = 'Declaration of Sovereignty (1960)';
+// Template text the base data uses for every other country without a curated history
+const GENERIC_EVENT = /^Declaration of Sovereignty \(-?\d+\)$/;
+const GENERIC_ORIGIN = 'Ancient settlements and regional cultures.';
+const BOT = 'British Overseas Territory';
+const HISTORY_FIXES: Record<string, History> = {
+  KY: { year: 1962, event: 'Became a separate British colony when Jamaica gained independence (1962)', era: BOT },
+  FO: { year: 1948, event: 'Home Rule within the Kingdom of Denmark (1 April 1948)', era: 'Self-governing territory of the Kingdom of Denmark', constitutionYear: 1948 },
+  FK: { year: 1833, event: 'Continuous British administration since 1833', era: BOT },
+  GS: { year: 1985, event: 'Separated from the Falkland Islands Dependencies (3 October 1985)', era: BOT, constitutionYear: 1985 },
+  AX: { year: 1921, event: 'League of Nations confirmed autonomy within Finland (24 June 1921)', era: 'Autonomous region of Finland', constitutionYear: 1991 },
+  PF: { year: 1842, event: 'French protectorate (1842); overseas collectivity of France since 2003', era: 'Overseas collectivity of France', constitutionYear: 2004 },
+  TF: { year: 1955, event: 'Created as a French overseas territory (6 August 1955)', era: 'Overseas territory of France', constitutionYear: null },
+  PS: { year: 1988, event: 'Palestinian Declaration of Independence (15 November 1988)', era: 'UN non-member observer state (since 2012)', constitutionYear: 2003, independence: '15 November 1988 (declared)' },
+  GL: { year: 1979, event: 'Home Rule within the Kingdom of Denmark (1 May 1979); self-government since 21 June 2009', era: 'Self-governing territory of the Kingdom of Denmark' },
+  GU: { year: 1898, event: 'Ceded by Spain to the United States (Treaty of Paris, 1898)', era: 'Unincorporated territory of the United States' },
+  HM: { year: 1947, event: 'Transferred from the United Kingdom to Australia (26 December 1947)', era: 'External territory of Australia', constitutionYear: null },
+  HK: { year: 1997, event: 'Transfer of sovereignty from the United Kingdom to China (1 July 1997)', era: 'Special Administrative Region of China' },
+  MO: { year: 1999, event: 'Transfer of sovereignty from Portugal to China (20 December 1999)', era: 'Special Administrative Region of China' },
+  MS: { year: 1632, event: 'English settlement (1632)', era: BOT },
+  CW: { year: 2010, event: 'Became a constituent country of the Kingdom of the Netherlands (10 October 2010)', era: 'Constituent country of the Kingdom of the Netherlands' },
+  AW: { year: 1986, event: 'Separate status within the Kingdom of the Netherlands (1 January 1986)', era: 'Constituent country of the Kingdom of the Netherlands', constitutionYear: 1986 },
+  SX: { year: 2010, event: 'Became a constituent country of the Kingdom of the Netherlands (10 October 2010)', era: 'Constituent country of the Kingdom of the Netherlands' },
+  NC: { year: 1853, event: 'Annexed by France (24 September 1853)', era: 'Special collectivity of France', constitutionYear: 1998 },
+  NF: { year: 1914, event: 'Became an external territory of Australia (1 July 1914)', era: 'External territory of Australia' },
+  MP: { year: 1978, event: 'Commonwealth in political union with the United States (9 January 1978)', era: 'Commonwealth of the United States' },
+  PN: { year: 1838, event: 'Became a British colony (1838), settled by HMS Bounty mutineers in 1790', era: BOT },
+  PR: { year: 1952, event: 'Commonwealth constitution took effect (25 July 1952); a US territory since 1898', era: 'Unincorporated territory of the United States (Commonwealth)' },
+  BL: { year: 2007, event: 'Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007)', era: 'Overseas collectivity of France', constitutionYear: 2007 },
+  SH: { year: 1659, event: 'Settled by the English East India Company (1659)', era: BOT, constitutionYear: 2009 },
+  AI: { year: 1980, event: 'Formally separated from Saint Kitts and Nevis (19 December 1980)', era: BOT },
+  MF: { year: 2007, event: 'Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007)', era: 'Overseas collectivity of France', constitutionYear: 2007 },
+  PM: { year: 1816, event: 'Returned to France for the last time (1816); overseas collectivity since 2003', era: 'Overseas collectivity of France', constitutionYear: null },
+  EH: { year: 1976, event: 'Sahrawi Arab Democratic Republic proclaimed (27 February 1976)', era: 'Disputed non-self-governing territory', constitutionYear: null, independence: '27 February 1976 (declared by the SADR)' },
+  TC: { year: 1973, event: 'Became a separate British colony when the Bahamas gained independence (1973)', era: BOT },
+  GG: { year: 1204, event: 'Stayed with the English Crown after the loss of Normandy (1204)', era: 'British Crown Dependency' },
+  JE: { year: 1204, event: 'Stayed with the English Crown after the loss of Normandy (1204)', era: 'British Crown Dependency' },
+  IM: { year: 979, event: 'Tynwald parliament traditionally founded (979)', era: 'British Crown Dependency', constitutionYear: null },
+  VI: { year: 1917, event: 'Purchased by the United States from Denmark (31 March 1917)', era: 'Unincorporated territory of the United States' },
+  WF: { year: 1961, event: 'Became a French overseas territory (29 July 1961)', era: 'Overseas collectivity of France', constitutionYear: 1961 },
+  AS: { year: 1900, event: 'Tutuila ceded to the United States (17 April 1900)', era: 'Unincorporated territory of the United States', constitutionYear: 1967 },
+  IO: {
+    year: 1965, event: 'Created as a British overseas territory (8 November 1965)', era: BOT,
+    notes: 'Created as a British overseas territory (8 November 1965). In May 2025 the UK and Mauritius signed a treaty to transfer sovereignty to Mauritius, with Diego Garcia leased back to the UK.',
+  },
+  BM: { year: 1612, event: 'Settled by the Virginia Company (1612)', era: BOT },
+  VG: { year: 1672, event: 'Under English control since 1672', era: BOT },
+  AQ: { year: 1959, event: 'Antarctic Treaty signed (1 December 1959)', era: 'International zone under the Antarctic Treaty System', constitutionYear: null },
+};
+const longevityFrom = (h: History) => ({
+  foundationYear: h.year,
+  foundationEvent: h.event,
+  sovereignEra: h.era,
+  yearsAlive: 2026 - h.year,
+  historicalContinuityNotes: h.notes ?? `${h.event}.`,
+  // only sovereign states have an independence date
+  independenceDate: h.independence ?? null,
+  ancientOrigin: null,
+  ...(h.constitutionYear !== undefined && { constitutionYear: h.constitutionYear }),
+});
 const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string>> = {
   Somaliland: {
+    officialName: 'Republic of Somaliland',
+    // shares ISO codes with Somalia; no code of its own
+    code3: '',
     capital: 'Hargeisa',
     largestCity: 'Hargeisa',
     // Somaliland government estimate (2021); no census since 1975
     demographics: { population: 5700000, densityPerKm2: 32.3, lifeExpectancy: 0 },
     geography: { areaKm2: 176120, highestPoint: { name: 'Shimbiris', elevationM: 2416 } },
     economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Somaliland Shilling', currencyCode: 'SLSH', currencySymbol: 'Sl.Sh.' },
+    longevity: longevityFrom({
+      year: 1991, event: 'Restoration of sovereignty declared (18 May 1991)', era: 'Self-declared state without international recognition', constitutionYear: 2001,
+      independence: '18 May 1991 (declared; first independent as the State of Somaliland, 26 June 1960)',
+      notes: 'British Somaliland became independent as the State of Somaliland on 26 June 1960 and joined Somalia five days later. It declared the union void on 18 May 1991.',
+    }),
     governance: { headOfState: 'Abdirahman Mohamed Abdullahi', headOfGovernment: 'Abdirahman Mohamed Abdullahi', governmentType: 'Unrecognised presidential republic', unMemberSince: 0, nationalMotto: null, nationalDay: 'Restoration of Sovereignty, 18 May (1991)' },
     culture: { officialLanguages: ['Somali', 'Arabic', 'English'], majorReligions: ['Sunni Muslim'] },
     military: NO_MILITARY_DATA,
   },
   'N. Cyprus': {
+    officialName: 'Turkish Republic of Northern Cyprus',
+    code3: '',
     capital: 'North Nicosia',
     largestCity: 'North Nicosia',
     // 2011 census, the last with published results
     demographics: { population: 294906, densityPerKm2: 87.9, lifeExpectancy: 0 },
     geography: { areaKm2: 3355, highestPoint: { name: 'Selvili Tepe', elevationM: 1024 } },
     economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Turkish Lira', currencyCode: 'TRY', currencySymbol: '₺' },
+    longevity: longevityFrom({ year: 1983, event: 'Turkish Republic of Northern Cyprus declared (15 November 1983)', era: 'Self-declared state, recognised only by Türkiye', constitutionYear: 1985, independence: '15 November 1983 (declared)' }),
     governance: { headOfState: 'Tufan Erhürman', headOfGovernment: 'Ünal Üstel', governmentType: 'Unrecognised semi-presidential republic (recognised only by Türkiye)', unMemberSince: 0, nationalMotto: null, nationalDay: 'Republic Day, 15 November (1983)' },
     culture: { officialLanguages: ['Turkish'], majorReligions: ['Sunni Muslim'] },
     military: NO_MILITARY_DATA,
   },
   'Indian Ocean Ter.': {
+    officialName: 'Australian Indian Ocean Territories',
+    code3: '',
+    // UN M49 places both territories in Australia and New Zealand
+    continent: 'Oceania',
+    subregion: 'Australia and New Zealand',
     capital: 'Flying Fish Cove',
     largestCity: 'Flying Fish Cove',
     // Christmas Island (1,692) and Cocos (Keeling) Islands (593), 2021 Australian census
@@ -661,16 +754,20 @@ const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string
     // Christmas Island 135 km² + Cocos (Keeling) Islands 14 km²
     geography: { areaKm2: 149, highestPoint: { name: 'Murray Hill (Christmas Island)', elevationM: 361 } },
     economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Australian Dollar', currencyCode: 'AUD', currencySymbol: '$' },
+    longevity: longevityFrom({ year: 1955, event: 'Cocos (Keeling) Islands transferred to Australia (1955); Christmas Island followed in 1958', era: 'External territory of Australia (two island groups)', constitutionYear: null }),
     governance: { headOfState: 'Charles III', headOfGovernment: 'Administrator (appointed by Australia)', governmentType: 'External territories of Australia', unMemberSince: 0, nationalMotto: null, nationalDay: 'Australia Day, 26 January' },
     culture: { officialLanguages: ['English', 'Malay'], majorReligions: ['Muslim', 'Buddhist', 'Christian'] },
     military: { ...NO_MILITARY_DATA, tier: 'No Armed Forces' },
   },
   'Siachen Glacier': {
+    officialName: 'Siachen Glacier',
+    code3: '',
     capital: 'None (military outposts only)',
     largestCity: 'None',
     demographics: { population: 0, densityPerKm2: 0, lifeExpectancy: 0, urbanPercentage: 0, medianAge: 0 },
     geography: { highestPoint: { name: 'Teram Kangri I', elevationM: 7462 } },
     economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Indian Rupee', currencyCode: 'INR', currencySymbol: '₹' },
+    longevity: longevityFrom({ year: 1984, event: 'Indian forces took control in Operation Meghdoot (13 April 1984)', era: 'Disputed territory (administered by India, claimed by Pakistan)', constitutionYear: null }),
     governance: { headOfState: 'Disputed (administered by India)', headOfGovernment: 'Disputed (administered by India)', governmentType: 'Disputed territory', unMemberSince: 0, nationalMotto: null, nationalDay: 'None (no permanent population)' },
     culture: { officialLanguages: [], majorReligions: ['None (no permanent population)'] },
     military: { ...NO_MILITARY_DATA, tier: 'No Armed Forces' },
@@ -802,7 +899,19 @@ async function main() {
       else missing.push('religions');
       if (wd.heritage[iso]?.top.length) patch.culture.famousLandmarks = wd.heritage[iso].top;
       if (fb?.notes.length) patch.culture.interestingFacts = fb.notes.slice(0, 3);
-      if (fb?.foundation && c.longevity.foundationYear === 1960) {
+      if (fb?.conscription) patch.military.conscription = fb.conscription;
+      const alliances = wd.alliances[iso];
+      if (alliances?.length) patch.military.alliances = [...new Set(alliances)];
+      if (NUCLEAR[iso]) Object.assign(patch.military, { nuclearStatus: NUCLEAR[iso].status, nuclearWarheads: NUCLEAR[iso].warheads });
+    }
+
+    // History: replace the "Declaration of Sovereignty (1960)" placeholder (and its 1991 constitution and generic origin)
+    if (c.longevity.foundationEvent === PLACEHOLDER_EVENT) {
+      // the Factbook's constitution year, or null so the app hides the row
+      patch.longevity.constitutionYear = fb?.constitutionYear ?? null;
+      patch.longevity.ancientOrigin = null;
+      if (HISTORY_FIXES[iso]) Object.assign(patch.longevity, longevityFrom(HISTORY_FIXES[iso]));
+      else if (fb?.foundation) {
         const { year, event } = fb.foundation;
         Object.assign(patch.longevity, {
           foundationYear: year,
@@ -811,11 +920,17 @@ async function main() {
           yearsAlive: 2026 - year,
           historicalContinuityNotes: `${event}.`,
         });
-      }
-      if (fb?.conscription) patch.military.conscription = fb.conscription;
-      const alliances = wd.alliances[iso];
-      if (alliances?.length) patch.military.alliances = [...new Set(alliances)];
-      if (NUCLEAR[iso]) Object.assign(patch.military, { nuclearStatus: NUCLEAR[iso].status, nuclearWarheads: NUCLEAR[iso].warheads });
+      } else missing.push('history');
+    } else if (GENERIC_EVENT.test(c.longevity.foundationEvent)) {
+      // The year is curated but the event, independence date, 1991 constitution and origin are template text
+      const year = c.longevity.foundationYear;
+      if (c.longevity.constitutionYear === 1991) patch.longevity.constitutionYear = fb?.constitutionYear ?? null;
+      if (c.longevity.ancientOrigin === GENERIC_ORIGIN) patch.longevity.ancientOrigin = null;
+      patch.longevity.independenceDate = fb?.foundation?.event ?? null;
+      if (fb?.foundation?.year === year) {
+        patch.longevity.foundationEvent = fb.foundation.event;
+        patch.longevity.historicalContinuityNotes = `${fb.foundation.event}.`;
+      } else patch.longevity.foundationEvent = `Statehood established (${year < 0 ? `${-year} BCE` : year})`;
     }
 
     // Places no source measures: 0 means "not measured" and the app shows N/A

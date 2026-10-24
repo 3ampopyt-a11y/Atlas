@@ -1,4 +1,5 @@
 import { CountryData } from '../types.ts';
+import { getUnStatus } from '../utils/formatters.ts';
 
 export interface HistoricalMilestone {
   year: string;
@@ -457,9 +458,15 @@ export function getDetailedCountryInfo(country: CountryData): ExtendedCountryDet
   const curated = CURATED_DETAILS[country.id];
 
   // Base fallback logic for any of the 240+ countries
+  // Territories, dependencies and unrecognised states carry their status in sovereignEra
+  const isSovereign = getUnStatus(country) !== 'Not a UN Member' || country.longevity.sovereignEra === 'Sovereign State';
+  const era = country.longevity.sovereignEra;
+  const fullName = country.officialName && country.officialName !== country.name ? `${country.name} (${country.officialName})` : country.name;
+  const foundedIn = country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE';
   const defaultOverview =
     curated?.overview ||
-    `${country.name} (${country.officialName}) is a sovereign nation located in ${country.subregion}, ${country.continent}. Founded as a sovereign state in ${country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE'} (${country.longevity.foundationEvent}), it has maintained continuous sovereign continuity for over ${country.longevity.yearsAlive.toLocaleString()} years. With an area of ${country.geography.areaKm2.toLocaleString()} km² and a population of ${country.demographics.population.toLocaleString()}, it ranks #${country.military.globalRank} in global firepower with a defense budget of $${country.military.defenseBudgetUSD}B USD.`;
+    (isSovereign ? null : `${fullName} is ${/^[aeiou]/i.test(era) ? 'an' : 'a'} ${/^[A-Z][a-z]/.test(era) && !/^British\b/.test(era) ? era.charAt(0).toLowerCase() + era.slice(1) : era} in ${country.subregion}, ${country.continent}. Its current status dates from ${foundedIn}: ${country.longevity.foundationEvent}. It covers ${country.geography.areaKm2.toLocaleString()} km² with a population of ${country.demographics.population.toLocaleString()}.`) ||
+    `${fullName} is a sovereign nation located in ${country.subregion}, ${country.continent}. Founded as a sovereign state in ${country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE'} (${country.longevity.foundationEvent}), it has maintained continuous sovereign continuity for over ${country.longevity.yearsAlive.toLocaleString()} years. With an area of ${country.geography.areaKm2.toLocaleString()} km² and a population of ${country.demographics.population.toLocaleString()}, it ranks #${country.military.globalRank} in global firepower with a defense budget of $${country.military.defenseBudgetUSD}B USD.`;
 
   const defaultFoundingFigures =
     curated?.foundingFigures || [
@@ -593,11 +600,13 @@ export function getDetailedCountryInfo(country: CountryData): ExtendedCountryDet
         title: 'Constitutional Charter & Modern Statehood',
         description: `Codification of modern governance, borders, and national legal framework.`,
       },
-      {
-        year: `${country.governance.unMemberSince}`,
-        title: 'United Nations Accession',
-        description: `Formal entry into the United Nations, recognized internationally as a sovereign member state.`,
-      },
+      ...(country.governance.unMemberSince > 0
+        ? [{
+            year: `${country.governance.unMemberSince}`,
+            title: 'United Nations Accession',
+            description: `Formal entry into the United Nations, recognized internationally as a sovereign member state.`,
+          }]
+        : []),
       {
         year: '21st Century',
         title: 'Modern Technological & Geopolitical Evolution',
@@ -636,7 +645,7 @@ export function getDetailedCountryInfo(country: CountryData): ExtendedCountryDet
 
   const defaultMemberships =
     curated?.internationalMemberships || [
-      'United Nations (UN)',
+      ...(country.governance.unMemberSince > 0 ? ['United Nations (UN)'] : []),
       ...(country.military.alliances.length > 0 ? country.military.alliances : []),
       `Regional Union of ${country.continent}`,
       'World Trade Organization (WTO)',

@@ -1,20 +1,37 @@
 import express from 'express';
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
-
 // Fastest models first. With minimal thinking these answer in ~2-3s; default thinking took 20s+.
 // The list runs twice: "high demand" 503s often hit every model at once and clear within seconds.
 const FAST_MODELS = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.6-flash'];
-const ATTEMPTS = [...FAST_MODELS, ...FAST_MODELS];
 // Defaults suit the local server; createApiApp() can tighten them (Netlify cuts functions off at ~10s).
 let HEDGE_DELAY_MS = 5000; // start the next model if the current one is still silent
 const RETRY_PAUSE_MS = 1500; // pause before the second round so a demand spike can pass
 let TOTAL_BUDGET_MS = 20000;
 
+// A model that hit its daily request quota is skipped until the quota resets, instead of
+// spending more requests (and time) on calls that are certain to fail.
+const outOfQuotaUntil = new Map<string, number>();
+
+export class AiQuotaError extends Error {}
+
+// Daily-quota 429s carry the time until reset (e.g. retryDelay "49188s"); per-minute limits don't count here.
+function dailyQuotaResetMs(err: any): number | null {
+  const message = String(err?.message || err);
+  if (!message.includes('PerDay')) return null;
+  const seconds = Number(message.match(/retryDelay\W+(\d+)s/)?.[1]);
+  return (Number.isFinite(seconds) && seconds > 0 ? seconds : 3600) * 1000;
+}
+
+const hasQuota = (model: string) => (outOfQuotaUntil.get(model) ?? 0) <= Date.now();
+
 // Races the models with staggered starts: the next one starts as soon as the previous fails
 // (429/503 come back fast) or has been silent for HEDGE_DELAY_MS. First non-empty answer wins
 // and the rest are aborted.
 async function generateJsonFast(ai: GoogleGenAI, prompt: string, temperature = 0.1): Promise<string> {
+  const models = FAST_MODELS.filter(hasQuota);
+  if (!models.length) throw new AiQuotaError('All AI models are out of daily quota');
+  const attempts = [...models, ...models];
   const controllers: AbortController[] = [];
   const errors: string[] = [];
   const deadline = AbortSignal.timeout(TOTAL_BUDGET_MS);
@@ -37,13 +54,24 @@ async function generateJsonFast(ai: GoogleGenAI, prompt: string, temperature = 0
       const onDeadline = () => finish(new Error(`AI models timed out after ${TOTAL_BUDGET_MS / 1000}s (${errors.join('; ') || 'no response'})`));
       deadline.addEventListener('abort', onDeadline);
 
+      const failAll = () =>
+        finish(
+          models.every((m) => !hasQuota(m))
+            ? new AiQuotaError(`All AI models are out of daily quota (${errors.join('; ')})`)
+            : new Error(`All AI models failed (${errors.join('; ')})`),
+        );
+
       const launchNext = () => {
-        if (next === FAST_MODELS.length && running === 0) setTimeout(launch, RETRY_PAUSE_MS);
+        if (next === models.length && running === 0) setTimeout(launch, RETRY_PAUSE_MS);
         else launch();
       };
       const launch = () => {
-        if (settled || next >= ATTEMPTS.length) return;
-        const model = ATTEMPTS[next++];
+        while (next < attempts.length && !hasQuota(attempts[next])) next++;
+        if (settled || next >= attempts.length) {
+          if (!settled && running === 0) failAll();
+          return;
+        }
+        const model = attempts[next++];
         const controller = new AbortController();
         controllers.push(controller);
         running++;
@@ -71,9 +99,11 @@ async function generateJsonFast(ai: GoogleGenAI, prompt: string, temperature = 0
             const reason = String(err?.message || err).slice(0, 160);
             console.warn(`Model ${model} failed: ${reason}`);
             errors.push(`${model}: ${reason}`);
+            const resetMs = dailyQuotaResetMs(err);
+            if (resetMs) outOfQuotaUntil.set(model, Date.now() + resetMs);
             running--;
-            if (next < ATTEMPTS.length) launchNext();
-            else if (running === 0) finish(new Error(`All AI models failed (${errors.join('; ')})`));
+            if (next < attempts.length) launchNext();
+            else if (running === 0) failAll();
           });
       };
 
@@ -1891,7 +1921,10 @@ Respond STRICTLY in valid JSON matching this schema:
       if (fallback.answer.startsWith('Direct answer for "')) {
         return res.json({
           success: false,
-          error: 'The live AI lookup is busy right now and could not answer this question. Please try again in a moment.',
+          error:
+            err instanceof AiQuotaError
+              ? "AI answers have reached today's limit. Questions about countries, leaders, rankings and foods still work."
+              : 'The live AI lookup is busy right now and could not answer this question. Please try again in a moment.',
         });
       }
       return sendCachedResponse({

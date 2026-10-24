@@ -3,7 +3,7 @@ import { CountryData } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
 import { formatBudget, formatPersonnel, formatPopulation } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../utils/sovereignData.ts';
-import { getCountryAlliances } from '../utils/allianceData.ts';
+import { getAlliancesFor } from '../utils/allianceData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
 import {
   Clock,
@@ -300,9 +300,11 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
                     <div className="min-w-0">
                       <div className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-cyan-300 transition-colors flex items-center gap-1.5 sm:gap-2 truncate">
                         <span className="truncate">{c.name}</span>
-                        <span className="text-[10px] text-slate-500 font-mono font-normal shrink-0">
-                          ({c.code3})
-                        </span>
+                        {c.code3 && (
+                          <span className="text-[10px] text-slate-500 font-mono font-normal shrink-0">
+                            ({c.code3})
+                          </span>
+                        )}
                         {c.military.nuclearWarheads > 0 && (
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/40 shrink-0">
                             ☢ Nuclear
@@ -324,7 +326,7 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
 
                       {/* Display Alliances if country belongs to any */}
                       {(() => {
-                        const countryAlliances = getCountryAlliances(c.code || c.name);
+                        const countryAlliances = getAlliancesFor(c);
                         if (countryAlliances.length === 0) return null;
                         return (
                           <div className="flex items-center gap-1 mt-1 flex-wrap">

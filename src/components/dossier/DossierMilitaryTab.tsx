@@ -3,7 +3,7 @@ import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
 import { formatPersonnel, formatBudget } from '../../utils/formatters.ts';
 import { getDetailedMilitary } from '../../utils/militaryData.ts';
-import { getCountryAlliances } from '../../utils/allianceData.ts';
+import { getAlliancesFor } from '../../utils/allianceData.ts';
 import { AllianceCard } from '../AllianceCard.tsx';
 import {
   Shield,
@@ -37,7 +37,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
   nuclearBadge,
 }) => {
   const [subTab, setSubTab] = useState<MilitarySubCategory>('all');
-  const alliances = useMemo(() => getCountryAlliances(country.code || country.name), [country]);
+  const alliances = useMemo(() => getAlliancesFor(country), [country]);
   const mil = useMemo(() => getDetailedMilitary(country), [country]);
 
   // Active / Reserve percentages for proportional display

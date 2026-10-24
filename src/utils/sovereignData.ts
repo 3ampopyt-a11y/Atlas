@@ -1,5 +1,6 @@
 import { CountryData } from '../types.ts';
 import { getCuratedLeader } from './worldLeadersRegistry.ts';
+import { SHARED_ISO_ENTRIES } from './allianceData.ts';
 
 // Returns the true Unicode flag emoji for any ISO 2-letter country code
 export function getCountryFlagEmoji(country: { code?: string; flag?: string }): string {
@@ -924,8 +925,6 @@ export async function fetchLiveCountryUpdate(country: CountryData): Promise<Veri
  * Flag, Capital, President / Head of State, Head of Government,
  * Leader (in executive control), Government Type, Population, Area, and Languages.
  */
-const SHARED_ISO_ENTRIES = new Set(['Somaliland', 'N. Cyprus', 'Indian Ocean Ter.', 'Siachen Glacier']);
-
 export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereignInfo {
   // Entries such as Somaliland or N. Cyprus share an ISO code (and, fuzzily, a name) with another country, so skip the registries for them
   const ownCodes = !SHARED_ISO_ENTRIES.has(country.id);

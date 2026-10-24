@@ -374,6 +374,13 @@ export function getCountryAlliances(countryCodeOrName: string): AllianceInfo[] {
   return matched;
 }
 
+// Entries that borrow another country's ISO code (Siachen Glacier uses India's), so must not inherit its alliances
+export const SHARED_ISO_ENTRIES = new Set(['Somaliland', 'N. Cyprus', 'Indian Ocean Ter.', 'Siachen Glacier']);
+
+export function getAlliancesFor(country: { id: string; code: string; name: string }): AllianceInfo[] {
+  return SHARED_ISO_ENTRIES.has(country.id) ? [] : getCountryAlliances(country.code || country.name);
+}
+
 /**
  * Check if a country has any military alliance
  */

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CountryData } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
 import { formatBudget, formatGdp, formatPerCapita, formatPersonnel, formatPopulation, formatArea, formatLongevity, getNuclearBadge } from '../utils/formatters.ts';
-import { getCountryAlliances } from '../utils/allianceData.ts';
+import { getAlliancesFor } from '../utils/allianceData.ts';
 import { getCountryCulinaryProfile } from '../utils/nationalFoodsData.ts';
 import { getDetailedMilitary } from '../utils/militaryData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
@@ -342,7 +342,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {selectedCountries.map((c) => {
-                const countryAlliances = getCountryAlliances(c.code || c.name);
+                const countryAlliances = getAlliancesFor(c);
                 return (
                   <div key={c.id} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2 text-[11px]">
                     <div className="text-slate-400 text-[10px]">

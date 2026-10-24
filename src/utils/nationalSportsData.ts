@@ -1,3 +1,5 @@
+import { SHARED_ISO_ENTRIES } from './allianceData.ts';
+
 export interface NationalSportProfile {
   sportName: string;
   nativeName?: string;
@@ -800,20 +802,22 @@ export const NATIONAL_SPORTS_REGISTRY: Record<string, NationalSportProfile> = {
  * Intelligent resolver for country national sport
  */
 export function getCountryNationalSport(country: {
+  id?: string;
   code?: string;
   name: string;
   continent?: string;
   subregion?: string;
 }): NationalSportProfile {
-  // Check exact code match
-  if (country.code && NATIONAL_SPORTS_REGISTRY[country.code]) {
-    return NATIONAL_SPORTS_REGISTRY[country.code];
+  // Check exact code match (not for entries that borrow another country's code)
+  const ownCode = SHARED_ISO_ENTRIES.has(country.id || '') ? undefined : country.code;
+  if (ownCode && NATIONAL_SPORTS_REGISTRY[ownCode]) {
+    return NATIONAL_SPORTS_REGISTRY[ownCode];
   }
 
   // Common country name alias lookups
   const nameLower = country.name.toLowerCase();
   for (const [code, prof] of Object.entries(NATIONAL_SPORTS_REGISTRY)) {
-    if (code.toLowerCase() === country.code?.toLowerCase()) return prof;
+    if (code.toLowerCase() === ownCode?.toLowerCase()) return prof;
   }
 
   // Continent-specific, culturally accurate intelligent fallbacks

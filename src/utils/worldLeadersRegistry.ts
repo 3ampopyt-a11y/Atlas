@@ -248,7 +248,7 @@ export function getCuratedLeader(countryName: string) {
   
   // Loose matching for official names ("Republic of Bulgaria") and abbreviations ("Cayman Islands" / "Cayman Is.").
   // A plain substring test would hand American Samoa to Samoa, or a 3-letter code like GHA to Afghanistan.
-  const norm = (s: string) => s.toLowerCase().replace(/islands?/g, 'is').replace(/[^a-z0-9]/g, '');
+  const norm = (s: string) => s.toLowerCase().replace(/islands?\b/g, 'is').replace(/[^a-z0-9]/g, '');
   const clean = norm(countryName);
   for (const [key, val] of Object.entries(LEADERS_BY_NAME)) {
     const cleanKey = norm(key);

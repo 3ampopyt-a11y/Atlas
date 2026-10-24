@@ -8,7 +8,7 @@ import {
   getNuclearBadge,
 } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo, fetchLiveCountryUpdate } from '../utils/sovereignData.ts';
-import { getCountryAlliances } from '../utils/allianceData.ts';
+import { getAlliancesFor } from '../utils/allianceData.ts';
 import { getCountryLeadingProfile } from '../utils/worldLeadingData.ts';
 import { getCountryNationalSport } from '../utils/nationalSportsData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
@@ -72,7 +72,7 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
 
   const nuclearBadge = getNuclearBadge(country.military.nuclearStatus, country.military.nuclearWarheads);
   const details = getDetailedCountryInfo(country);
-  const alliances = getCountryAlliances(country.code || country.name);
+  const alliances = getAlliancesFor(country);
   const leadingProfile = getCountryLeadingProfile(country);
   const nationalSport = getCountryNationalSport(country);
 
@@ -290,9 +290,11 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                   <h2 className="text-base sm:text-lg font-bold text-slate-100 tracking-tight max-w-[150px] sm:max-w-xs md:max-w-sm truncate">
                     {sovereignState.name}
                   </h2>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-semibold border border-slate-700/50 shrink-0">
-                    {country.code3}
-                  </span>
+                  {country.code3 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono font-semibold border border-slate-700/50 shrink-0">
+                      {country.code3}
+                    </span>
+                  )}
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
                     GFP #{country.military.globalRank}
                   </span>

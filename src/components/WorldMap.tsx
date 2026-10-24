@@ -12,7 +12,7 @@ import { countryMapPoints, isCoordOnFrontHemisphere } from '../utils/geoCentroid
 import { CountryLayer } from './CountryLayer.tsx';
 import { formatLongevity, formatBudget, formatPersonnel, formatPopulation } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../utils/sovereignData.ts';
-import { getCountryAlliances } from '../utils/allianceData.ts';
+import { getAlliancesFor } from '../utils/allianceData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
 import { countryList } from '../data/countriesData.ts';
 import {
@@ -1661,7 +1661,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
             </div>
           ) : hoveredCountry ? (() => {
             const sov = getVerifiedSovereignInfo(hoveredCountry);
-            const alliances = getCountryAlliances(hoveredCountry.code || hoveredCountry.name);
+            const alliances = getAlliancesFor(hoveredCountry);
 
             return (
               <div className="space-y-2">

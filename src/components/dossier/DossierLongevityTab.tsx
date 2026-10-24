@@ -1,6 +1,7 @@
 import React from 'react';
 import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
+import { getUnStatus } from '../../utils/formatters.ts';
 import {
   Clock,
   BookOpen,
@@ -127,7 +128,7 @@ export const DossierLongevityTab: React.FC<DossierLongevityTabProps> = ({
           )}
           <div className="flex justify-between py-1 border-b border-slate-800">
             <span className="text-slate-400">UN Membership Since:</span>
-            <span className="font-mono font-semibold text-slate-200">{country.governance.unMemberSince}</span>
+            <span className="font-mono font-semibold text-slate-200">{country.governance.unMemberSince || getUnStatus(country)}</span>
           </div>
           <div className="flex justify-between py-1">
             <span className="text-slate-400">National Holiday / Day:</span>

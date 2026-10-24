@@ -100,6 +100,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1990,
+    "ancientOrigin": null,
+    "independenceDate": "3 March 1878 (as an autonomous principality within the Ottoman Empire)",
+    "foundationEvent": "Statehood established (681)"
    }
   },
   "104": {
@@ -190,6 +196,12 @@
     "destroyersFrigates": 6,
     "tier": "Middle Power",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 2008,
+    "ancientOrigin": null,
+    "independenceDate": "4 January 1948 (from the UK)",
+    "foundationEvent": "Statehood established (849)"
    }
   },
   "108": {
@@ -280,6 +292,13 @@
     "alliances": [
      "African Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2005,
+    "ancientOrigin": null,
+    "independenceDate": "1 July 1962 (from UN trusteeship under Belgian administration)",
+    "foundationEvent": "1 July 1962 (from UN trusteeship under Belgian administration)",
+    "historicalContinuityNotes": "1 July 1962 (from UN trusteeship under Belgian administration)."
    }
   },
   "112": {
@@ -373,6 +392,13 @@
      "CIS",
      "CSTO"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "25 August 1991 (from the Soviet Union)",
+    "foundationEvent": "25 August 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "25 August 1991 (from the Soviet Union)."
    }
   },
   "116": {
@@ -463,6 +489,12 @@
     "submarines": 0,
     "destroyersFrigates": 0,
     "tier": "Developing Defense"
+   },
+   "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
+    "independenceDate": "9 November 1953 (from France)",
+    "foundationEvent": "Statehood established (802)"
    }
   },
   "120": {
@@ -561,6 +593,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1996,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "1 January 1960 (from French-administered UN trusteeship)",
     "independenceDate": "1 January 1960 (from French-administered UN trusteeship)",
@@ -664,6 +698,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "independenceDate": "1 July 1867 (union of British North American colonies)",
+    "foundationEvent": "1 July 1867 (union of British North American colonies)",
+    "historicalContinuityNotes": "1 July 1867 (union of British North American colonies)."
    }
   },
   "132": {
@@ -756,6 +797,13 @@
     "alliances": [
      "African Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "5 July 1975 (from Portugal)",
+    "foundationEvent": "5 July 1975 (from Portugal)",
+    "historicalContinuityNotes": "5 July 1975 (from Portugal)."
    }
   },
   "136": {
@@ -842,6 +890,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2009,
+    "ancientOrigin": null,
+    "foundationYear": 1962,
+    "foundationEvent": "Became a separate British colony when Jamaica gained independence (1962)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 64,
+    "historicalContinuityNotes": "Became a separate British colony when Jamaica gained independence (1962).",
+    "independenceDate": null
    }
   },
   "140": {
@@ -933,6 +991,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2023,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "13 August 1960 (from France)",
     "independenceDate": "13 August 1960 (from France)",
@@ -1034,6 +1094,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1978,
+    "ancientOrigin": null,
+    "independenceDate": "4 February 1948 (from the UK)",
+    "foundationEvent": "4 February 1948 (from the UK)",
+    "historicalContinuityNotes": "4 February 1948 (from the UK)."
    }
   },
   "148": {
@@ -1128,6 +1195,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2023,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "11 August 1960 (from France)",
     "independenceDate": "11 August 1960 (from France)",
@@ -1230,6 +1299,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1981,
+    "ancientOrigin": null,
+    "independenceDate": "18 September 1810 (from Spain)",
+    "foundationEvent": "18 September 1810 (from Spain)",
+    "historicalContinuityNotes": "18 September 1810 (from Spain)."
    }
   },
   "156": {
@@ -1317,7 +1393,7 @@
     }
    },
    "governance": {
-    "unMemberSince": 1945,
+    "unMemberSince": 0,
     "headOfState": "Lai Ching-te",
     "headOfGovernment": "Cho Jung-tai",
     "governmentType": "Semi-Presidential Republic",
@@ -1358,6 +1434,12 @@
     "destroyersFrigates": 25,
     "tier": "Regional Power",
     "conscription": "Mandatory"
+   },
+   "longevity": {
+    "constitutionYear": 1947,
+    "ancientOrigin": null,
+    "independenceDate": null,
+    "foundationEvent": "Statehood established (1912)"
    }
   },
   "170": {
@@ -1453,6 +1535,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "20 July 1810 (from Spain)",
+    "foundationEvent": "20 July 1810 (from Spain)",
+    "historicalContinuityNotes": "20 July 1810 (from Spain)."
    }
   },
   "174": {
@@ -1547,6 +1636,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1996,
+    "ancientOrigin": null,
     "foundationYear": 1975,
     "foundationEvent": "6 July 1975 (from France)",
     "independenceDate": "6 July 1975 (from France)",
@@ -1647,6 +1738,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2015,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "15 August 1960 (from France)",
     "independenceDate": "15 August 1960 (from France)",
@@ -1750,6 +1843,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2005,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "30 June 1960 (from Belgium)",
     "independenceDate": "30 June 1960 (from Belgium)",
@@ -1843,6 +1938,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1965,
+    "ancientOrigin": null,
     "foundationYear": 1965,
     "foundationEvent": "4 August 1965 (Cook Islands became self-governing state in free association with New Zealand)",
     "independenceDate": "4 August 1965 (Cook Islands became self-governing state in free association with New Zealand)",
@@ -1942,6 +2039,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1949,
+    "ancientOrigin": null,
+    "independenceDate": "15 September 1821 (from Spain)",
+    "foundationEvent": "15 September 1821 (from Spain)",
+    "historicalContinuityNotes": "15 September 1821 (from Spain)."
    }
   },
   "191": {
@@ -2037,6 +2141,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1990,
+    "ancientOrigin": null,
+    "independenceDate": "25 June 1991 (from Yugoslavia)",
+    "foundationEvent": "Statehood established (925)"
    }
   },
   "192": {
@@ -2132,6 +2242,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2018,
+    "ancientOrigin": null,
+    "independenceDate": "20 May 1902 (from US administration)",
+    "foundationEvent": "20 May 1902 (from US administration)",
+    "historicalContinuityNotes": "20 May 1902 (from US administration)."
    }
   },
   "196": {
@@ -2230,6 +2347,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1960,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "16 August 1960 (from the UK)",
     "independenceDate": "16 August 1960 (from the UK)",
@@ -2326,6 +2445,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
+    "independenceDate": "1 January 1993 (Czechoslovakia split into the Czech Republic and Slovakia)",
+    "foundationEvent": "Statehood established (870)"
    }
   },
   "204": {
@@ -2421,6 +2546,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1990,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "1 August 1960 (from France)",
     "independenceDate": "1 August 1960 (from France)",
@@ -2521,6 +2648,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1953,
+    "ancientOrigin": null,
+    "independenceDate": "Ca. 965 (unified and Christianized under Harald I GORMSSON)",
+    "foundationEvent": "Ca. 965 (unified and Christianized under Harald I GORMSSON)",
+    "historicalContinuityNotes": "Ca. 965 (unified and Christianized under Harald I GORMSSON)."
    }
   },
   "212": {
@@ -2616,6 +2750,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1978,
+    "ancientOrigin": null,
     "foundationYear": 1978,
     "foundationEvent": "3 November 1978 (from the UK)",
     "independenceDate": "3 November 1978 (from the UK)",
@@ -2712,6 +2848,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2015,
+    "ancientOrigin": null,
+    "independenceDate": "27 February 1844 (from Haiti)",
+    "foundationEvent": "27 February 1844 (from Haiti)",
+    "historicalContinuityNotes": "27 February 1844 (from Haiti)."
    }
   },
   "218": {
@@ -2807,6 +2950,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2008,
+    "ancientOrigin": null,
+    "independenceDate": "24 May 1822 (from Spain)",
+    "foundationEvent": "24 May 1822 (from Spain)",
+    "historicalContinuityNotes": "24 May 1822 (from Spain)."
    }
   },
   "222": {
@@ -2898,6 +3048,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1983,
+    "ancientOrigin": null,
+    "independenceDate": "15 September 1821 (from Spain)",
+    "foundationEvent": "15 September 1821 (from Spain)",
+    "historicalContinuityNotes": "15 September 1821 (from Spain)."
    }
   },
   "226": {
@@ -2988,6 +3145,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1968,
+    "ancientOrigin": null,
     "foundationYear": 1968,
     "foundationEvent": "12 October 1968 (from Spain)",
     "independenceDate": "12 October 1968 (from Spain)",
@@ -3090,6 +3249,12 @@
      "African Union",
      "BRICS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "Oldest independent country in Africa and one of the oldest in the world, at least 2,000 years",
+    "foundationEvent": "Statehood established (1270)"
    }
   },
   "232": {
@@ -3185,6 +3350,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1997,
+    "ancientOrigin": null,
     "foundationYear": 1993,
     "foundationEvent": "24 May 1993 (from Ethiopia)",
     "independenceDate": "24 May 1993 (from Ethiopia)",
@@ -3284,6 +3451,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
     "foundationYear": 1918,
     "foundationEvent": "24 February 1918 (from Soviet Russia)",
     "independenceDate": "24 February 1918 (from Soviet Russia)",
@@ -3370,6 +3539,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 1948,
+    "ancientOrigin": null,
+    "foundationYear": 1948,
+    "foundationEvent": "Home Rule within the Kingdom of Denmark (1 April 1948)",
+    "sovereignEra": "Self-governing territory of the Kingdom of Denmark",
+    "yearsAlive": 78,
+    "historicalContinuityNotes": "Home Rule within the Kingdom of Denmark (1 April 1948).",
+    "independenceDate": null
    }
   },
   "238": {
@@ -3450,6 +3629,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2009,
+    "ancientOrigin": null,
+    "foundationYear": 1833,
+    "foundationEvent": "Continuous British administration since 1833",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 193,
+    "historicalContinuityNotes": "Continuous British administration since 1833.",
+    "independenceDate": null
    }
   },
   "239": {
@@ -3517,6 +3706,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1985,
+    "ancientOrigin": null,
+    "foundationYear": 1985,
+    "foundationEvent": "Separated from the Falkland Islands Dependencies (3 October 1985)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 41,
+    "historicalContinuityNotes": "Separated from the Falkland Islands Dependencies (3 October 1985).",
+    "independenceDate": null
    }
   },
   "242": {
@@ -3613,6 +3812,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2013,
+    "ancientOrigin": null,
     "foundationYear": 1970,
     "foundationEvent": "10 October 1970 (from the UK)",
     "independenceDate": "10 October 1970 (from the UK)",
@@ -3713,6 +3914,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2000,
+    "ancientOrigin": null,
+    "independenceDate": "6 December 1917 (from Russia)",
+    "foundationEvent": "6 December 1917 (from Russia)",
+    "historicalContinuityNotes": "6 December 1917 (from Russia)."
    }
   },
   "248": {
@@ -3769,6 +3977,16 @@
     "tier": "No Armed Forces",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "foundationYear": 1921,
+    "foundationEvent": "League of Nations confirmed autonomy within Finland (24 June 1921)",
+    "sovereignEra": "Autonomous region of Finland",
+    "yearsAlive": 105,
+    "historicalContinuityNotes": "League of Nations confirmed autonomy within Finland (24 June 1921).",
+    "independenceDate": null
    }
   },
   "250": {
@@ -3896,6 +4114,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2004,
+    "ancientOrigin": null,
+    "foundationYear": 1842,
+    "foundationEvent": "French protectorate (1842); overseas collectivity of France since 2003",
+    "sovereignEra": "Overseas collectivity of France",
+    "yearsAlive": 184,
+    "historicalContinuityNotes": "French protectorate (1842); overseas collectivity of France since 2003.",
+    "independenceDate": null
    }
   },
   "260": {
@@ -3967,6 +4195,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1955,
+    "foundationEvent": "Created as a French overseas territory (6 August 1955)",
+    "sovereignEra": "Overseas territory of France",
+    "yearsAlive": 71,
+    "historicalContinuityNotes": "Created as a French overseas territory (6 August 1955).",
+    "independenceDate": null
    }
   },
   "262": {
@@ -4055,6 +4293,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
     "foundationYear": 1977,
     "foundationEvent": "27 June 1977 (from France)",
     "independenceDate": "27 June 1977 (from France)",
@@ -4156,6 +4396,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2024,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "17 August 1960 (from France)",
     "independenceDate": "17 August 1960 (from France)",
@@ -4254,6 +4496,13 @@
     "destroyersFrigates": 0,
     "tier": "Developing Defense",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "9 April 1991 (from the Soviet Union)",
+    "foundationEvent": "9 April 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "9 April 1991 (from the Soviet Union)."
    }
   },
   "270": {
@@ -4347,6 +4596,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1997,
+    "ancientOrigin": null,
     "foundationYear": 1965,
     "foundationEvent": "18 February 1965 (from the UK)",
     "independenceDate": "18 February 1965 (from the UK)",
@@ -4444,6 +4695,16 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2003,
+    "ancientOrigin": null,
+    "foundationYear": 1988,
+    "foundationEvent": "Palestinian Declaration of Independence (15 November 1988)",
+    "sovereignEra": "UN non-member observer state (since 2012)",
+    "yearsAlive": 38,
+    "historicalContinuityNotes": "Palestinian Declaration of Independence (15 November 1988).",
+    "independenceDate": "15 November 1988 (declared)"
    }
   },
   "276": {
@@ -4543,6 +4804,8 @@
     "nuclearWarheads": 0
    },
    "longevity": {
+    "constitutionYear": 1949,
+    "ancientOrigin": null,
     "foundationYear": 1871,
     "foundationEvent": "18 January 1871 (establishment of the German Empire)",
     "independenceDate": "18 January 1871 (establishment of the German Empire)",
@@ -4644,6 +4907,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
+    "independenceDate": "6 March 1957 (from the UK)",
+    "foundationEvent": "6 March 1957 (from the UK)",
+    "historicalContinuityNotes": "6 March 1957 (from the UK)."
    }
   },
   "296": {
@@ -4731,6 +5001,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
     "foundationYear": 1979,
     "foundationEvent": "12 July 1979 (from the UK)",
     "independenceDate": "12 July 1979 (from the UK)",
@@ -4830,6 +5102,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1975,
+    "ancientOrigin": null,
+    "independenceDate": "3 February 1830 (from the Ottoman Empire)",
+    "foundationEvent": "Statehood established (1821)"
    }
   },
   "304": {
@@ -4921,6 +5199,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2009,
+    "ancientOrigin": null,
+    "foundationYear": 1979,
+    "foundationEvent": "Home Rule within the Kingdom of Denmark (1 May 1979); self-government since 21 June 2009",
+    "sovereignEra": "Self-governing territory of the Kingdom of Denmark",
+    "yearsAlive": 47,
+    "historicalContinuityNotes": "Home Rule within the Kingdom of Denmark (1 May 1979); self-government since 21 June 2009.",
+    "independenceDate": null
    }
   },
   "308": {
@@ -5010,6 +5298,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1974,
+    "ancientOrigin": null,
     "foundationYear": 1974,
     "foundationEvent": "7 February 1974 (from the UK)",
     "independenceDate": "7 February 1974 (from the UK)",
@@ -5100,6 +5390,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1950,
+    "ancientOrigin": null,
+    "foundationYear": 1898,
+    "foundationEvent": "Ceded by Spain to the United States (Treaty of Paris, 1898)",
+    "sovereignEra": "Unincorporated territory of the United States",
+    "yearsAlive": 128,
+    "historicalContinuityNotes": "Ceded by Spain to the United States (Treaty of Paris, 1898).",
+    "independenceDate": null
    }
   },
   "320": {
@@ -5195,6 +5495,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1986,
+    "ancientOrigin": null,
+    "independenceDate": "15 September 1821 (from Spain)",
+    "foundationEvent": "15 September 1821 (from Spain)",
+    "historicalContinuityNotes": "15 September 1821 (from Spain)."
    }
   },
   "324": {
@@ -5289,6 +5596,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1958,
+    "ancientOrigin": null,
     "foundationYear": 1958,
     "foundationEvent": "2 October 1958 (from France)",
     "independenceDate": "2 October 1958 (from France)",
@@ -5386,6 +5695,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1980,
+    "ancientOrigin": null,
     "foundationYear": 1966,
     "foundationEvent": "26 May 1966 (from the UK)",
     "independenceDate": "26 May 1966 (from the UK)",
@@ -5485,6 +5796,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1987,
+    "ancientOrigin": null,
     "foundationYear": 1804,
     "foundationEvent": "1 January 1804 (from France)",
     "independenceDate": "1 January 1804 (from France)",
@@ -5555,6 +5868,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1947,
+    "foundationEvent": "Transferred from the United Kingdom to Australia (26 December 1947)",
+    "sovereignEra": "External territory of Australia",
+    "yearsAlive": 79,
+    "historicalContinuityNotes": "Transferred from the United Kingdom to Australia (26 December 1947).",
+    "independenceDate": null
    }
   },
   "336": {
@@ -5638,6 +5961,8 @@
     "conscription": "Voluntary"
    },
    "longevity": {
+    "constitutionYear": 2023,
+    "ancientOrigin": null,
     "foundationYear": 1929,
     "foundationEvent": "11 February 1929",
     "independenceDate": "11 February 1929",
@@ -5737,6 +6062,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1982,
+    "ancientOrigin": null,
     "foundationYear": 1821,
     "foundationEvent": "15 September 1821 (from Spain)",
     "independenceDate": "15 September 1821 (from Spain)",
@@ -5829,6 +6156,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1997,
+    "ancientOrigin": null,
+    "foundationYear": 1997,
+    "foundationEvent": "Transfer of sovereignty from the United Kingdom to China (1 July 1997)",
+    "sovereignEra": "Special Administrative Region of China",
+    "yearsAlive": 29,
+    "historicalContinuityNotes": "Transfer of sovereignty from the United Kingdom to China (1 July 1997).",
+    "independenceDate": null
    }
   },
   "348": {
@@ -5921,6 +6258,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2012,
+    "ancientOrigin": null,
+    "independenceDate": "16 November 1918 (republic proclaimed)",
+    "foundationEvent": "Statehood established (895)"
    }
   },
   "352": {
@@ -6014,6 +6357,12 @@
     "destroyersFrigates": 0,
     "tier": "Minimal / Neutral",
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 1944,
+    "ancientOrigin": null,
+    "independenceDate": "1 December 1918 (became a sovereign state under the Danish Crown)",
+    "foundationEvent": "Statehood established (930)"
    }
   },
   "356": {
@@ -6153,6 +6502,13 @@
     "alliances": [
      "BRICS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1945,
+    "ancientOrigin": null,
+    "independenceDate": "17 August 1945 (declared independence from the Netherlands)",
+    "foundationEvent": "17 August 1945 (declared independence from the Netherlands)",
+    "historicalContinuityNotes": "17 August 1945 (declared independence from the Netherlands)."
    }
   },
   "364": {
@@ -6289,6 +6645,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2005,
+    "ancientOrigin": null,
+    "independenceDate": "3 October 1932 (from League of Nations mandate under British administration)",
+    "foundationEvent": "3 October 1932 (from League of Nations mandate under British administration)",
+    "historicalContinuityNotes": "3 October 1932 (from League of Nations mandate under British administration)."
    }
   },
   "372": {
@@ -6383,6 +6746,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1937,
+    "ancientOrigin": null,
+    "independenceDate": "6 December 1921 (from the UK)",
+    "foundationEvent": "Statehood established (1922)"
    }
   },
   "376": {
@@ -6521,6 +6890,13 @@
     ],
     "nuclearStatus": "Nuclear Sharing / NATO",
     "nuclearWarheads": 0
+   },
+   "longevity": {
+    "constitutionYear": 1947,
+    "ancientOrigin": null,
+    "independenceDate": "17 March 1861",
+    "foundationEvent": "17 March 1861",
+    "historicalContinuityNotes": "17 March 1861."
    }
   },
   "384": {
@@ -6618,6 +6994,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2016,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "7 August 1960 (from France)",
     "independenceDate": "7 August 1960 (from France)",
@@ -6720,6 +7098,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1962,
+    "ancientOrigin": null,
     "foundationYear": 1962,
     "foundationEvent": "6 August 1962 (from the UK)",
     "independenceDate": "6 August 1962 (from the UK)",
@@ -6864,6 +7244,13 @@
      "CSTO",
      "SCO"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "16 December 1991 (from the Soviet Union)",
+    "foundationEvent": "16 December 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "16 December 1991 (from the Soviet Union)."
    }
   },
   "400": {
@@ -6961,6 +7348,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1947,
+    "ancientOrigin": null,
     "foundationYear": 1946,
     "foundationEvent": "25 May 1946 (from League of Nations mandate under British administration)",
     "independenceDate": "25 May 1946 (from League of Nations mandate under British administration)",
@@ -7062,6 +7451,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "independenceDate": "12 December 1963 (from the UK)",
+    "foundationEvent": "12 December 1963 (from the UK)",
+    "historicalContinuityNotes": "12 December 1963 (from the UK)."
    }
   },
   "408": {
@@ -7153,6 +7549,12 @@
     "conscription": "Mandatory",
     "nuclearStatus": "Declared Nuclear State",
     "nuclearWarheads": 50
+   },
+   "longevity": {
+    "constitutionYear": 1998,
+    "ancientOrigin": null,
+    "independenceDate": "15 August 1945 (from Japan)",
+    "foundationEvent": "Statehood established (1948)"
    }
   },
   "410": {
@@ -7282,6 +7684,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1962,
+    "ancientOrigin": null,
+    "independenceDate": "19 June 1961 (from the UK)",
+    "foundationEvent": "19 June 1961 (from the UK)",
+    "historicalContinuityNotes": "19 June 1961 (from the UK)."
    }
   },
   "417": {
@@ -7375,6 +7784,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2021,
+    "ancientOrigin": null,
     "foundationYear": 1991,
     "foundationEvent": "31 August 1991 (from the Soviet Union)",
     "independenceDate": "31 August 1991 (from the Soviet Union)",
@@ -7470,6 +7881,8 @@
     "conscription": "Mandatory"
    },
    "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
     "foundationYear": 1949,
     "foundationEvent": "19 July 1949 (from France)",
     "independenceDate": "19 July 1949 (from France)",
@@ -7570,6 +7983,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1926,
+    "ancientOrigin": null,
+    "independenceDate": "22 November 1943 (from League of Nations mandate under French administration)",
+    "foundationEvent": "22 November 1943 (from League of Nations mandate under French administration)",
+    "historicalContinuityNotes": "22 November 1943 (from League of Nations mandate under French administration)."
    }
   },
   "426": {
@@ -7666,6 +8086,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1967,
+    "ancientOrigin": null,
     "foundationYear": 1966,
     "foundationEvent": "4 October 1966 (from the UK)",
     "independenceDate": "4 October 1966 (from the UK)",
@@ -7764,6 +8186,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "18 November 1918 (from Soviet Russia)",
+    "foundationEvent": "18 November 1918 (from Soviet Russia)",
+    "historicalContinuityNotes": "18 November 1918 (from Soviet Russia)."
    }
   },
   "430": {
@@ -7854,6 +8283,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1986,
+    "ancientOrigin": null,
     "foundationYear": 1847,
     "foundationEvent": "26 July 1847",
     "independenceDate": "26 July 1847",
@@ -7955,6 +8386,13 @@
      "African Union",
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1951,
+    "ancientOrigin": null,
+    "independenceDate": "24 December 1951 (from UN trusteeship)",
+    "foundationEvent": "24 December 1951 (from UN trusteeship)",
+    "historicalContinuityNotes": "24 December 1951 (from UN trusteeship)."
    }
   },
   "438": {
@@ -8043,6 +8481,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1921,
+    "ancientOrigin": null,
     "foundationYear": 1719,
     "foundationEvent": "23 January 1719 (Principality of Liechtenstein established)",
     "independenceDate": "23 January 1719 (Principality of Liechtenstein established)",
@@ -8143,6 +8583,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "16 February 1918 (from Soviet Russia and Germany)",
+    "foundationEvent": "Statehood established (1253)"
    }
   },
   "442": {
@@ -8230,6 +8676,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1868,
+    "ancientOrigin": null,
+    "independenceDate": "1839 (from the Netherlands)",
+    "foundationEvent": "Statehood established (963)"
    }
   },
   "446": {
@@ -8316,6 +8768,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1999,
+    "ancientOrigin": null,
+    "foundationYear": 1999,
+    "foundationEvent": "Transfer of sovereignty from Portugal to China (20 December 1999)",
+    "sovereignEra": "Special Administrative Region of China",
+    "yearsAlive": 27,
+    "historicalContinuityNotes": "Transfer of sovereignty from Portugal to China (20 December 1999).",
+    "independenceDate": null
    }
   },
   "450": {
@@ -8413,6 +8875,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "26 June 1960 (from France)",
     "independenceDate": "26 June 1960 (from France)",
@@ -8515,6 +8979,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
     "foundationYear": 1964,
     "foundationEvent": "6 July 1964 (from the UK)",
     "independenceDate": "6 July 1964 (from the UK)",
@@ -8615,6 +9081,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1957,
+    "ancientOrigin": null,
+    "independenceDate": "31 August 1957 (from the UK)",
+    "foundationEvent": "31 August 1957 (from the UK)",
+    "historicalContinuityNotes": "31 August 1957 (from the UK)."
    }
   },
   "462": {
@@ -8703,6 +9176,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2008,
+    "ancientOrigin": null,
     "foundationYear": 1965,
     "foundationEvent": "26 July 1965 (from the UK)",
     "independenceDate": "26 July 1965 (from the UK)",
@@ -8800,6 +9275,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2022,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "22 September 1960 (from France)",
     "independenceDate": "22 September 1960 (from France)",
@@ -8900,6 +9377,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1964,
+    "ancientOrigin": null,
     "foundationYear": 1964,
     "foundationEvent": "21 September 1964 (from the UK)",
     "independenceDate": "21 September 1964 (from the UK)",
@@ -9045,6 +9524,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1968,
+    "ancientOrigin": null,
     "foundationYear": 1968,
     "foundationEvent": "12 March 1968 (from the UK)",
     "independenceDate": "12 March 1968 (from the UK)",
@@ -9147,6 +9628,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1917,
+    "ancientOrigin": null,
+    "independenceDate": "16 September 1810 (declared independence from Spain)",
+    "foundationEvent": "16 September 1810 (declared independence from Spain)",
+    "historicalContinuityNotes": "16 September 1810 (declared independence from Spain)."
    }
   },
   "492": {
@@ -9232,6 +9720,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1962,
+    "ancientOrigin": null,
     "foundationYear": 1419,
     "foundationEvent": "1419 (beginning of permanent rule by the House of GRIMALDI)",
     "independenceDate": "1419 (beginning of permanent rule by the House of GRIMALDI)",
@@ -9326,6 +9816,12 @@
     "destroyersFrigates": 0,
     "tier": "Developing Defense",
     "conscription": "Mandatory"
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "29 December 1911 (independence declared from China",
+    "foundationEvent": "Statehood established (1206)"
    }
   },
   "498": {
@@ -9416,6 +9912,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1994,
+    "ancientOrigin": null,
     "foundationYear": 1991,
     "foundationEvent": "27 August 1991 (from the Soviet Union)",
     "independenceDate": "27 August 1991 (from the Soviet Union)",
@@ -9515,6 +10013,8 @@
     "conscription": "Voluntary"
    },
    "longevity": {
+    "constitutionYear": 2007,
+    "ancientOrigin": null,
     "foundationYear": 2006,
     "foundationEvent": "3 June 2006 (from the State Union of Serbia and Montenegro)",
     "independenceDate": "3 June 2006 (from the State Union of Serbia and Montenegro)",
@@ -9602,6 +10102,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "foundationYear": 1632,
+    "foundationEvent": "English settlement (1632)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 394,
+    "historicalContinuityNotes": "English settlement (1632).",
+    "independenceDate": null
    }
   },
   "504": {
@@ -9696,6 +10206,12 @@
      "African Union",
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2011,
+    "ancientOrigin": null,
+    "independenceDate": "2 March 1956 (from France)",
+    "foundationEvent": "Statehood established (789)"
    }
   },
   "508": {
@@ -9790,6 +10306,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2004,
+    "ancientOrigin": null,
+    "independenceDate": "25 June 1975 (from Portugal)",
+    "foundationEvent": "25 June 1975 (from Portugal)",
+    "historicalContinuityNotes": "25 June 1975 (from Portugal)."
    }
   },
   "512": {
@@ -9884,6 +10407,12 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1996,
+    "ancientOrigin": null,
+    "independenceDate": "1650 (expulsion of the Portuguese)",
+    "foundationEvent": "Statehood established (751)"
    }
   },
   "516": {
@@ -9975,6 +10504,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1990,
+    "ancientOrigin": null,
+    "independenceDate": "21 March 1990 (from South African mandate)",
+    "foundationEvent": "21 March 1990 (from South African mandate)",
+    "historicalContinuityNotes": "21 March 1990 (from South African mandate)."
    }
   },
   "520": {
@@ -10060,6 +10596,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1968,
+    "ancientOrigin": null,
     "foundationYear": 1968,
     "foundationEvent": "31 January 1968 (from the Australia-, NZ-, and UK-administered UN trusteeship)",
     "independenceDate": "31 January 1968 (from the Australia-, NZ-, and UK-administered UN trusteeship)",
@@ -10154,6 +10692,13 @@
     "destroyersFrigates": 0,
     "tier": "Minimal / Neutral",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 2015,
+    "ancientOrigin": null,
+    "independenceDate": "1768 (unified by Prithvi Narayan SHAH)",
+    "foundationEvent": "1768 (unified by Prithvi Narayan SHAH)",
+    "historicalContinuityNotes": "1768 (unified by Prithvi Narayan SHAH)."
    }
   },
   "528": {
@@ -10243,6 +10788,13 @@
     "conscription": "Mandatory",
     "nuclearStatus": "Nuclear Sharing / NATO",
     "nuclearWarheads": 0
+   },
+   "longevity": {
+    "constitutionYear": 1983,
+    "ancientOrigin": null,
+    "independenceDate": "26 July 1581",
+    "foundationEvent": "26 July 1581",
+    "historicalContinuityNotes": "26 July 1581."
    }
   },
   "531": {
@@ -10333,6 +10885,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "foundationYear": 2010,
+    "foundationEvent": "Became a constituent country of the Kingdom of the Netherlands (10 October 2010)",
+    "sovereignEra": "Constituent country of the Kingdom of the Netherlands",
+    "yearsAlive": 16,
+    "historicalContinuityNotes": "Became a constituent country of the Kingdom of the Netherlands (10 October 2010).",
+    "independenceDate": null
    }
   },
   "533": {
@@ -10418,6 +10980,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 1986,
+    "ancientOrigin": null,
+    "foundationYear": 1986,
+    "foundationEvent": "Separate status within the Kingdom of the Netherlands (1 January 1986)",
+    "sovereignEra": "Constituent country of the Kingdom of the Netherlands",
+    "yearsAlive": 40,
+    "historicalContinuityNotes": "Separate status within the Kingdom of the Netherlands (1 January 1986).",
+    "independenceDate": null
    }
   },
   "534": {
@@ -10503,6 +11075,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "foundationYear": 2010,
+    "foundationEvent": "Became a constituent country of the Kingdom of the Netherlands (10 October 2010)",
+    "sovereignEra": "Constituent country of the Kingdom of the Netherlands",
+    "yearsAlive": 16,
+    "historicalContinuityNotes": "Became a constituent country of the Kingdom of the Netherlands (10 October 2010).",
+    "independenceDate": null
    }
   },
   "540": {
@@ -10584,6 +11166,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 1998,
+    "ancientOrigin": null,
+    "foundationYear": 1853,
+    "foundationEvent": "Annexed by France (24 September 1853)",
+    "sovereignEra": "Special collectivity of France",
+    "yearsAlive": 173,
+    "historicalContinuityNotes": "Annexed by France (24 September 1853).",
+    "independenceDate": null
    }
   },
   "548": {
@@ -10678,6 +11270,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1980,
+    "ancientOrigin": null,
     "foundationYear": 1980,
     "foundationEvent": "30 July 1980 (from France and the UK)",
     "independenceDate": "30 July 1980 (from France and the UK)",
@@ -10781,6 +11375,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "independenceDate": "26 September 1907 (from the UK)",
+    "foundationEvent": "26 September 1907 (from the UK)",
+    "historicalContinuityNotes": "26 September 1907 (from the UK)."
    }
   },
   "558": {
@@ -10874,6 +11475,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1987,
+    "ancientOrigin": null,
+    "independenceDate": "15 September 1821 (from Spain)",
+    "foundationEvent": "15 September 1821 (from Spain)",
+    "historicalContinuityNotes": "15 September 1821 (from Spain)."
    }
   },
   "562": {
@@ -10967,6 +11575,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "3 August 1960 (from France)",
     "independenceDate": "3 August 1960 (from France)",
@@ -11066,6 +11676,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1999,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "1 October 1960 (from the UK)",
     "independenceDate": "1 October 1960 (from the UK)",
@@ -11152,6 +11764,8 @@
     "defenseBudgetPercentGDP": 0
    },
    "longevity": {
+    "constitutionYear": 1974,
+    "ancientOrigin": null,
     "foundationYear": 1974,
     "foundationEvent": "19 October 1974 (Niue became a self-governing state in free association with New Zealand)",
     "independenceDate": "19 October 1974 (Niue became a self-governing state in free association with New Zealand)",
@@ -11238,6 +11852,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
+    "foundationYear": 1914,
+    "foundationEvent": "Became an external territory of Australia (1 July 1914)",
+    "sovereignEra": "External territory of Australia",
+    "yearsAlive": 112,
+    "historicalContinuityNotes": "Became an external territory of Australia (1 July 1914).",
+    "independenceDate": null
    }
   },
   "578": {
@@ -11330,6 +11954,12 @@
     "destroyersFrigates": 4,
     "tier": "Middle Power",
     "conscription": "Selective / Hybrid"
+   },
+   "longevity": {
+    "constitutionYear": 1814,
+    "ancientOrigin": null,
+    "independenceDate": "7 June 1905 (union with Sweden declared dissolved)",
+    "foundationEvent": "Statehood established (872)"
    }
   },
   "580": {
@@ -11413,6 +12043,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1978,
+    "ancientOrigin": null,
+    "foundationYear": 1978,
+    "foundationEvent": "Commonwealth in political union with the United States (9 January 1978)",
+    "sovereignEra": "Commonwealth of the United States",
+    "yearsAlive": 48,
+    "historicalContinuityNotes": "Commonwealth in political union with the United States (9 January 1978).",
+    "independenceDate": null
    }
   },
   "583": {
@@ -11501,6 +12141,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
     "foundationYear": 1986,
     "foundationEvent": "3 November 1986 (from the US-administered UN trusteeship)",
     "independenceDate": "3 November 1986 (from the US-administered UN trusteeship)",
@@ -11595,6 +12237,8 @@
     "defenseBudgetPercentGDP": 0
    },
    "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
     "foundationYear": 1986,
     "foundationEvent": "21 October 1986 (from the US-administered UN trusteeship)",
     "independenceDate": "21 October 1986 (from the US-administered UN trusteeship)",
@@ -11687,6 +12331,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1981,
+    "ancientOrigin": null,
     "foundationYear": 1994,
     "foundationEvent": "1 October 1994 (from the US-administered UN trusteeship)",
     "independenceDate": "1 October 1994 (from the US-administered UN trusteeship)",
@@ -11792,6 +12438,13 @@
     ],
     "nuclearStatus": "Declared Nuclear State",
     "nuclearWarheads": 170
+   },
+   "longevity": {
+    "constitutionYear": 1973,
+    "ancientOrigin": null,
+    "independenceDate": "14 August 1947 (from British India)",
+    "foundationEvent": "14 August 1947 (from British India)",
+    "historicalContinuityNotes": "14 August 1947 (from British India)."
    }
   },
   "591": {
@@ -11885,6 +12538,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1972,
+    "ancientOrigin": null,
+    "independenceDate": "3 November 1903 (from Colombia)",
+    "foundationEvent": "3 November 1903 (from Colombia)",
+    "historicalContinuityNotes": "3 November 1903 (from Colombia)."
    }
   },
   "598": {
@@ -11979,6 +12639,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1975,
+    "ancientOrigin": null,
+    "independenceDate": "16 September 1975 (from the Australia-administered UN trusteeship)",
+    "foundationEvent": "16 September 1975 (from the Australia-administered UN trusteeship)",
+    "historicalContinuityNotes": "16 September 1975 (from the Australia-administered UN trusteeship)."
    }
   },
   "600": {
@@ -12068,6 +12735,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "14-15 May 1811 (from Spain)",
+    "foundationEvent": "14-15 May 1811 (from Spain)",
+    "historicalContinuityNotes": "14-15 May 1811 (from Spain)."
    }
   },
   "604": {
@@ -12165,6 +12839,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
+    "independenceDate": "28 July 1821 (from Spain)",
+    "foundationEvent": "28 July 1821 (from Spain)",
+    "historicalContinuityNotes": "28 July 1821 (from Spain)."
    }
   },
   "608": {
@@ -12260,6 +12941,12 @@
     "destroyersFrigates": 4,
     "tier": "Middle Power",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 1987,
+    "ancientOrigin": null,
+    "independenceDate": "4 July 1946 (from the US)",
+    "foundationEvent": "Statehood established (1898)"
    }
   },
   "612": {
@@ -12339,6 +13026,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "foundationYear": 1838,
+    "foundationEvent": "Became a British colony (1838), settled by HMS Bounty mutineers in 1790",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 188,
+    "historicalContinuityNotes": "Became a British colony (1838), settled by HMS Bounty mutineers in 1790.",
+    "independenceDate": null
    }
   },
   "616": {
@@ -12432,6 +13129,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1997,
+    "ancientOrigin": null,
+    "independenceDate": "11 November 1918 (republic proclaimed)",
+    "foundationEvent": "Statehood established (966)"
    }
   },
   "620": {
@@ -12565,6 +13268,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1984,
+    "ancientOrigin": null,
     "foundationYear": 1973,
     "foundationEvent": "24 September 1973 (declared)",
     "independenceDate": "24 September 1973 (declared)",
@@ -12659,6 +13364,8 @@
     "conscription": "Voluntary"
    },
    "longevity": {
+    "constitutionYear": 2002,
+    "ancientOrigin": null,
     "foundationYear": 1975,
     "foundationEvent": "28 November 1975 (from Portugal)",
     "independenceDate": "28 November 1975 (from Portugal)",
@@ -12750,6 +13457,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1952,
+    "ancientOrigin": null,
+    "foundationYear": 1952,
+    "foundationEvent": "Commonwealth constitution took effect (25 July 1952); a US territory since 1898",
+    "sovereignEra": "Unincorporated territory of the United States (Commonwealth)",
+    "yearsAlive": 74,
+    "historicalContinuityNotes": "Commonwealth constitution took effect (25 July 1952); a US territory since 1898.",
+    "independenceDate": null
    }
   },
   "634": {
@@ -12842,6 +13559,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2005,
+    "ancientOrigin": null,
+    "independenceDate": "3 September 1971 (from the UK)",
+    "foundationEvent": "3 September 1971 (from the UK)",
+    "historicalContinuityNotes": "3 September 1971 (from the UK)."
    }
   },
   "642": {
@@ -12937,6 +13661,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "9 May 1877 (independence proclaimed from the Ottoman Empire",
+    "foundationEvent": "Statehood established (1859)"
    }
   },
   "643": {
@@ -13078,6 +13808,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2003,
+    "ancientOrigin": null,
     "foundationYear": 1962,
     "foundationEvent": "1 July 1962 (from Belgium-administered UN trusteeship)",
     "independenceDate": "1 July 1962 (from Belgium-administered UN trusteeship)",
@@ -13154,6 +13886,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2007,
+    "ancientOrigin": null,
+    "foundationYear": 2007,
+    "foundationEvent": "Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007)",
+    "sovereignEra": "Overseas collectivity of France",
+    "yearsAlive": 19,
+    "historicalContinuityNotes": "Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007).",
+    "independenceDate": null
    }
   },
   "654": {
@@ -13238,6 +13980,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2009,
+    "ancientOrigin": null,
+    "foundationYear": 1659,
+    "foundationEvent": "Settled by the English East India Company (1659)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 367,
+    "historicalContinuityNotes": "Settled by the English East India Company (1659).",
+    "independenceDate": null
    }
   },
   "659": {
@@ -13333,6 +14085,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1983,
+    "ancientOrigin": null,
     "foundationYear": 1983,
     "foundationEvent": "19 September 1983 (from the UK)",
     "independenceDate": "19 September 1983 (from the UK)",
@@ -13421,6 +14175,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1982,
+    "ancientOrigin": null,
+    "foundationYear": 1980,
+    "foundationEvent": "Formally separated from Saint Kitts and Nevis (19 December 1980)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 46,
+    "historicalContinuityNotes": "Formally separated from Saint Kitts and Nevis (19 December 1980).",
+    "independenceDate": null
    }
   },
   "662": {
@@ -13516,6 +14280,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
     "foundationYear": 1979,
     "foundationEvent": "22 February 1979 (from the UK)",
     "independenceDate": "22 February 1979 (from the UK)",
@@ -13605,6 +14371,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2007,
+    "ancientOrigin": null,
+    "foundationYear": 2007,
+    "foundationEvent": "Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007)",
+    "sovereignEra": "Overseas collectivity of France",
+    "yearsAlive": 19,
+    "historicalContinuityNotes": "Became an overseas collectivity of France, separate from Guadeloupe (15 July 2007).",
+    "independenceDate": null
    }
   },
   "666": {
@@ -13681,6 +14457,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1816,
+    "foundationEvent": "Returned to France for the last time (1816); overseas collectivity since 2003",
+    "sovereignEra": "Overseas collectivity of France",
+    "yearsAlive": 210,
+    "historicalContinuityNotes": "Returned to France for the last time (1816); overseas collectivity since 2003.",
+    "independenceDate": null
    }
   },
   "670": {
@@ -13775,6 +14561,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
     "foundationYear": 1979,
     "foundationEvent": "27 October 1979 (from the UK)",
     "independenceDate": "27 October 1979 (from the UK)",
@@ -13866,6 +14654,8 @@
     "conscription": "Abolished / None"
    },
    "longevity": {
+    "constitutionYear": 1974,
+    "ancientOrigin": null,
     "foundationYear": 301,
     "foundationEvent": "3 September 301 (traditional founding date)",
     "independenceDate": "3 September 301 (traditional founding date)",
@@ -13965,6 +14755,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1975,
+    "ancientOrigin": null,
     "foundationYear": 1975,
     "foundationEvent": "12 July 1975 (from Portugal)",
     "independenceDate": "12 July 1975 (from Portugal)",
@@ -14063,6 +14855,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "23 September 1932 (unification of the kingdom)",
+    "foundationEvent": "23 September 1932 (unification of the kingdom)",
+    "historicalContinuityNotes": "23 September 1932 (unification of the kingdom)."
    }
   },
   "686": {
@@ -14157,6 +14956,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2001,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "4 April 1960 (from France)",
     "independenceDate": "4 April 1960 (from France)",
@@ -14250,6 +15051,12 @@
     "destroyersFrigates": 0,
     "tier": "Middle Power",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 2006,
+    "ancientOrigin": null,
+    "independenceDate": "5 June 2006 (from the State Union of Serbia and Montenegro)",
+    "foundationEvent": "Statehood established (780)"
    }
   },
   "690": {
@@ -14346,6 +15153,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
     "foundationYear": 1976,
     "foundationEvent": "29 June 1976 (from the UK)",
     "independenceDate": "29 June 1976 (from the UK)",
@@ -14443,6 +15252,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
     "foundationYear": 1961,
     "foundationEvent": "27 April 1961 (from the UK)",
     "independenceDate": "27 April 1961 (from the UK)",
@@ -14543,6 +15354,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1965,
+    "ancientOrigin": null,
+    "independenceDate": "9 August 1965 (from Malaysian Federation)",
+    "foundationEvent": "9 August 1965 (from Malaysian Federation)",
+    "historicalContinuityNotes": "9 August 1965 (from Malaysian Federation)."
    }
   },
   "703": {
@@ -14635,6 +15453,12 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "ancientOrigin": null,
+    "independenceDate": "1 January 1993 (Czechoslovakia split into the Czech Republic and Slovakia)",
+    "foundationEvent": "1 January 1993 (Czechoslovakia split into the Czech Republic and Slovakia)",
+    "historicalContinuityNotes": "1 January 1993 (Czechoslovakia split into the Czech Republic and Slovakia)."
    }
   },
   "704": {
@@ -14728,6 +15552,11 @@
     "destroyersFrigates": 9,
     "tier": "Regional Power",
     "conscription": "Mandatory"
+   },
+   "longevity": {
+    "foundationEvent": "Legendary founding of Văn Lang by the Hùng kings (2879 BCE)",
+    "constitutionYear": 2013,
+    "ancientOrigin": null
    }
   },
   "705": {
@@ -14825,6 +15654,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "25 June 1991 (from Yugoslavia)",
+    "foundationEvent": "25 June 1991 (from Yugoslavia)",
+    "historicalContinuityNotes": "25 June 1991 (from Yugoslavia)."
    }
   },
   "706": {
@@ -14914,6 +15750,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2012,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "1 July 1960 (from a merger of British Somaliland, which became independent from the UK on 26 June 1960, and Italian Somaliland",
     "independenceDate": "1 July 1960 (from a merger of British Somaliland, which became independent from the UK on 26 June 1960, and Italian Somaliland",
@@ -15022,6 +15860,13 @@
      "African Union",
      "BRICS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1997,
+    "ancientOrigin": null,
+    "independenceDate": "31 May 1910 (Union of South Africa formed from four British colonies: Cape Colony, Natal, Transvaal, and Orange Free State)",
+    "foundationEvent": "31 May 1910 (Union of South Africa formed from four British colonies: Cape Colony, Natal, Transvaal, and Orange Free State)",
+    "historicalContinuityNotes": "31 May 1910 (Union of South Africa formed from four British colonies: Cape Colony, Natal, Transvaal, and Orange Free State)."
    }
   },
   "716": {
@@ -15117,6 +15962,13 @@
     "alliances": [
      "African Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2013,
+    "ancientOrigin": null,
+    "independenceDate": "18 April 1980 (from the UK)",
+    "foundationEvent": "18 April 1980 (from the UK)",
+    "historicalContinuityNotes": "18 April 1980 (from the UK)."
    }
   },
   "724": {
@@ -15216,6 +16068,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1978,
+    "ancientOrigin": null,
+    "independenceDate": "1492",
+    "foundationEvent": "1492",
+    "historicalContinuityNotes": "1492."
    }
   },
   "728": {
@@ -15300,6 +16159,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2011,
+    "ancientOrigin": null,
     "foundationYear": 2011,
     "foundationEvent": "9 July 2011 (from Sudan)",
     "independenceDate": "9 July 2011 (from Sudan)",
@@ -15399,6 +16260,13 @@
      "African Union",
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2019,
+    "ancientOrigin": null,
+    "independenceDate": "1 January 1956 (from Egypt and the UK)",
+    "foundationEvent": "1 January 1956 (from Egypt and the UK)",
+    "historicalContinuityNotes": "1 January 1956 (from Egypt and the UK)."
    }
   },
   "732": {
@@ -15476,6 +16344,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1976,
+    "foundationEvent": "Sahrawi Arab Democratic Republic proclaimed (27 February 1976)",
+    "sovereignEra": "Disputed non-self-governing territory",
+    "yearsAlive": 50,
+    "historicalContinuityNotes": "Sahrawi Arab Democratic Republic proclaimed (27 February 1976).",
+    "independenceDate": "27 February 1976 (declared by the SADR)"
    }
   },
   "740": {
@@ -15572,6 +16450,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1987,
+    "ancientOrigin": null,
     "foundationYear": 1975,
     "foundationEvent": "25 November 1975 (from the Netherlands)",
     "independenceDate": "25 November 1975 (from the Netherlands)",
@@ -15668,6 +16548,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 2006,
+    "ancientOrigin": null,
     "foundationYear": 1968,
     "foundationEvent": "6 September 1968 (from the UK)",
     "independenceDate": "6 September 1968 (from the UK)",
@@ -15765,6 +16647,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1810,
+    "ancientOrigin": null,
+    "independenceDate": "6 June 1523 (Gustav VASA elected king of Sweden, marking the abolishment of the Kalmar Union of Denmark, Norway, and Sweden)",
+    "foundationEvent": "6 June 1523 (Gustav VASA elected king of Sweden, marking the abolishment of the Kalmar Union of Denmark, Norway, and Sweden)",
+    "historicalContinuityNotes": "6 June 1523 (Gustav VASA elected king of Sweden, marking the abolishment of the Kalmar Union of Denmark, Norway, and Sweden)."
    }
   },
   "756": {
@@ -15857,6 +16746,13 @@
     "destroyersFrigates": 0,
     "tier": "Middle Power",
     "conscription": "Mandatory"
+   },
+   "longevity": {
+    "constitutionYear": 2000,
+    "ancientOrigin": null,
+    "independenceDate": "1 August 1291 (founding of the Swiss Confederation)",
+    "foundationEvent": "1 August 1291 (founding of the Swiss Confederation)",
+    "historicalContinuityNotes": "1 August 1291 (founding of the Swiss Confederation)."
    }
   },
   "760": {
@@ -15950,6 +16846,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2012,
+    "ancientOrigin": null,
+    "independenceDate": "17 April 1946 (from League of Nations mandate under French administration)",
+    "foundationEvent": "17 April 1946 (from League of Nations mandate under French administration)",
+    "historicalContinuityNotes": "17 April 1946 (from League of Nations mandate under French administration)."
    }
   },
   "762": {
@@ -16041,6 +16944,13 @@
      "CSTO",
      "SCO"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1994,
+    "ancientOrigin": null,
+    "independenceDate": "9 September 1991 (from the Soviet Union)",
+    "foundationEvent": "9 September 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "9 September 1991 (from the Soviet Union)."
    }
   },
   "764": {
@@ -16132,6 +17042,13 @@
     "destroyersFrigates": 7,
     "tier": "Regional Power",
     "conscription": "Selective / Hybrid"
+   },
+   "longevity": {
+    "constitutionYear": 2016,
+    "ancientOrigin": null,
+    "independenceDate": "1238 (traditional founding date",
+    "foundationEvent": "1238 (traditional founding date",
+    "historicalContinuityNotes": "1238 (traditional founding date."
    }
   },
   "768": {
@@ -16226,6 +17143,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "27 April 1960 (from French-administered UN trusteeship)",
     "independenceDate": "27 April 1960 (from French-administered UN trusteeship)",
@@ -16321,6 +17240,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1875,
+    "ancientOrigin": null,
     "foundationYear": 1970,
     "foundationEvent": "4 June 1970 (from UK protectorate status)",
     "independenceDate": "4 June 1970 (from UK protectorate status)",
@@ -16416,6 +17337,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1976,
+    "ancientOrigin": null,
+    "independenceDate": "31 August 1962 (from the UK)",
+    "foundationEvent": "31 August 1962 (from the UK)",
+    "historicalContinuityNotes": "31 August 1962 (from the UK)."
    }
   },
   "784": {
@@ -16511,6 +17439,13 @@
      "Arab League",
      "BRICS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1979,
+    "ancientOrigin": null,
+    "independenceDate": "2 December 1971 (from the UK)",
+    "foundationEvent": "2 December 1971 (from the UK)",
+    "historicalContinuityNotes": "2 December 1971 (from the UK)."
    }
   },
   "788": {
@@ -16604,6 +17539,13 @@
      "African Union",
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2022,
+    "ancientOrigin": null,
+    "independenceDate": "20 March 1956 (from France)",
+    "foundationEvent": "20 March 1956 (from France)",
+    "historicalContinuityNotes": "20 March 1956 (from France)."
    }
   },
   "792": {
@@ -16741,6 +17683,13 @@
     "alliances": [
      "CIS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2016,
+    "ancientOrigin": null,
+    "independenceDate": "27 October 1991 (from the Soviet Union)",
+    "foundationEvent": "27 October 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "27 October 1991 (from the Soviet Union)."
    }
   },
   "796": {
@@ -16822,6 +17771,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2012,
+    "ancientOrigin": null,
+    "foundationYear": 1973,
+    "foundationEvent": "Became a separate British colony when the Bahamas gained independence (1973)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 53,
+    "historicalContinuityNotes": "Became a separate British colony when the Bahamas gained independence (1973).",
+    "independenceDate": null
    }
   },
   "800": {
@@ -16915,6 +17874,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "9 October 1962 (from the UK)",
+    "foundationEvent": "9 October 1962 (from the UK)",
+    "historicalContinuityNotes": "9 October 1962 (from the UK)."
    }
   },
   "804": {
@@ -17047,6 +18013,8 @@
     "conscription": "Voluntary"
    },
    "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
     "foundationYear": 1991,
     "foundationEvent": "8 September 1991 (referendum endorsed independence from Yugoslavia)",
     "independenceDate": "8 September 1991 (referendum endorsed independence from Yugoslavia)",
@@ -17217,6 +18185,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1204,
+    "foundationEvent": "Stayed with the English Crown after the loss of Normandy (1204)",
+    "sovereignEra": "British Crown Dependency",
+    "yearsAlive": 822,
+    "historicalContinuityNotes": "Stayed with the English Crown after the loss of Normandy (1204).",
+    "independenceDate": null
    }
   },
   "832": {
@@ -17302,6 +18280,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1204,
+    "foundationEvent": "Stayed with the English Crown after the loss of Normandy (1204)",
+    "sovereignEra": "British Crown Dependency",
+    "yearsAlive": 822,
+    "historicalContinuityNotes": "Stayed with the English Crown after the loss of Normandy (1204).",
+    "independenceDate": null
    }
   },
   "833": {
@@ -17386,6 +18374,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 979,
+    "foundationEvent": "Tynwald parliament traditionally founded (979)",
+    "sovereignEra": "British Crown Dependency",
+    "yearsAlive": 1047,
+    "historicalContinuityNotes": "Tynwald parliament traditionally founded (979).",
+    "independenceDate": null
    }
   },
   "834": {
@@ -17483,6 +18481,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1977,
+    "ancientOrigin": null,
+    "independenceDate": "26 April 1964 (Tanganyika united with Zanzibar to form the United Republic of Tanganyika and Zanzibar)",
+    "foundationEvent": "26 April 1964 (Tanganyika united with Zanzibar to form the United Republic of Tanganyika and Zanzibar)",
+    "historicalContinuityNotes": "26 April 1964 (Tanganyika united with Zanzibar to form the United Republic of Tanganyika and Zanzibar)."
    }
   },
   "840": {
@@ -17611,6 +18616,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1954,
+    "ancientOrigin": null,
+    "foundationYear": 1917,
+    "foundationEvent": "Purchased by the United States from Denmark (31 March 1917)",
+    "sovereignEra": "Unincorporated territory of the United States",
+    "yearsAlive": 109,
+    "historicalContinuityNotes": "Purchased by the United States from Denmark (31 March 1917).",
+    "independenceDate": null
    }
   },
   "854": {
@@ -17705,6 +18720,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
     "foundationYear": 1960,
     "foundationEvent": "5 August 1960 (from France)",
     "independenceDate": "5 August 1960 (from France)",
@@ -17804,6 +18821,12 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1967,
+    "ancientOrigin": null,
+    "independenceDate": "25 August 1825 (from Brazil)",
+    "foundationEvent": "Statehood established (1828)"
    }
   },
   "860": {
@@ -17898,6 +18921,13 @@
      "CIS",
      "SCO"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1992,
+    "ancientOrigin": null,
+    "independenceDate": "1 September 1991 (from the Soviet Union)",
+    "foundationEvent": "1 September 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "1 September 1991 (from the Soviet Union)."
    }
   },
   "862": {
@@ -17989,6 +19019,13 @@
     "destroyersFrigates": 1,
     "tier": "Middle Power",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 1999,
+    "ancientOrigin": null,
+    "independenceDate": "5 July 1811 (from Spain)",
+    "foundationEvent": "5 July 1811 (from Spain)",
+    "historicalContinuityNotes": "5 July 1811 (from Spain)."
    }
   },
   "876": {
@@ -18065,6 +19102,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1961,
+    "ancientOrigin": null,
+    "foundationYear": 1961,
+    "foundationEvent": "Became a French overseas territory (29 July 1961)",
+    "sovereignEra": "Overseas collectivity of France",
+    "yearsAlive": 65,
+    "historicalContinuityNotes": "Became a French overseas territory (29 July 1961).",
+    "independenceDate": null
    }
   },
   "882": {
@@ -18155,6 +19202,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1962,
+    "ancientOrigin": null,
     "foundationYear": 1962,
     "foundationEvent": "1 January 1962 (from New Zealand-administered UN trusteeship)",
     "independenceDate": "1 January 1962 (from New Zealand-administered UN trusteeship)",
@@ -18251,6 +19300,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "22 May 1990 (Republic of Yemen established with the merger of the Yemen Arab Republic [Yemen (Sanaa) or North Yemen] and the People's Democratic Republic of",
+    "foundationEvent": "22 May 1990 (Republic of Yemen established with the merger of the Yemen Arab Republic [Yemen (Sanaa) or North Yemen] and the People's Democratic Republic of",
+    "historicalContinuityNotes": "22 May 1990 (Republic of Yemen established with the merger of the Yemen Arab Republic [Yemen (Sanaa) or North Yemen] and the People's Democratic Republic of."
    }
   },
   "894": {
@@ -18340,6 +19396,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1991,
+    "ancientOrigin": null,
+    "independenceDate": "24 October 1964 (from the UK)",
+    "foundationEvent": "24 October 1964 (from the UK)",
+    "historicalContinuityNotes": "24 October 1964 (from the UK)."
    }
   },
   "016": {
@@ -18421,6 +19484,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1967,
+    "ancientOrigin": null,
+    "foundationYear": 1900,
+    "foundationEvent": "Tutuila ceded to the United States (17 April 1900)",
+    "sovereignEra": "Unincorporated territory of the United States",
+    "yearsAlive": 126,
+    "historicalContinuityNotes": "Tutuila ceded to the United States (17 April 1900).",
+    "independenceDate": null
    }
   },
   "086": {
@@ -18494,6 +19567,16 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 2004,
+    "ancientOrigin": null,
+    "foundationYear": 1965,
+    "foundationEvent": "Created as a British overseas territory (8 November 1965)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 61,
+    "historicalContinuityNotes": "Created as a British overseas territory (8 November 1965). In May 2025 the UK and Mauritius signed a treaty to transfer sovereignty to Mauritius, with Diego Garcia leased back to the UK.",
+    "independenceDate": null
    }
   },
   "060": {
@@ -18577,6 +19660,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 1968,
+    "ancientOrigin": null,
+    "foundationYear": 1612,
+    "foundationEvent": "Settled by the Virginia Company (1612)",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 414,
+    "historicalContinuityNotes": "Settled by the Virginia Company (1612).",
+    "independenceDate": null
    }
   },
   "092": {
@@ -18662,9 +19755,21 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": 2007,
+    "ancientOrigin": null,
+    "foundationYear": 1672,
+    "foundationEvent": "Under English control since 1672",
+    "sovereignEra": "British Overseas Territory",
+    "yearsAlive": 354,
+    "historicalContinuityNotes": "Under English control since 1672.",
+    "independenceDate": null
    }
   },
   "Somaliland": {
+   "officialName": "Republic of Somaliland",
+   "code3": "",
    "capital": "Hargeisa",
    "largestCity": "Hargeisa",
    "demographics": {
@@ -18685,6 +19790,16 @@
     "currencyName": "Somaliland Shilling",
     "currencyCode": "SLSH",
     "currencySymbol": "Sl.Sh."
+   },
+   "longevity": {
+    "foundationYear": 1991,
+    "foundationEvent": "Restoration of sovereignty declared (18 May 1991)",
+    "sovereignEra": "Self-declared state without international recognition",
+    "yearsAlive": 35,
+    "historicalContinuityNotes": "British Somaliland became independent as the State of Somaliland on 26 June 1960 and joined Somalia five days later. It declared the union void on 18 May 1991.",
+    "independenceDate": "18 May 1991 (declared; first independent as the State of Somaliland, 26 June 1960)",
+    "ancientOrigin": null,
+    "constitutionYear": 2001
    },
    "governance": {
     "headOfState": "Abdirahman Mohamed Abdullahi",
@@ -18812,6 +19927,8 @@
     ]
    },
    "longevity": {
+    "constitutionYear": 1978,
+    "ancientOrigin": null,
     "foundationYear": 1978,
     "foundationEvent": "7 July 1978 (from the UK)",
     "independenceDate": "7 July 1978 (from the UK)",
@@ -18905,6 +20022,8 @@
     "tier": "Minimal / Neutral"
    },
    "longevity": {
+    "constitutionYear": 2008,
+    "ancientOrigin": null,
     "foundationYear": 2008,
     "foundationEvent": "17 February 2008 (from Serbia)",
     "independenceDate": "17 February 2008 (from Serbia)",
@@ -18913,6 +20032,8 @@
    }
   },
   "N. Cyprus": {
+   "officialName": "Turkish Republic of Northern Cyprus",
+   "code3": "",
    "capital": "North Nicosia",
    "largestCity": "North Nicosia",
    "demographics": {
@@ -18933,6 +20054,16 @@
     "currencyName": "Turkish Lira",
     "currencyCode": "TRY",
     "currencySymbol": "₺"
+   },
+   "longevity": {
+    "foundationYear": 1983,
+    "foundationEvent": "Turkish Republic of Northern Cyprus declared (15 November 1983)",
+    "sovereignEra": "Self-declared state, recognised only by Türkiye",
+    "yearsAlive": 43,
+    "historicalContinuityNotes": "Turkish Republic of Northern Cyprus declared (15 November 1983).",
+    "independenceDate": "15 November 1983 (declared)",
+    "ancientOrigin": null,
+    "constitutionYear": 1985
    },
    "governance": {
     "headOfState": "Tufan Erhürman",
@@ -19057,6 +20188,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1954,
+    "ancientOrigin": null,
+    "independenceDate": "1 January 1984 (from the UK)",
+    "foundationEvent": "1 January 1984 (from the UK)",
+    "historicalContinuityNotes": "1 January 1984 (from the UK)."
    }
   },
   "076": {
@@ -19154,6 +20292,13 @@
      "OAS",
      "BRICS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1988,
+    "ancientOrigin": null,
+    "independenceDate": "7 September 1822 (from Portugal)",
+    "foundationEvent": "7 September 1822 (from Portugal)",
+    "historicalContinuityNotes": "7 September 1822 (from Portugal)."
    }
   },
   "072": {
@@ -19242,6 +20387,13 @@
      "African Union",
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1966,
+    "ancientOrigin": null,
+    "independenceDate": "30 September 1966 (from the UK)",
+    "foundationEvent": "30 September 1966 (from the UK)",
+    "historicalContinuityNotes": "30 September 1966 (from the UK)."
    }
   },
   "070": {
@@ -19336,6 +20488,12 @@
     "destroyersFrigates": 0,
     "tier": "Minimal / Neutral",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "ancientOrigin": null,
+    "independenceDate": "1 March 1992 (from Yugoslavia)",
+    "foundationEvent": "1 March 1992 (from Yugoslavia)",
+    "historicalContinuityNotes": "1 March 1992 (from Yugoslavia)."
    }
   },
   "068": {
@@ -19431,6 +20589,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2009,
+    "ancientOrigin": null,
+    "independenceDate": "6 August 1825 (from Spain)",
+    "foundationEvent": "6 August 1825 (from Spain)",
+    "historicalContinuityNotes": "6 August 1825 (from Spain)."
    }
   },
   "064": {
@@ -19512,6 +20677,12 @@
     "destroyersFrigates": 0,
     "tier": "Minimal / Neutral",
     "conscription": "Mandatory"
+   },
+   "longevity": {
+    "constitutionYear": 2001,
+    "ancientOrigin": null,
+    "independenceDate": "17 December 1907 (became a unified kingdom under its first hereditary king)",
+    "foundationEvent": "Statehood established (1616)"
    }
   },
   "084": {
@@ -19605,6 +20776,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1981,
+    "ancientOrigin": null,
+    "independenceDate": "21 September 1981 (from the UK)",
+    "foundationEvent": "21 September 1981 (from the UK)",
+    "historicalContinuityNotes": "21 September 1981 (from the UK)."
    }
   },
   "056": {
@@ -19704,6 +20882,13 @@
     ],
     "nuclearStatus": "Nuclear Sharing / NATO",
     "nuclearWarheads": 0
+   },
+   "longevity": {
+    "constitutionYear": 1831,
+    "ancientOrigin": null,
+    "independenceDate": "4 October 1830 (a provisional government declared independence from the Netherlands)",
+    "foundationEvent": "4 October 1830 (a provisional government declared independence from the Netherlands)",
+    "historicalContinuityNotes": "4 October 1830 (a provisional government declared independence from the Netherlands)."
    }
   },
   "052": {
@@ -19793,6 +20978,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1966,
+    "ancientOrigin": null,
+    "independenceDate": "30 November 1966 (from the UK)",
+    "foundationEvent": "30 November 1966 (from the UK)",
+    "historicalContinuityNotes": "30 November 1966 (from the UK)."
    }
   },
   "050": {
@@ -19884,6 +21076,13 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1972,
+    "ancientOrigin": null,
+    "independenceDate": "16 December 1971 (from Pakistan)",
+    "foundationEvent": "16 December 1971 (from Pakistan)",
+    "historicalContinuityNotes": "16 December 1971 (from Pakistan)."
    }
   },
   "048": {
@@ -19975,6 +21174,13 @@
     "alliances": [
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2002,
+    "ancientOrigin": null,
+    "independenceDate": "15 August 1971 (from the UK)",
+    "foundationEvent": "15 August 1971 (from the UK)",
+    "historicalContinuityNotes": "15 August 1971 (from the UK)."
    }
   },
   "044": {
@@ -20064,6 +21270,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1973,
+    "ancientOrigin": null,
+    "independenceDate": "10 July 1973 (from the UK)",
+    "foundationEvent": "10 July 1973 (from the UK)",
+    "historicalContinuityNotes": "10 July 1973 (from the UK)."
    }
   },
   "031": {
@@ -20158,6 +21371,12 @@
     "alliances": [
      "CIS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "30 August 1991 (declared from the Soviet Union)",
+    "foundationEvent": "Statehood established (1918)"
    }
   },
   "040": {
@@ -20251,6 +21470,13 @@
     "alliances": [
      "European Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1920,
+    "ancientOrigin": null,
+    "independenceDate": "No official date of independence: 976 (Margravate of Austria established)",
+    "foundationEvent": "No official date of independence: 976 (Margravate of Austria established)",
+    "historicalContinuityNotes": "No official date of independence: 976 (Margravate of Austria established)."
    }
   },
   "036": {
@@ -20350,9 +21576,20 @@
     "alliances": [
      "Commonwealth"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1901,
+    "ancientOrigin": null,
+    "independenceDate": "1 January 1901 (from the federation of UK colonies)",
+    "foundationEvent": "1 January 1901 (from the federation of UK colonies)",
+    "historicalContinuityNotes": "1 January 1901 (from the federation of UK colonies)."
    }
   },
   "Indian Ocean Ter.": {
+   "officialName": "Australian Indian Ocean Territories",
+   "code3": "",
+   "continent": "Oceania",
+   "subregion": "Australia and New Zealand",
    "capital": "Flying Fish Cove",
    "largestCity": "Flying Fish Cove",
    "demographics": {
@@ -20373,6 +21610,16 @@
     "currencyName": "Australian Dollar",
     "currencyCode": "AUD",
     "currencySymbol": "$"
+   },
+   "longevity": {
+    "foundationYear": 1955,
+    "foundationEvent": "Cocos (Keeling) Islands transferred to Australia (1955); Christmas Island followed in 1958",
+    "sovereignEra": "External territory of Australia (two island groups)",
+    "yearsAlive": 71,
+    "historicalContinuityNotes": "Cocos (Keeling) Islands transferred to Australia (1955); Christmas Island followed in 1958.",
+    "independenceDate": null,
+    "ancientOrigin": null,
+    "constitutionYear": null
    },
    "governance": {
     "headOfState": "Charles III",
@@ -20506,6 +21753,13 @@
      "CIS",
      "CSTO"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1995,
+    "ancientOrigin": null,
+    "independenceDate": "21 September 1991 (from the Soviet Union)",
+    "foundationEvent": "21 September 1991 (from the Soviet Union)",
+    "historicalContinuityNotes": "21 September 1991 (from the Soviet Union)."
    }
   },
   "032": {
@@ -20601,6 +21855,13 @@
     "alliances": [
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1853,
+    "ancientOrigin": null,
+    "independenceDate": "9 July 1816 (from Spain)",
+    "foundationEvent": "9 July 1816 (from Spain)",
+    "historicalContinuityNotes": "9 July 1816 (from Spain)."
    }
   },
   "028": {
@@ -20690,6 +21951,13 @@
      "Commonwealth",
      "OAS"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 1981,
+    "ancientOrigin": null,
+    "independenceDate": "1 November 1981 (from the UK)",
+    "foundationEvent": "1 November 1981 (from the UK)",
+    "historicalContinuityNotes": "1 November 1981 (from the UK)."
    }
   },
   "024": {
@@ -20781,6 +22049,13 @@
     "alliances": [
      "African Union"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2010,
+    "ancientOrigin": null,
+    "independenceDate": "11 November 1975 (from Portugal)",
+    "foundationEvent": "11 November 1975 (from Portugal)",
+    "historicalContinuityNotes": "11 November 1975 (from Portugal)."
    }
   },
   "020": {
@@ -20867,6 +22142,13 @@
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0,
     "conscription": "Abolished / None"
+   },
+   "longevity": {
+    "constitutionYear": 1993,
+    "ancientOrigin": null,
+    "independenceDate": "1278 (formed under the joint sovereignty of the French Count of Foix and the Spanish Bishop of Urgell)",
+    "foundationEvent": "1278 (formed under the joint sovereignty of the French Count of Foix and the Spanish Bishop of Urgell)",
+    "historicalContinuityNotes": "1278 (formed under the joint sovereignty of the French Count of Foix and the Spanish Bishop of Urgell)."
    }
   },
   "012": {
@@ -20961,6 +22243,13 @@
      "African Union",
      "Arab League"
     ]
+   },
+   "longevity": {
+    "constitutionYear": 2020,
+    "ancientOrigin": null,
+    "independenceDate": "5 July 1962 (from France)",
+    "foundationEvent": "5 July 1962 (from France)",
+    "historicalContinuityNotes": "5 July 1962 (from France)."
    }
   },
   "008": {
@@ -21053,6 +22342,13 @@
     "destroyersFrigates": 0,
     "tier": "Developing Defense",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 1998,
+    "ancientOrigin": null,
+    "independenceDate": "28 November 1912 (from the Ottoman Empire)",
+    "foundationEvent": "28 November 1912 (from the Ottoman Empire)",
+    "historicalContinuityNotes": "28 November 1912 (from the Ottoman Empire)."
    }
   },
   "004": {
@@ -21137,9 +22433,17 @@
     "destroyersFrigates": 0,
     "tier": "Minimal / Neutral",
     "conscription": "Voluntary"
+   },
+   "longevity": {
+    "constitutionYear": 2004,
+    "ancientOrigin": null,
+    "independenceDate": "19 August 1919 (from UK control over Afghan foreign affairs)",
+    "foundationEvent": "Statehood established (1747)"
    }
   },
   "Siachen Glacier": {
+   "officialName": "Siachen Glacier",
+   "code3": "",
    "capital": "None (military outposts only)",
    "largestCity": "None",
    "demographics": {
@@ -21161,6 +22465,16 @@
     "currencyName": "Indian Rupee",
     "currencyCode": "INR",
     "currencySymbol": "₹"
+   },
+   "longevity": {
+    "foundationYear": 1984,
+    "foundationEvent": "Indian forces took control in Operation Meghdoot (13 April 1984)",
+    "sovereignEra": "Disputed territory (administered by India, claimed by Pakistan)",
+    "yearsAlive": 42,
+    "historicalContinuityNotes": "Indian forces took control in Operation Meghdoot (13 April 1984).",
+    "independenceDate": null,
+    "ancientOrigin": null,
+    "constitutionYear": null
    },
    "governance": {
     "headOfState": "Disputed (administered by India)",
@@ -21258,6 +22572,16 @@
     "tier": "Minimal / Neutral",
     "defenseBudgetUSD": 0,
     "defenseBudgetPercentGDP": 0
+   },
+   "longevity": {
+    "constitutionYear": null,
+    "ancientOrigin": null,
+    "foundationYear": 1959,
+    "foundationEvent": "Antarctic Treaty signed (1 December 1959)",
+    "sovereignEra": "International zone under the Antarctic Treaty System",
+    "yearsAlive": 67,
+    "historicalContinuityNotes": "Antarctic Treaty signed (1 December 1959).",
+    "independenceDate": null
    }
   }
  }

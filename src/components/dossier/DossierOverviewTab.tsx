@@ -1,9 +1,9 @@
 import React from 'react';
 import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
-import { formatBudget, formatGdp, formatPerCapita, formatPersonnel } from '../../utils/formatters.ts';
+import { formatBudget, formatGdp, formatPerCapita, formatPersonnel, getUnStatus } from '../../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../../utils/sovereignData.ts';
-import { getCountryAlliances } from '../../utils/allianceData.ts';
+import { getAlliancesFor, SHARED_ISO_ENTRIES } from '../../utils/allianceData.ts';
 import { getCountryCulinaryProfile } from '../../utils/nationalFoodsData.ts';
 import { CONSIDERED_ITEMS } from '../../utils/consideredData.ts';
 import { getCountryLeadingProfile } from '../../utils/worldLeadingData.ts';
@@ -49,13 +49,13 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
   onNavigateToCulture,
 }) => {
   const sovereign = getVerifiedSovereignInfo(country);
-  const alliances = getCountryAlliances(country.code || country.name);
+  const alliances = getAlliancesFor(country);
   const culinary = getCountryCulinaryProfile(country);
   const primaryDish = culinary.nationalDishes[0];
 
   const countryAccolades = CONSIDERED_ITEMS.filter(
     (item) =>
-      item.countryCode === country.code ||
+      (item.countryCode === country.code && !SHARED_ISO_ENTRIES.has(country.id)) ||
       item.countryId === country.id ||
       item.countryName.toLowerCase() === country.name.toLowerCase()
   );
@@ -104,9 +104,11 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
                 <h3 className="text-lg sm:text-xl font-extrabold text-slate-100 tracking-tight">
                   {sovereign.name}
                 </h3>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-bold border border-cyan-500/30">
-                  {country.code3}
-                </span>
+                {country.code3 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-mono font-bold border border-cyan-500/30">
+                    {country.code3}
+                  </span>
+                )}
                 <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-semibold border border-emerald-500/30">
                   {country.continent}
                 </span>
@@ -175,7 +177,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               {sovereign.governmentType}
             </div>
             <div className="text-[11px] text-slate-400">
-              UN Member State • Sovereign Era: {country.longevity.sovereignEra}
+              {getUnStatus(country)} • {country.governance.unMemberSince > 0 ? 'Sovereign Era' : 'Status'}: {country.longevity.sovereignEra}
             </div>
           </div>
 

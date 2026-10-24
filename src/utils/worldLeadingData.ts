@@ -1,3 +1,5 @@
+import { SHARED_ISO_ENTRIES } from './allianceData.ts';
+
 export interface WorldLeadingRecord {
   title: string;
   metricOrValue: string;
@@ -2069,7 +2071,7 @@ export function getCountryLeadingProfile(country: {
   id?: string;
   name?: string;
 }): CountryLeadingProfile | null {
-  if (!country) return null;
+  if (!country || SHARED_ISO_ENTRIES.has(country.id || '')) return null;
 
   const code = (country.code || country.code2 || '').toUpperCase();
   const id = country.id ? String(country.id).padStart(3, '0') : '';
