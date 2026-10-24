@@ -46,6 +46,11 @@ export function formatArea(areaKm2: number): string {
 // Palestine and the Holy See hold the UN's two non-member observer seats
 const UN_OBSERVER_STATES = new Set(['PS', 'VA']);
 
+// Global Firepower ranks 145 countries; everywhere else (powerIndex 0) has no rank
+export function formatGfpRank(military: { globalRank: number; powerIndex: number }): string {
+  return military.powerIndex > 0 ? `GFP #${military.globalRank}` : 'GFP unranked';
+}
+
 export function getUnStatus(country: CountryData): string {
   if (country.governance.unMemberSince > 0) return 'UN Member State';
   return UN_OBSERVER_STATES.has(country.code) ? 'UN Observer State' : 'Not a UN Member';

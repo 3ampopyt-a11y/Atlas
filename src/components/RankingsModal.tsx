@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CountryData } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
-import { formatBudget, formatPersonnel, formatPopulation } from '../utils/formatters.ts';
+import { formatBudget, formatPersonnel, formatPopulation, formatGfpRank } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../utils/sovereignData.ts';
 import { getAlliancesFor } from '../utils/allianceData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
@@ -377,7 +377,7 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
                       {activeCategory === 'military' && (
                         <div>
                           <div className="font-mono font-bold text-amber-400 text-xs sm:text-sm">
-                            GFP #{c.military.globalRank} ({c.military.tier})
+                            {formatGfpRank(c.military)} ({c.military.tier})
                           </div>
                           <div className="text-[10px] text-slate-400 flex items-center gap-1.5 sm:justify-end">
                             <span>PwrIdx: {c.military.powerIndex.toFixed(4)}</span>
@@ -410,7 +410,7 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
                           <div className="text-[10px] text-slate-400 flex items-center gap-1.5 sm:justify-end">
                             <span>Armored: {c.military.armoredVehicles.toLocaleString()}</span>
                             <span>•</span>
-                            <span>GFP #{c.military.globalRank}</span>
+                            <span>{formatGfpRank(c.military)}</span>
                           </div>
                         </div>
                       )}
@@ -488,9 +488,19 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
                             {formatPopulation(sovereignInfo.population)}
                           </div>
                           <div className="text-[10px] text-slate-400 flex items-center gap-1.5 sm:justify-end">
-                            <span>{sovereignInfo.densityPerKm2} / km²</span>
-                            <span>•</span>
-                            <span>{sovereignInfo.urbanPercentage}% urban</span>
+                            {sovereignInfo.population > 0 ? (
+                              <>
+                                <span>{sovereignInfo.densityPerKm2} / km²</span>
+                                {!!sovereignInfo.urbanPercentage && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{sovereignInfo.urbanPercentage}% urban</span>
+                                  </>
+                                )}
+                              </>
+                            ) : (
+                              <span>No permanent population</span>
+                            )}
                           </div>
                         </div>
                       )}
@@ -507,8 +517,12 @@ export const RankingsModal: React.FC<RankingsModalProps> = ({
                           </div>
                           <div className="text-[10px] text-slate-400 flex items-center gap-1.5 sm:justify-end">
                             <span>{sovereignInfo.areaSqMi.toLocaleString()} sq mi</span>
-                            <span>•</span>
-                            <span>Coast: {c.geography.coastlineKm.toLocaleString()} km</span>
+                            {c.geography.coastlineKm !== undefined && (
+                              <>
+                                <span>•</span>
+                                <span>Coast: {c.geography.coastlineKm.toLocaleString()} km</span>
+                              </>
+                            )}
                           </div>
                         </div>
                       )}

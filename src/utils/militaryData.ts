@@ -1,4 +1,5 @@
 import { CountryData } from '../types.ts';
+import { SHARED_ISO_ENTRIES } from './allianceData.ts';
 
 export interface DetailedMilitaryData {
   // Global & Budget
@@ -736,18 +737,20 @@ const CURATED_MILITARY_PROFILES: Record<string, Partial<DetailedMilitaryData>> =
  */
 export function getDetailedMilitary(country: CountryData): DetailedMilitaryData {
   const code = country.code.toUpperCase();
-  const curated = CURATED_MILITARY_PROFILES[code];
+  // Entries that borrow another country's code (Siachen uses IN) must not get that country's forces
+  const curated = SHARED_ISO_ENTRIES.has(country.id) ? undefined : CURATED_MILITARY_PROFILES[code];
 
   const m = country.military;
-  const pop = country.demographics?.population || 10_000_000;
-  const gdp = country.economy?.gdpNominalUSD || 100;
-  const budget = m.defenseBudgetUSD || (gdp * (m.defenseBudgetPercentGDP / 100)) || 1.0;
+  const pop = country.demographics?.population || 0;
+  const gdp = country.economy?.gdpNominalUSD || 0;
+  const budget = m.defenseBudgetUSD || gdp * (m.defenseBudgetPercentGDP / 100);
   const perCapitaBudget = pop > 0 ? Math.round((budget * 1_000_000_000) / pop) : 0;
 
   // Active, Reserve, and Paramilitary calculations
-  const active = curated?.activePersonnel ?? (m.activePersonnel || Math.round(pop * 0.003));
-  const reserve = curated?.reservePersonnel ?? (m.reservePersonnel || Math.round(active * 1.5));
-  const paramilitary = curated?.paramilitary ?? (m.paramilitary || Math.round(active * 0.25));
+  // Measured figures only: a place with no listed forces shows none
+  const active = curated?.activePersonnel ?? m.activePersonnel;
+  const reserve = curated?.reservePersonnel ?? m.reservePersonnel;
+  const paramilitary = curated?.paramilitary ?? m.paramilitary;
   const totalPersonnel = active + reserve + paramilitary;
   const reserveRatio = totalPersonnel > 0 ? Math.round((reserve / totalPersonnel) * 100) : 0;
 

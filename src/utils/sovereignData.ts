@@ -1013,14 +1013,12 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
     popStr = population.toLocaleString();
   }
 
-  // Languages
-  let languages = curated.languages || country.culture?.officialLanguages || [];
-  if (languages.length === 0 || languages[0] === 'National Language') {
-    languages = [`National Language of ${country.name}`];
-  }
+  // Languages (none listed for places without a permanent population)
+  const languages = (curated.languages || country.culture?.officialLanguages || []).filter((l) => l !== 'National Language');
 
-  // Density
-  const densityPerKm2 = areaKm2 > 0 ? Math.max(1, Math.round(population / areaKm2)) : country.demographics.densityPerKm2;
+  // Density: 0 when nobody lives there; one decimal below 10 people per km²
+  const density = areaKm2 > 0 ? population / areaKm2 : country.demographics.densityPerKm2;
+  const densityPerKm2 = density >= 10 ? Math.round(density) : Math.round(density * 10) / 10;
 
   // The curated text above can still name a predecessor, so swap any outdated name for the current one
   const nameOf = (s?: string) => (s || '').split(' (')[0].trim();
@@ -1061,7 +1059,8 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
     areaFormatted,
     languages,
     densityPerKm2,
-    urbanPercentage: country.demographics.urbanPercentage || 70,
+    // 0 when no source measures it; the app hides it then
+    urbanPercentage: country.demographics.urbanPercentage,
     lastUpdated,
     recentDevelopments,
     isLiveUpdated: !!cached.isLiveUpdated,

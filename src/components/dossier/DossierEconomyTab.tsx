@@ -24,7 +24,8 @@ export const DossierEconomyTab: React.FC<DossierEconomyTabProps> = ({
   country,
   details,
 }) => {
-  const { agriculture, industry, services } = details.economicSectors;
+  const { agriculture = 0, industry = 0, services = 0, year: sectorYear } = details.economicSectors || {};
+  const infra = details.infrastructureHighlights;
 
   return (
     <div id="section-economy" className="space-y-4 animate-in fade-in duration-150">
@@ -58,9 +59,10 @@ export const DossierEconomyTab: React.FC<DossierEconomyTabProps> = ({
       </div>
 
       {/* GDP Sector Composition */}
+      {details.economicSectors && (
       <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
         <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <PieChart className="w-4 h-4 text-cyan-400" /> GDP Sector Breakdown
+          <PieChart className="w-4 h-4 text-cyan-400" /> GDP Sector Breakdown{sectorYear ? ` (${sectorYear})` : ''}
         </div>
 
         {/* Visual Multi-Segment Bar */}
@@ -98,116 +100,141 @@ export const DossierEconomyTab: React.FC<DossierEconomyTabProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* Strategic Infrastructure Highlights */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3 text-xs">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <Building2 className="w-4 h-4 text-sky-400" /> Critical Infrastructure & Transit Networks
+      {infra && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3 text-xs">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <Building2 className="w-4 h-4 text-sky-400" /> Critical Infrastructure & Transit Networks
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {(infra.mainAirports || infra.airportCount !== undefined) && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                  <Plane className="w-3.5 h-3.5 text-sky-400" />
+                  <span>{infra.mainAirports ? 'International Hub Airports' : 'Airports'}</span>
+                </div>
+                <div className="font-semibold text-slate-200 text-xs leading-snug">
+                  {infra.mainAirports ? infra.mainAirports.join(', ') : `${infra.airportCount!.toLocaleString()} airports and airfields`}
+                </div>
+              </div>
+            )}
+
+            {infra.majorPorts && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                  <Ship className="w-3.5 h-3.5 text-blue-400" />
+                  <span>{infra.mainAirports ? 'Major Deepwater Ports' : 'Key Ports'}</span>
+                </div>
+                <div className="font-semibold text-slate-200 text-xs leading-snug">
+                  {infra.majorPorts.join(', ')}
+                </div>
+              </div>
+            )}
+
+            {(infra.highSpeedRailStatus || infra.railwaysKm !== undefined) && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                  <Train className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{infra.highSpeedRailStatus ? 'High-Speed Rail Network' : 'Railway Network'}</span>
+                </div>
+                <div className="font-semibold text-slate-200 text-xs leading-snug">
+                  {infra.highSpeedRailStatus || `${Math.round(infra.railwaysKm!).toLocaleString()} km of track`}
+                </div>
+              </div>
+            )}
+
+            {infra.cleanEnergyPercent !== undefined && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+                <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
+                  <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{infra.cleanEnergyBasis === 'capacity' ? 'Non-Fossil Power' : 'Clean / Renewable Energy'}</span>
+                </div>
+                <div className="font-mono font-bold text-emerald-400 text-sm">
+                  {infra.cleanEnergyPercent}% {infra.cleanEnergyBasis === 'capacity' ? 'of Installed Capacity' : 'of Grid Generation'}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-              <Plane className="w-3.5 h-3.5 text-sky-400" />
-              <span>International Hub Airports</span>
-            </div>
-            <div className="font-semibold text-slate-200 text-xs leading-snug">
-              {details.infrastructureHighlights.mainAirports.join(', ')}
-            </div>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-              <Ship className="w-3.5 h-3.5 text-blue-400" />
-              <span>Major Deepwater Ports</span>
-            </div>
-            <div className="font-semibold text-slate-200 text-xs leading-snug">
-              {details.infrastructureHighlights.majorPorts.join(', ')}
-            </div>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-              <Train className="w-3.5 h-3.5 text-amber-400" />
-              <span>High-Speed Rail Network</span>
-            </div>
-            <div className="font-semibold text-slate-200 text-xs leading-snug">
-              {details.infrastructureHighlights.highSpeedRailStatus}
-            </div>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-            <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
-              <Zap className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Clean / Renewable Energy</span>
-            </div>
-            <div className="font-mono font-bold text-emerald-400 text-sm">
-              {details.infrastructureHighlights.cleanEnergyPercent}% of Grid Generation
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Strategic Natural Resources */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <Gem className="w-4 h-4 text-amber-400" /> Strategic Natural Resources
+      {details.naturalResources && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <Gem className="w-4 h-4 text-amber-400" /> Strategic Natural Resources
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {details.naturalResources.map((res, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px]"
+              >
+                {res}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.naturalResources.map((res, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px]"
-            >
-              {res}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* Top Trading Partners */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs">Top Global Trading Partners</div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.topTradingPartners.map((partner, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px]"
-            >
-              {partner}
-            </span>
-          ))}
-        </div>
-      </div>
+      {/* Trading Partners: export and import shares where the Factbook has them, else the hand-written list */}
+      {[
+        { title: 'Top Export Markets', list: details.exportPartners },
+        { title: 'Top Import Sources', list: details.importPartners },
+        { title: 'Top Global Trading Partners', list: details.exportPartners ? undefined : details.topTradingPartners },
+      ]
+        .filter((section) => section.list)
+        .map((section) => (
+          <div key={section.title} className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+            <div className="font-bold text-slate-200 text-xs">{section.title}</div>
+            <div className="flex flex-wrap gap-1.5">
+              {section.list!.map((partner, idx) => (
+                <span
+                  key={idx}
+                  className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-[11px]"
+                >
+                  {partner}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
 
       {/* Key Exports */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs">Key Export Commodities</div>
-        <div className="flex flex-wrap gap-1.5">
-          {country.economy.mainExports.map((exp, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px]"
-            >
-              {exp}
-            </span>
-          ))}
+      {country.economy.mainExports.length > 0 && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 text-xs">Key Export Commodities</div>
+          <div className="flex flex-wrap gap-1.5">
+            {country.economy.mainExports.map((exp, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-[11px]"
+              >
+                {exp}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Major Industries */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs">Leading National Industries</div>
-        <div className="flex flex-wrap gap-1.5">
-          {country.economy.majorIndustries.map((ind, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px]"
-            >
-              {ind}
-            </span>
-          ))}
+      {country.economy.majorIndustries.length > 0 && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 text-xs">Leading National Industries</div>
+          <div className="flex flex-wrap gap-1.5">
+            {country.economy.majorIndustries.map((ind, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300 text-[11px]"
+              >
+                {ind}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Political Leadership */}
       <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2 text-[11px]">

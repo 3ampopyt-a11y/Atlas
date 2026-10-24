@@ -46,9 +46,10 @@ export interface MilitaryInfo {
 export interface GeographyInfo {
   areaKm2: number;
   areaSqMi: number;
-  coastlineKm: number;
+  // missing where no source gives it; climate and terrain are '' then
+  coastlineKm?: number;
   highestPoint: HighestPoint;
-  lowestPoint: LowestPoint;
+  lowestPoint?: LowestPoint;
   climate: string;
   terrain: string;
   borders: string[];
@@ -140,6 +141,28 @@ export interface CountryData {
   economy: EconomyInfo;
   governance: GovernanceInfo;
   culture: CultureInfo;
+  details?: SourcedDetails;
+}
+
+// Dossier facts with a source (CIA World Factbook, Wikidata); a field is absent when no source has it
+export interface SourcedDetails {
+  tld?: string;
+  callingCode?: string;
+  timeZone?: string; // the capital's UTC offset
+  timeZoneNote?: string;
+  drivingSide?: 'Left' | 'Right';
+  hdi?: { score: number; year: number };
+  naturalResources?: string[];
+  exportPartners?: string[];
+  importPartners?: string[];
+  majorRivers?: string[];
+  gdpBySector?: { agriculture: number; industry: number; services: number; year?: number };
+  airports?: number;
+  keyPorts?: string[];
+  railwaysKm?: number;
+  nonFossilPowerPercent?: number; // share of installed generating capacity
+  armedForces?: string[];
+  organizations?: string[];
 }
 
 export type MapMetricMode =

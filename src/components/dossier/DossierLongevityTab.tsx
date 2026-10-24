@@ -97,7 +97,7 @@ export const DossierLongevityTab: React.FC<DossierLongevityTabProps> = ({
                     {m.year}
                   </span>
                 </div>
-                <p className="text-slate-400 text-xs mt-1 leading-relaxed">{m.description}</p>
+                {m.description && <p className="text-slate-400 text-xs mt-1 leading-relaxed">{m.description}</p>}
               </div>
             </div>
           ))}

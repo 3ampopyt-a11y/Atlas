@@ -10,7 +10,7 @@ import { CountryData, MapMetricMode } from '../types.ts';
 import { worldFeatures50, worldBorders50, worldFeaturesLite, worldBordersLite } from '../data/worldMapData.ts';
 import { countryMapPoints, isCoordOnFrontHemisphere } from '../utils/geoCentroids.ts';
 import { CountryLayer } from './CountryLayer.tsx';
-import { formatLongevity, formatBudget, formatPersonnel, formatPopulation } from '../utils/formatters.ts';
+import { formatLongevity, formatBudget, formatPersonnel, formatPopulation, formatGfpRank } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../utils/sovereignData.ts';
 import { getAlliancesFor } from '../utils/allianceData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
@@ -1721,14 +1721,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                 {metricMode === 'population' && (
                   <div className="bg-blue-950/50 border border-blue-500/40 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px]">
                     <span className="font-bold text-blue-300">👥 {sov.populationFormatted}</span>
-                    <span className="text-blue-400 font-mono text-[10px] font-semibold">{sov.densityPerKm2} / km²</span>
+                    {sov.population > 0 && <span className="text-blue-400 font-mono text-[10px] font-semibold">{sov.densityPerKm2} / km²</span>}
                   </div>
                 )}
 
                 {metricMode === 'war' && (
                   <div className="bg-red-950/50 border border-red-500/40 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px]">
                     <span className="font-bold text-red-300">⚔️ {hoveredCountry.military.activePersonnel.toLocaleString()} Active Troops</span>
-                    <span className="text-amber-400 font-mono font-bold">GFP #{hoveredCountry.military.globalRank}</span>
+                    <span className="text-amber-400 font-mono font-bold">{formatGfpRank(hoveredCountry.military)}</span>
                   </div>
                 )}
 
@@ -1744,7 +1744,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                   </div>
                 )}
 
-                {metricMode === 'biomes' && (
+                {metricMode === 'biomes' && hoveredCountry.geography.climate && (
                   <div className="bg-amber-950/50 border border-amber-500/40 rounded-xl px-2.5 py-1.5 text-[11px] text-amber-200">
                     <span>🌿 {hoveredCountry.geography.climate}</span>
                   </div>

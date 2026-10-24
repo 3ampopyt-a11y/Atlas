@@ -27,7 +27,7 @@ export const DossierCultureTab: React.FC<DossierCultureTabProps> = ({
   onNavigateToCuisine,
 }) => {
   const { nationalDish, famousHistoricalFigures, globalContributions } =
-    details.culturalHeritageHighlights;
+    details.culturalHeritageHighlights || {};
   const culinary = getCountryCulinaryProfile(country);
   const primaryDish = culinary.nationalDishes[0];
   const nationalSport = getCountryNationalSport(country);
@@ -125,38 +125,43 @@ export const DossierCultureTab: React.FC<DossierCultureTabProps> = ({
       </div>
 
       {/* Celebrated Historical Figures & Pioneers */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <GraduationCap className="w-4 h-4 text-cyan-400" /> Celebrated Historical Figures & Pioneers
+      {famousHistoricalFigures && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <GraduationCap className="w-4 h-4 text-cyan-400" /> Celebrated Historical Figures & Pioneers
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {famousHistoricalFigures.map((person, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 text-[11px] font-medium"
+              >
+                {person}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {famousHistoricalFigures.map((person, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 text-[11px] font-medium"
-            >
-              {person}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Global Civilizational Contributions */}
-      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-emerald-400" /> Global Civilizational & Scientific Contributions
+      {globalContributions && (
+        <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2.5">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-emerald-400" /> Global Civilizational & Scientific Contributions
+          </div>
+          <div className="space-y-1.5 text-xs">
+            {globalContributions.map((contrib, idx) => (
+              <div key={idx} className="flex items-start gap-2 text-slate-300">
+                <span className="text-emerald-400 font-bold mt-0.5">•</span>
+                <span className="leading-relaxed">{contrib}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-1.5 text-xs">
-          {globalContributions.map((contrib, idx) => (
-            <div key={idx} className="flex items-start gap-2 text-slate-300">
-              <span className="text-emerald-400 font-bold mt-0.5">•</span>
-              <span className="leading-relaxed">{contrib}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* National Sport & Athletic Identity */}
+      {nationalSport && (
       <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/30 via-slate-900 to-slate-900 border border-emerald-500/30 space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="font-bold text-slate-100 text-xs flex items-center gap-1.5">
@@ -198,6 +203,7 @@ export const DossierCultureTab: React.FC<DossierCultureTabProps> = ({
           </div>
         </div>
       </div>
+      )}
 
       {/* National Symbols */}
       {(details.nationalAnimal || details.nationalSymbol) && (

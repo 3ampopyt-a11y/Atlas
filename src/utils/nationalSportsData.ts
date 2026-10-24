@@ -807,7 +807,11 @@ export function getCountryNationalSport(country: {
   name: string;
   continent?: string;
   subregion?: string;
-}): NationalSportProfile {
+  demographics?: { population: number };
+}): NationalSportProfile | null {
+  // Nobody lives there permanently, so there is no national sport to name
+  if (country.demographics && !country.demographics.population) return null;
+
   // Check exact code match (not for entries that borrow another country's code)
   const ownCode = SHARED_ISO_ENTRIES.has(country.id || '') ? undefined : country.code;
   if (ownCode && NATIONAL_SPORTS_REGISTRY[ownCode]) {

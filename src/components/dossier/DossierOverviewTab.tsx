@@ -191,15 +191,19 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
                 <Users className="w-3.5 h-3.5" />
                 <span>National Population</span>
               </span>
-              <span className="text-[10px] font-mono text-emerald-300">
-                {sovereign.densityPerKm2}/km²
-              </span>
+              {sovereign.population > 0 && (
+                <span className="text-[10px] font-mono text-emerald-300">
+                  {sovereign.densityPerKm2}/km²
+                </span>
+              )}
             </div>
             <div className="text-base font-bold text-emerald-300 font-mono">
               {sovereign.populationFormatted}
             </div>
             <div className="text-[11px] text-slate-400 font-mono">
-              {sovereign.populationExact} citizens ({sovereign.urbanPercentage}% urban)
+              {sovereign.population > 0
+                ? `${sovereign.populationExact} citizens${sovereign.urbanPercentage ? ` (${sovereign.urbanPercentage}% urban)` : ''}`
+                : 'No permanent population'}
             </div>
           </div>
 
@@ -261,6 +265,9 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               <span className="text-[10px] text-purple-300">Linguistic</span>
             </div>
             <div className="flex flex-wrap gap-1 pt-0.5">
+              {sovereign.languages.length === 0 && (
+                <span className="text-slate-400 text-[11px]">None (no permanent population)</span>
+              )}
               {sovereign.languages.map((lang, idx) => (
                 <span
                   key={idx}
@@ -311,6 +318,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
       </div>
 
       {/* National Sport & Athletic Heritage Highlight */}
+      {nationalSport && (
       <div
         id="card-national-sport"
         className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-950 border border-emerald-500/30 flex items-start sm:items-center justify-between gap-3"
@@ -359,6 +367,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           </button>
         )}
       </div>
+      )}
 
       {/* Leading the World In Section */}
       {leadingProfile && leadingProfile.records.length > 0 && (
@@ -470,32 +479,39 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
           <div className="text-[10px] text-slate-400">Global Firepower</div>
+          {/* powerIndex 0: not in the Global Firepower ranking */}
           <div className="text-base font-bold text-amber-400 font-mono">
-            Rank #{country.military.globalRank}
+            {country.military.powerIndex > 0 ? `Rank #${country.military.globalRank}` : 'Not ranked'}
           </div>
-          <div className="text-[10px] text-slate-400">
-            PowerIndex: {country.military.powerIndex.toFixed(4)}
-          </div>
+          {country.military.powerIndex > 0 && (
+            <div className="text-[10px] text-slate-400">
+              PowerIndex: {country.military.powerIndex.toFixed(4)}
+            </div>
+          )}
         </div>
 
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
           <div className="text-[10px] text-slate-400">Annual Defense Budget</div>
           <div className="text-base font-bold text-cyan-400 font-mono">
-            {formatBudget(country.military.defenseBudgetUSD)}
+            {country.military.defenseBudgetUSD > 0 ? formatBudget(country.military.defenseBudgetUSD) : 'Not listed'}
           </div>
-          <div className="text-[10px] text-slate-400">
-            {country.military.defenseBudgetPercentGDP}% of GDP
-          </div>
+          {country.military.defenseBudgetUSD > 0 && (
+            <div className="text-[10px] text-slate-400">
+              {country.military.defenseBudgetPercentGDP}% of GDP
+            </div>
+          )}
         </div>
 
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
           <div className="text-[10px] text-slate-400">Active Armed Forces</div>
           <div className="text-base font-bold text-rose-400 font-mono">
-            {formatPersonnel(country.military.activePersonnel)}
+            {country.military.activePersonnel > 0 ? formatPersonnel(country.military.activePersonnel) : 'None listed'}
           </div>
-          <div className="text-[10px] text-slate-400">
-            +{formatPersonnel(country.military.reservePersonnel)} Reserves
-          </div>
+          {country.military.reservePersonnel > 0 && (
+            <div className="text-[10px] text-slate-400">
+              +{formatPersonnel(country.military.reservePersonnel)} Reserves
+            </div>
+          )}
         </div>
 
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
@@ -526,10 +542,21 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
         {alliances.length === 0 ? (
           <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-center space-y-1.5">
             <div className="text-2xl">🕊️</div>
-            <div className="font-bold text-slate-200 text-xs">Neutral / Non-Aligned Sovereign State</div>
-            <p className="text-slate-400 text-xs max-w-md mx-auto">
-              {country.name} does not hold formal binding mutual defense commitments with external military pacts, maintaining independent foreign and security policy.
-            </p>
+            {getUnStatus(country) !== 'Not a UN Member' || country.longevity.sovereignEra === 'Sovereign State' ? (
+              <>
+                <div className="font-bold text-slate-200 text-xs">Neutral / Non-Aligned Sovereign State</div>
+                <p className="text-slate-400 text-xs max-w-md mx-auto">
+                  {country.name} does not hold formal binding mutual defense commitments with external military pacts, maintaining independent foreign and security policy.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="font-bold text-slate-200 text-xs">No Alliance Memberships of Its Own</div>
+                <p className="text-slate-400 text-xs max-w-md mx-auto">
+                  {country.name} is not a sovereign state and holds no military alliance memberships in its own name.
+                </p>
+              </>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -545,106 +572,129 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
       </div>
 
       {/* International Alliances & Multilateral Treaties */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <Globe2 className="w-4 h-4 text-indigo-400" /> International Alliances & Treaties
+      {details.internationalMemberships.length > 0 && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <Globe2 className="w-4 h-4 text-indigo-400" /> International Organisations & Alliances
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {details.internationalMemberships.map((org, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[11px] font-medium"
+              >
+                {org}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.internationalMemberships.map((org, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-[11px] font-medium"
-            >
-              {org}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Climate & Biomes */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <TreePine className="w-4 h-4 text-emerald-400" /> Climate & Ecological Biomes
+      {details.climateBiomes && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <TreePine className="w-4 h-4 text-emerald-400" /> Climate & Ecological Biomes
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {details.climateBiomes.map((biome, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px]"
+              >
+                {biome}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.climateBiomes.map((biome, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px]"
-            >
-              {biome}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Founding Figures & Originators */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 flex items-center gap-1.5">
-          <BookOpen className="w-4 h-4 text-emerald-400" /> Founding Figures & Sovereign Inception
+      {details.foundingFigures && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 flex items-center gap-1.5">
+            <BookOpen className="w-4 h-4 text-emerald-400" /> Founding Figures & Sovereign Inception
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {details.foundingFigures.map((figure, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium"
+              >
+                {figure}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.foundingFigures.map((figure, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-medium"
-            >
-              {figure}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Historical Predecessors & Empires */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-        <div className="font-bold text-slate-200 flex items-center gap-1.5">
-          <Landmark className="w-4 h-4 text-slate-400" /> Historical Predecessors & Pre-Statehood Eras
+      {details.historicalPredecessors && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
+          <div className="font-bold text-slate-200 flex items-center gap-1.5">
+            <Landmark className="w-4 h-4 text-slate-400" /> Historical Predecessors & Pre-Statehood Eras
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {details.historicalPredecessors.map((pred, idx) => (
+              <span
+                key={idx}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px]"
+              >
+                {pred}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {details.historicalPredecessors.map((pred, idx) => (
-            <span
-              key={idx}
-              className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px]"
-            >
-              {pred}
-            </span>
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Society, Digital & Infrastructure Quick Facts */}
-      <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2 text-[11px]">
-        <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-          <Gauge className="w-4 h-4 text-cyan-400" /> Infrastructure & Society Standards
+      {(details.hdiScore !== undefined || details.drivingSide || details.callingCode || details.tld || details.timeZones) && (
+        <div className="p-3.5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2 text-[11px]">
+          <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+            <Gauge className="w-4 h-4 text-cyan-400" /> Infrastructure & Society Standards
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {details.hdiScore !== undefined && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="text-slate-400 text-[10px]">Human Dev. Index{details.hdiYear ? ` (${details.hdiYear})` : ''}</div>
+                <div className="font-mono font-bold text-cyan-300 text-sm mt-0.5">
+                  {details.hdiScore.toFixed(3)}{' '}
+                  <span className="text-[10px] text-slate-400 font-normal">({details.hdiTier})</span>
+                </div>
+              </div>
+            )}
+            {details.drivingSide && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="text-slate-400 text-[10px]">Driving Side</div>
+                <div className="font-bold text-slate-200 text-sm mt-0.5">
+                  {details.drivingSide} Side
+                </div>
+              </div>
+            )}
+            {(details.callingCode || details.tld) && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="text-slate-400 text-[10px]">
+                  {details.callingCode && details.tld ? 'Calling Code & TLD' : details.callingCode ? 'Calling Code' : 'Internet Domain'}
+                </div>
+                <div className="font-mono font-bold text-slate-200 text-sm mt-0.5">
+                  {[details.callingCode, details.tld].filter(Boolean).join(' • ')}
+                </div>
+              </div>
+            )}
+            {details.timeZones && (
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="text-slate-400 text-[10px]">Time Zone(s)</div>
+                <div className="font-mono text-slate-300 text-[11px] truncate mt-0.5" title={details.timeZoneNote}>
+                  {details.timeZones[0]}
+                </div>
+                {details.timeZoneNote && (
+                  <div className="text-slate-500 text-[10px] leading-snug mt-0.5">{details.timeZoneNote}</div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-            <div className="text-slate-400 text-[10px]">Human Dev. Index</div>
-            <div className="font-mono font-bold text-cyan-300 text-sm mt-0.5">
-              {details.hdiScore.toFixed(3)}{' '}
-              <span className="text-[10px] text-slate-400 font-normal">({details.hdiTier})</span>
-            </div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-            <div className="text-slate-400 text-[10px]">Driving Side</div>
-            <div className="font-bold text-slate-200 text-sm mt-0.5">
-              {details.drivingSide} Side
-            </div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-            <div className="text-slate-400 text-[10px]">Calling Code & TLD</div>
-            <div className="font-mono font-bold text-slate-200 text-sm mt-0.5">
-              {details.callingCode} • {details.tld}
-            </div>
-          </div>
-          <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
-            <div className="text-slate-400 text-[10px]">Time Zone(s)</div>
-            <div className="font-mono text-slate-300 text-[11px] truncate mt-0.5">
-              {details.timeZones[0]}
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

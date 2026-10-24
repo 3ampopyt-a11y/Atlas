@@ -8,8 +8,11 @@
 //   World Bank API         population, GDP, GDP per capita, life expectancy, urbanisation, military spend (SIPRI)
 //   CIA World Factbook     climate, terrain, coastline, elevation extremes, median age, religions, languages,
 //                          government type, national holiday, independence, industries, exports, conscription
+//                          and the dossier details: internet domain, capital time zone, natural resources, rivers,
+//                          trade partners, GDP by sector, airports, ports, railways, power sources, armed forces, organisations
 //                          (via github.com/factbook/factbook.json)
-//   Wikidata               currency, heads of state and government, motto, UN membership, alliances, UNESCO sites
+//   Wikidata               currency, heads of state and government, motto, UN membership, alliances, UNESCO sites, calling code,
+//                          driving side, Human Development Index
 //   Global Firepower 2026  military rank, PwrIndx, personnel and equipment inventories
 //
 // Measured figures are refreshed for every country. Descriptive text only replaces the generic template
@@ -178,10 +181,17 @@ async function loadWikidata() {
         OPTIONAL { ?item rdfs:label ?label . FILTER(LANG(?label) = "en") }
       }`,
     ),
+    () => sparql('calling-code', `SELECT ?iso ?code WHERE { ?c wdt:P297 ?iso; p:P474 ?st . ?st ps:P474 ?code; ${NOT_DEPRECATED} ${CURRENT} }`),
+    () => sparql(
+      'driving-side',
+      `SELECT ?iso ?side WHERE { ?c wdt:P297 ?iso; p:P1622 ?st . ?st ps:P1622 ?s; ${NOT_DEPRECATED} ${CURRENT}
+        ?s rdfs:label ?side . FILTER(LANG(?side) = "en") }`,
+    ),
+    () => sparql('hdi', `SELECT ?iso ?hdi ?time WHERE { ?c wdt:P297 ?iso; p:P1081 ?st . ?st ps:P1081 ?hdi; pq:P585 ?time; ${NOT_DEPRECATED} }`),
   ];
   const results: any[][] = [];
   for (const query of queries) results.push(await query());
-  const [fips, currencies, mottos, officialLangs, un, memberships, leaders, heritage] = results;
+  const [fips, currencies, mottos, officialLangs, un, memberships, leaders, heritage, callingCodes, driving, hdi] = results;
 
   const byIso = <T>(rows: any[], fn: (acc: T | undefined, row: any) => T) => {
     const out: Record<string, T> = {};
@@ -245,6 +255,23 @@ async function loadWikidata() {
         { count: m.size, top: [...m.values()].sort((a, b) => b.links - a.links).slice(0, 4).map((s) => s.label) },
       ]),
     ),
+    // "+1", or "+1 268" style codes for NANP members; several codes are joined
+    callingCode: byIso<string>(callingCodes, (acc, r) => {
+      const code = String(r.code).trim().replace(/^(\d)/, '+$1').replace(/^\+1-?(\d{3})$/, '+1 $1');
+      // a dialling prefix through another country's code ("+390549" for San Marino via Italy) is not a country code
+      if (/^\+\d{5,}$/.test(code)) return acc!;
+      return acc && !acc.split(', ').includes(code) ? `${acc}, ${code}` : code;
+    }),
+    // Countries with one driving side only; a split answer (left and right) is left out
+    drivingSide: Object.fromEntries(
+      Object.entries(byIso<Set<string>>(driving, (acc = new Set(), r) => acc.add(/left/i.test(r.side) ? 'Left' : 'Right')))
+        .filter(([, sides]) => sides.size === 1)
+        .map(([iso, sides]) => [iso, [...sides][0] as 'Left' | 'Right']),
+    ),
+    hdi: byIso<{ score: number; year: number }>(hdi, (acc, r) => {
+      const year = Number(String(r.time).slice(0, 4));
+      return !acc || year > acc.year ? { score: round(Number(r.hdi), 3), year } : acc;
+    }),
   };
 }
 
@@ -349,12 +376,102 @@ function parseConscription(text: string, forces: string): CountryData['military'
   return undefined;
 }
 
+const stripParens = (s: string) => {
+  let out = s;
+  while (/\([^()]*\)/.test(out)) out = out.replace(/\s*\([^()]*\)/g, '');
+  return out.replace(/[()]/g, '').trim();
+};
+
+// "Amazon river mouth (shared with Peru [s]) - 6,400 km; Tocantins - 3,650 km" -> ["Amazon (6,400 km)", "Tocantins (3,650 km)"]
+function parseRivers(text: string) {
+  return clean(text)
+    .replace(/\s*note:.*$/i, '')
+    .split(/;\s*/)
+    .map((part) => {
+      const m = part.match(/^(.*?)\s+-\s+([\d,.]+)\s*km/);
+      if (!m) return '';
+      // the name ends where the "river source (shared with ... [m])" annotation starts
+      const name = m[1]
+        .split(/\s*(?:\((?:mouth\s+)?shared|\b(?:river\s+)?(?:source|mouth)\b|\[|,)/i)[0]
+        .replace(/\s+river$/i, '')
+        .trim();
+      return name ? `${name} (${m[2]} km)` : '';
+    })
+    .filter(Boolean)
+    .slice(0, 6);
+}
+
+// "USA 19%, China 18%, Taiwan 6% (2023)" -> ["USA 19%", "China 18%", "Taiwan 6%"]; prose answers are dropped
+function parsePartners(text: string) {
+  const items = dropYear(dropNotes(clean(text))).split(/,\s*/).map((s) => s.trim());
+  return items.every((s) => /^\S.*\s<?\d+(\.\d+)?%$/.test(s)) ? items.slice(0, 5) : [];
+}
+
+function parseSectors(sectors: any) {
+  const pct = (k: string) => num(clean(sectors?.[k]?.text).match(/^-?[\d.]+(?=%)/)?.[0]);
+  const [agriculture, industry, services] = ['agriculture', 'industry', 'services'].map(pct);
+  if (agriculture === undefined || industry === undefined || services === undefined) return undefined;
+  const year = num(clean(sectors.services.text).match(/\((\d{4})/)?.[1]);
+  return { agriculture, industry, services, ...(year ? { year } : {}) };
+}
+
+// "Japan Self-Defense Force (JSDF): Ground Self-Defense Force (...), Maritime ... (2025)" -> the named forces.
+// Only the first paragraph: the ones after it list police and interior-ministry forces.
+function parseForces(text = '') {
+  const t = stripParens(dropNotes(clean(text.split(/<br\s*\/?>/i)[0])));
+  if (!t || /\bno (regular )?(military|armed forces)\b/i.test(t)) return [];
+  return [
+    ...new Set(
+      t
+        .split(/;\s*/)
+        .flatMap((seg) => {
+          const body = seg.includes(':') ? seg.slice(seg.indexOf(':') + 1) : seg;
+          return body.split(/,\s*/);
+        })
+        // "Ground Forces or People's Liberation Army Army" -> "Ground Forces"
+        .map((s) => s.trim().replace(/\.$/, '').replace(/\s+or\s+.*$/, ''))
+        .filter((s) => s.length > 2 && s.length < 70 && /^[A-Z]/.test(s) && !/^(includes|the |note)/i.test(s)),
+    ),
+  ].slice(0, 8);
+}
+
+// Full members only, of the groupings a reader would recognise
+const ORGANIZATIONS: Record<string, string> = {
+  WTO: 'World Trade Organization (WTO)', IMF: 'International Monetary Fund (IMF)',
+  NATO: 'NATO', AU: 'African Union', ASEAN: 'ASEAN', OAS: 'Organization of American States', LAS: 'Arab League',
+  GCC: 'Gulf Cooperation Council', C: 'Commonwealth of Nations', 'G-20': 'G20',
+  CIS: 'Commonwealth of Independent States', CSTO: 'CSTO',
+  Mercosur: 'Mercosur', ECOWAS: 'ECOWAS', SADC: 'Southern African Development Community', EAC: 'East African Community',
+  CARICOM: 'CARICOM', APEC: 'APEC', PIF: 'Pacific Islands Forum', OSCE: 'OSCE',
+  OIC: 'Organisation of Islamic Cooperation', NAM: 'Non-Aligned Movement', OIF: 'Francophonie', CPLP: 'Community of Portuguese Language Countries',
+};
+
+// The Factbook lists are out of date for these (the UK in the EU, Qatar in OPEC, India in the OECD, Russia in the
+// Council of Europe, no Indonesia in BRICS or Belarus in the SCO), so current membership is listed here (2026)
+const CURRENT_MEMBERS: Record<string, string[]> = {
+  'Council of Europe': 'AL AD AM AT AZ BE BA BG HR CY CZ DK EE FI FR GE DE GR HU IS IE IT LV LI LT LU MT MD MC ME NL MK NO PL PT RO SM RS SK SI ES SE CH TR UA GB'.split(' '),
+  BRICS: 'BR RU IN CN ZA EG ET IR AE ID'.split(' '),
+  'Shanghai Cooperation Organisation': 'CN IN IR KZ KG PK RU TJ UZ BY'.split(' '),
+  'European Union': 'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' '),
+  OECD: 'AU AT BE CA CL CO CR CZ DK EE FI FR DE GR HU IS IE IL IT JP KR LV LT LU MX NL NZ NO PL PT SK SI ES SE CH TR GB US'.split(' '),
+  OPEC: 'DZ CG GQ GA IR IQ KW LY NG SA AE VE'.split(' '),
+  G7: 'CA FR DE IT JP GB US'.split(' '),
+};
+
+function parseOrganizations(text: string) {
+  const items = dropNotes(clean(text)).split(/,\s*(?![^(]*\))/).map((s) => s.trim());
+  return items.filter((s) => ORGANIZATIONS[s]).map((s) => ORGANIZATIONS[s]);
+}
+
 function factbookFacts(fb: any) {
   const geo = fb.Geography || {};
   const ppl = fb['People and Society'] || {};
   const gov = fb.Government || {};
   const eco = fb.Economy || {};
   const mil = fb['Military and Security'] || {};
+  const comms = fb.Communications || {};
+  const transport = fb.Transportation || {};
+  const power = fb.Energy?.['Electricity generation sources'];
   const notes = clean(geo['Geography - note']?.text)
     .split(/note(?: \d+)?:/i)
     .map((s) => capitalize(s.trim()))
@@ -389,6 +506,27 @@ function factbookFacts(fb: any) {
     conscription: parseConscription(mil['Military service age and obligation']?.text || '', mil['Military and security forces']?.text || ''),
     noMilitary: /no regular (military|armed)|has no (military|armed)|defen[cs]e is the responsibility/i.test(clean(mil['Military and security forces']?.text)),
     notes,
+    details: {
+      tld: clean(comms['Internet country code']?.text).match(/^\.[a-z]{2}\b/)?.[0],
+      // "UTC+5.5" -> "UTC+5:30"
+      timeZone: clean(gov.Capital?.['time difference']?.text)
+        .match(/^UTC\s?[+-]?\s?[\d:.]*/)?.[0]
+        .replace(/\s/g, '')
+        .replace(/^UTC0$/, 'UTC±0')
+        .replace(/\.(\d+)$/, (_, frac) => `:${String(Math.round(Number(`0.${frac}`) * 60)).padStart(2, '0')}`),
+      timeZoneNote: gov.Capital?.['time zone note']?.text ? capitalize(shorten(clean(gov.Capital['time zone note'].text), 160)) : undefined,
+      naturalResources: geo['Natural resources']?.text ? parseList(geo['Natural resources'].text, 8).map((s) => capitalize(s.replace(/^and /i, ''))) : [],
+      exportPartners: parsePartners(eco['Exports - partners']?.text),
+      importPartners: parsePartners(eco['Imports - partners']?.text),
+      majorRivers: parseRivers(geo['Major rivers (by length in km)']?.text),
+      gdpBySector: parseSectors(eco['GDP - composition, by sector of origin']),
+      airports: num(clean(transport.Airports?.text ?? transport.Airports?.total?.text)),
+      keyPorts: transport.Ports?.['key ports']?.text ? parseList(transport.Ports['key ports'].text, 6) : [],
+      railwaysKm: num(clean(transport.Railways?.total?.text)),
+      nonFossilPowerPercent: power?.['fossil fuels']?.text ? round(100 - num(clean(power['fossil fuels'].text))!) : undefined,
+      armedForces: parseForces(mil['Military and security forces']?.text),
+      organizations: parseOrganizations(gov['International organization participation']?.text),
+    },
   };
 }
 
@@ -715,16 +853,35 @@ const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string
     capital: 'Hargeisa',
     largestCity: 'Hargeisa',
     // Somaliland government estimate (2021); no census since 1975
-    demographics: { population: 5700000, densityPerKm2: 32.3, lifeExpectancy: 0 },
-    geography: { areaKm2: 176120, highestPoint: { name: 'Shimbiris', elevationM: 2416 } },
-    economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Somaliland Shilling', currencyCode: 'SLSH', currencySymbol: 'Sl.Sh.' },
+    demographics: { population: 5700000, densityPerKm2: 32.3, lifeExpectancy: 0, urbanPercentage: 0 },
+    geography: {
+      areaKm2: 176120, areaSqMi: 68000, highestPoint: { name: 'Shimbiris', elevationM: 2416 }, lowestPoint: { name: 'Gulf of Aden', elevationM: 0 },
+      coastlineKm: 850, borders: ['DJI', 'ETH', 'SOM'],
+      terrain: 'A hot coastal plain on the Gulf of Aden rising to the Golis and Ogo highlands, with a dry plateau inland',
+      climate: 'Arid to semi-arid; hot coastal lowlands and cooler highlands, with rains in April–June and October–November',
+    },
+    economy: {
+      gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Somaliland Shilling', currencyCode: 'SLSH', currencySymbol: 'Sl.Sh.',
+      majorIndustries: ['Livestock herding', 'Port and logistics services (Berbera)', 'Telecommunications'],
+      mainExports: ['Livestock (sheep, goats, camels)', 'Hides and skins', 'Frankincense'],
+    },
     longevity: longevityFrom({
       year: 1991, event: 'Restoration of sovereignty declared (18 May 1991)', era: 'Self-declared state without international recognition', constitutionYear: 2001,
       independence: '18 May 1991 (declared; first independent as the State of Somaliland, 26 June 1960)',
       notes: 'British Somaliland became independent as the State of Somaliland on 26 June 1960 and joined Somalia five days later. It declared the union void on 18 May 1991.',
     }),
     governance: { headOfState: 'Abdirahman Mohamed Abdullahi', headOfGovernment: 'Abdirahman Mohamed Abdullahi', governmentType: 'Unrecognised presidential republic', unMemberSince: 0, nationalMotto: null, nationalDay: 'Restoration of Sovereignty, 18 May (1991)' },
-    culture: { officialLanguages: ['Somali', 'Arabic', 'English'], majorReligions: ['Sunni Muslim'] },
+    culture: {
+      officialLanguages: ['Somali', 'Arabic', 'English'], majorReligions: ['Sunni Muslim'], unescoSitesCount: 0,
+      famousLandmarks: ['Laas Geel rock art', 'Berbera', 'Zeila', 'Daallo Mountain'],
+      interestingFacts: [
+        "The cave paintings at Laas Geel, rediscovered in 2002, are among the best-preserved rock art in Africa and thought to be several thousand years old.",
+        'Live animal exports, mostly sheep and goats shipped from Berbera to the Arabian Peninsula, are the backbone of the economy.',
+        'Despite having no international recognition, it has held several peaceful, contested presidential elections since 2003.',
+      ],
+    },
+    // Somaliland uses Somalia's +252 country code; no internet domain of its own
+    details: { callingCode: '+252', timeZone: 'UTC+3', drivingSide: 'Right' },
     military: NO_MILITARY_DATA,
   },
   'N. Cyprus': {
@@ -733,12 +890,32 @@ const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string
     capital: 'North Nicosia',
     largestCity: 'North Nicosia',
     // 2011 census, the last with published results
-    demographics: { population: 294906, densityPerKm2: 87.9, lifeExpectancy: 0 },
-    geography: { areaKm2: 3355, highestPoint: { name: 'Selvili Tepe', elevationM: 1024 } },
-    economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Turkish Lira', currencyCode: 'TRY', currencySymbol: '₺' },
+    demographics: { population: 294906, densityPerKm2: 87.9, lifeExpectancy: 0, urbanPercentage: 0 },
+    geography: {
+      areaKm2: 3355, areaSqMi: 1295, highestPoint: { name: 'Selvili Tepe', elevationM: 1024 }, lowestPoint: { name: 'Mediterranean Sea', elevationM: 0 },
+      // the UN buffer zone (Green Line) separates it from the Republic of Cyprus
+      coastlineKm: null, borders: ['CYP'],
+      terrain: 'The Kyrenia mountain range along the north coast, the central Mesaoria plain, and the long Karpas peninsula to the north-east',
+      climate: 'Mediterranean; hot, dry summers and mild, wet winters',
+    },
+    economy: {
+      gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Turkish Lira', currencyCode: 'TRY', currencySymbol: '₺',
+      majorIndustries: ['Tourism', 'Higher education', 'Construction', 'Agriculture (citrus)'],
+      mainExports: [],
+    },
     longevity: longevityFrom({ year: 1983, event: 'Turkish Republic of Northern Cyprus declared (15 November 1983)', era: 'Self-declared state, recognised only by Türkiye', constitutionYear: 1985, independence: '15 November 1983 (declared)' }),
     governance: { headOfState: 'Tufan Erhürman', headOfGovernment: 'Ünal Üstel', governmentType: 'Unrecognised semi-presidential republic (recognised only by Türkiye)', unMemberSince: 0, nationalMotto: null, nationalDay: 'Republic Day, 15 November (1983)' },
-    culture: { officialLanguages: ['Turkish'], majorReligions: ['Sunni Muslim'] },
+    culture: {
+      officialLanguages: ['Turkish'], majorReligions: ['Sunni Muslim'], unescoSitesCount: 0,
+      famousLandmarks: ['Kyrenia Castle', 'St. Hilarion Castle', 'Bellapais Abbey', 'Salamis', 'Othello Castle (Famagusta)'],
+      interestingFacts: [
+        'Only Türkiye recognises it, and Turkish troops have been stationed in the north since 1974.',
+        'North Nicosia is the northern half of Nicosia, divided by the UN buffer zone that runs through the old city.',
+        'Universities are a major part of the economy, with tens of thousands of international students.',
+      ],
+    },
+    // reached through Türkiye's code; .tr domains
+    details: { callingCode: '+90 392', timeZone: 'UTC+2', drivingSide: 'Left' },
     military: NO_MILITARY_DATA,
   },
   'Indian Ocean Ter.': {
@@ -750,13 +927,31 @@ const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string
     capital: 'Flying Fish Cove',
     largestCity: 'Flying Fish Cove',
     // Christmas Island (1,692) and Cocos (Keeling) Islands (593), 2021 Australian census
-    demographics: { population: 2285, densityPerKm2: 15.3, lifeExpectancy: 0 },
+    demographics: { population: 2285, densityPerKm2: 15.3, lifeExpectancy: 0, urbanPercentage: 0 },
     // Christmas Island 135 km² + Cocos (Keeling) Islands 14 km²
-    geography: { areaKm2: 149, highestPoint: { name: 'Murray Hill (Christmas Island)', elevationM: 361 } },
-    economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Australian Dollar', currencyCode: 'AUD', currencySymbol: '$' },
+    // Factbook coastlines: Christmas Island 138.9 km, Cocos (Keeling) Islands 2.6 km
+    geography: {
+      areaKm2: 149, areaSqMi: 58, highestPoint: { name: 'Murray Hill (Christmas Island)', elevationM: 361 }, lowestPoint: { name: 'Indian Ocean', elevationM: 0 },
+      coastlineKm: 141.5, borders: [],
+      terrain: 'Christmas Island is a steep-sided limestone plateau; the Cocos (Keeling) Islands are two low-lying coral atolls',
+      climate: 'Tropical, with a wet season from about December to April and south-east trade winds the rest of the year',
+    },
+    economy: {
+      gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Australian Dollar', currencyCode: 'AUD', currencySymbol: '$',
+      majorIndustries: ['Phosphate mining', 'Tourism', 'Government services'],
+      mainExports: ['Phosphate'],
+    },
     longevity: longevityFrom({ year: 1955, event: 'Cocos (Keeling) Islands transferred to Australia (1955); Christmas Island followed in 1958', era: 'External territory of Australia (two island groups)', constitutionYear: null }),
     governance: { headOfState: 'Charles III', headOfGovernment: 'Administrator (appointed by Australia)', governmentType: 'External territories of Australia', unMemberSince: 0, nationalMotto: null, nationalDay: 'Australia Day, 26 January' },
-    culture: { officialLanguages: ['English', 'Malay'], majorReligions: ['Muslim', 'Buddhist', 'Christian'] },
+    culture: {
+      officialLanguages: ['English', 'Malay'], majorReligions: ['Muslim', 'Buddhist', 'Christian'], unescoSitesCount: 0,
+      famousLandmarks: ['Christmas Island National Park', 'Flying Fish Cove', 'Pulu Keeling National Park', 'Direction Island'],
+      interestingFacts: [
+        'Every year tens of millions of red crabs migrate from the Christmas Island forest to the sea to spawn.',
+        "Phosphate mining has been Christmas Island's main industry since the end of the 19th century.",
+        'On the Cocos (Keeling) Islands, most Cocos Malays live on Home Island while the administration is on West Island.',
+      ],
+    },
     military: { ...NO_MILITARY_DATA, tier: 'No Armed Forces' },
   },
   'Siachen Glacier': {
@@ -765,11 +960,28 @@ const SKIP_FACTS: Record<string, Record<string, Record<string, unknown> | string
     capital: 'None (military outposts only)',
     largestCity: 'None',
     demographics: { population: 0, densityPerKm2: 0, lifeExpectancy: 0, urbanPercentage: 0, medianAge: 0 },
-    geography: { highestPoint: { name: 'Teram Kangri I', elevationM: 7462 } },
-    economy: { gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Indian Rupee', currencyCode: 'INR', currencySymbol: '₹' },
+    geography: {
+      highestPoint: { name: 'Teram Kangri I', elevationM: 7462 }, lowestPoint: { name: 'Glacier snout (Nubra valley)', elevationM: 3620 },
+      // landlocked; it meets India's Ladakh, Pakistan's Gilgit-Baltistan and the Chinese-held Shaksgam valley
+      coastlineKm: 0, borders: ['IND', 'PAK', 'CHN'],
+      terrain: 'Glaciated high mountains in the eastern Karakoram; the Siachen Glacier is about 76 km long, one of the longest outside the polar regions',
+      climate: 'Polar high-altitude; winter temperatures fall below −50 °C, with heavy snowfall and frequent avalanches',
+    },
+    economy: {
+      gdpNominalUSD: 0, gdpPerCapitaUSD: 0, currencyName: 'Indian Rupee', currencyCode: 'INR', currencySymbol: '₹',
+      majorIndustries: [], mainExports: [],
+    },
     longevity: longevityFrom({ year: 1984, event: 'Indian forces took control in Operation Meghdoot (13 April 1984)', era: 'Disputed territory (administered by India, claimed by Pakistan)', constitutionYear: null }),
     governance: { headOfState: 'Disputed (administered by India)', headOfGovernment: 'Disputed (administered by India)', governmentType: 'Disputed territory', unMemberSince: 0, nationalMotto: null, nationalDay: 'None (no permanent population)' },
-    culture: { officialLanguages: [], majorReligions: ['None (no permanent population)'] },
+    culture: {
+      officialLanguages: [], majorReligions: ['None (no permanent population)'], unescoSitesCount: 0,
+      famousLandmarks: ['Siachen Glacier', 'Saltoro Ridge', 'Sia La', 'Bilafond La', 'Indira Col'],
+      interestingFacts: [
+        "Often called the world's highest battlefield, with military posts above 6,000 m.",
+        'Far more soldiers have died there from cold, avalanches and altitude than from combat.',
+        'Meltwater from the glacier feeds the Nubra River, which flows into the Shyok and on to the Indus.',
+      ],
+    },
     military: { ...NO_MILITARY_DATA, tier: 'No Armed Forces' },
   },
 };
@@ -881,13 +1093,15 @@ async function main() {
         Object.assign(patch.economy, { currencyName: cur?.name || fbName || code, currencyCode: code, currencySymbol: cur?.symbol || code });
       }
       else missing.push('currency');
-      if (fb?.industries.length) patch.economy.majorIndustries = fb.industries;
-      if (fb?.exports.length) patch.economy.mainExports = fb.exports;
-      if (fb?.climate) patch.geography.climate = fb.climate;
-      if (fb?.terrain) patch.geography.terrain = fb.terrain;
+      // Without a source the template text goes, and the app hides the empty field
+      patch.economy.majorIndustries = fb?.industries.length ? fb.industries : [];
+      patch.economy.mainExports = fb?.exports.length ? fb.exports : [];
+      patch.geography.climate = fb?.climate || '';
+      patch.geography.terrain = fb?.terrain || '';
       if (fb?.highestPoint) patch.geography.highestPoint = fb.highestPoint;
       else missing.push('highest point');
-      if (fb?.lowestPoint) patch.geography.lowestPoint = fb.lowestPoint;
+      patch.geography.lowestPoint = fb?.lowestPoint || null;
+      if (fb?.coastlineKm === undefined) patch.geography.coastlineKm = null;
       if (fb?.governmentType) patch.governance.governmentType = fb.governmentType;
       if (fb?.nationalDay) patch.governance.nationalDay = fb.nationalDay;
       patch.governance.nationalMotto = (MOTTO_OVERRIDES[iso] ?? wd.motto[iso]) || null;
@@ -897,8 +1111,8 @@ async function main() {
       const religions = RELIGION_OVERRIDES[iso] ?? fb?.religions;
       if (religions?.length) patch.culture.majorReligions = religions;
       else missing.push('religions');
-      if (wd.heritage[iso]?.top.length) patch.culture.famousLandmarks = wd.heritage[iso].top;
-      if (fb?.notes.length) patch.culture.interestingFacts = fb.notes.slice(0, 3);
+      patch.culture.famousLandmarks = wd.heritage[iso]?.top.length ? wd.heritage[iso].top : [];
+      patch.culture.interestingFacts = fb?.notes.length ? fb.notes.slice(0, 3) : [];
       if (fb?.conscription) patch.military.conscription = fb.conscription;
       const alliances = wd.alliances[iso];
       if (alliances?.length) patch.military.alliances = [...new Set(alliances)];
@@ -933,12 +1147,25 @@ async function main() {
       } else patch.longevity.foundationEvent = `Statehood established (${year < 0 ? `${-year} BCE` : year})`;
     }
 
+    // Dossier details: every country, only what a source states
+    const details: any = { ...fb?.details, callingCode: wd.callingCode[iso], drivingSide: wd.drivingSide[iso], hdi: wd.hdi[iso] };
+    details.organizations = [...(details.organizations || []), ...Object.keys(CURRENT_MEMBERS).filter((org) => CURRENT_MEMBERS[org].includes(iso))];
+    for (const [k, v] of Object.entries(details)) if (v === undefined || (Array.isArray(v) && !v.length)) delete details[k];
+    patch.details = details;
+
     // Places no source measures: 0 means "not measured" and the app shows N/A
     if (GOVERNANCE_FIXES[iso]) Object.assign((patch.governance ||= {}), GOVERNANCE_FIXES[iso]);
     const manual = MANUAL_FACTS[iso];
     if (manual) {
       for (const [section, fields] of Object.entries(manual)) Object.assign((patch[section] ||= {}), fields);
       missing.length = 0;
+    }
+
+    // Only UN members keep the "United Nations Member" alliance badge
+    const unSince = patch.governance?.unMemberSince ?? c.governance.unMemberSince;
+    const allianceList: string[] = patch.military?.alliances ?? c.military.alliances;
+    if (!unSince && allianceList.includes('United Nations Member')) {
+      (patch.military ||= {}).alliances = allianceList.filter((a) => a !== 'United Nations Member');
     }
 
     for (const k of Object.keys(patch)) if (!Object.keys(patch[k]).length) delete patch[k];

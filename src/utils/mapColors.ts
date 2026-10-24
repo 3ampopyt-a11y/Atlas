@@ -126,7 +126,7 @@ export function getCountryFillColor(
       }
 
       // Maritime oceanic nations
-      if (country.geography.coastlineKm > 10000 || ['JP', 'NZ', 'PH', 'GB', 'ID'].includes(code)) {
+      if ((country.geography.coastlineKm ?? 0) > 10000 || ['JP', 'NZ', 'PH', 'GB', 'ID'].includes(code)) {
         return isHovered ? '#38bdf8' : '#0284c7'; // Maritime oceanic nation
       }
 

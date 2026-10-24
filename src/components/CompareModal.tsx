@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CountryData } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
-import { formatBudget, formatGdp, formatPerCapita, formatPersonnel, formatPopulation, formatArea, formatLongevity, getNuclearBadge } from '../utils/formatters.ts';
+import { formatBudget, formatGdp, formatPerCapita, formatPersonnel, formatPopulation, formatArea, formatLongevity, getNuclearBadge, formatGfpRank } from '../utils/formatters.ts';
 import { getAlliancesFor } from '../utils/allianceData.ts';
 import { getCountryCulinaryProfile } from '../utils/nationalFoodsData.ts';
 import { getDetailedMilitary } from '../utils/militaryData.ts';
@@ -122,7 +122,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 <div>
                   <div className="font-bold text-slate-100 text-sm">{country.name}</div>
                   <div className="text-[10px] text-slate-400">
-                    GFP #{country.military.globalRank} • Alive {country.longevity.yearsAlive.toLocaleString()} yrs
+                    {formatGfpRank(country.military)} • Alive {country.longevity.yearsAlive.toLocaleString()} yrs
                   </div>
                 </div>
               </div>

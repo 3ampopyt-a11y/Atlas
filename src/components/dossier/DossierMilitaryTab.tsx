@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
-import { formatPersonnel, formatBudget } from '../../utils/formatters.ts';
+import { formatPersonnel, formatBudget, getUnStatus } from '../../utils/formatters.ts';
 import { getDetailedMilitary } from '../../utils/militaryData.ts';
 import { getAlliancesFor } from '../../utils/allianceData.ts';
 import { AllianceCard } from '../AllianceCard.tsx';
@@ -39,6 +39,8 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
   const [subTab, setSubTab] = useState<MilitarySubCategory>('all');
   const alliances = useMemo(() => getAlliancesFor(country), [country]);
   const mil = useMemo(() => getDetailedMilitary(country), [country]);
+  // No forces of its own and no Global Firepower rank: show no estimated inventories
+  const noForces = mil.totalMilitaryPersonnel === 0 && mil.powerIndex === 0;
 
   // Active / Reserve percentages for proportional display
   const activePct = mil.totalMilitaryPersonnel > 0
@@ -58,14 +60,14 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400 font-mono font-black text-sm shadow-md">
-              #{mil.globalRank}
+              {mil.powerIndex > 0 ? `#${mil.globalRank}` : '—'}
             </div>
             <div>
               <div className="text-[10px] uppercase font-mono tracking-wider text-slate-400 font-bold">
                 Global Firepower Ranking
               </div>
               <div className="font-black text-base text-slate-100 flex items-center gap-2">
-                <span>PowerIndex {mil.powerIndex.toFixed(4)}</span>
+                <span>{mil.powerIndex > 0 ? `PowerIndex ${mil.powerIndex.toFixed(4)}` : 'Not ranked'}</span>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/40">
                   {mil.tier}
                 </span>
@@ -76,11 +78,13 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           <div className="text-right">
             <div className="text-[10px] font-mono text-slate-400 uppercase">Annual Defense Budget</div>
             <div className="font-mono font-black text-cyan-300 text-base">
-              {formatBudget(mil.defenseBudgetUSD)}
+              {mil.defenseBudgetUSD > 0 ? formatBudget(mil.defenseBudgetUSD) : 'None of its own'}
             </div>
-            <div className="text-[10.5px] text-slate-400">
-              <span className="text-slate-300 font-bold">{mil.defenseBudgetPercentGDP}%</span> of GDP • ~${mil.perCapitaBudgetUSD}/person
-            </div>
+            {mil.defenseBudgetUSD > 0 && (
+              <div className="text-[10.5px] text-slate-400">
+                <span className="text-slate-300 font-bold">{mil.defenseBudgetPercentGDP}%</span> of GDP{mil.perCapitaBudgetUSD > 0 && ` • ~$${mil.perCapitaBudgetUSD}/person`}
+              </div>
+            )}
           </div>
         </div>
 
@@ -90,7 +94,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
             <span className="text-2xl">{nuclearBadge.icon}</span>
             <div>
               <div className="font-bold text-xs sm:text-sm">{mil.nuclearStatus}</div>
-              <div className="text-[10.5px] opacity-80">{mil.nuclearTriad}</div>
+              {!noForces && <div className="text-[10.5px] opacity-80">{mil.nuclearTriad}</div>}
             </div>
           </div>
           <div className="text-right font-mono font-bold text-sm sm:text-base shrink-0">
@@ -101,7 +105,15 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         </div>
       </div>
 
+      {noForces && (
+        <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+          {country.name} has no armed forces of its own listed by Global Firepower or the CIA World Factbook, so no troop,
+          equipment or fleet figures are shown.
+        </div>
+      )}
+
       {/* 2. Quick Navigation Filter Chips */}
+      {!noForces && (
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
         <button
           onClick={() => setSubTab('all')}
@@ -164,11 +176,12 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           🎯 Air Defense & Doctrine
         </button>
       </div>
+      )}
 
       {/* ========================================================================= */}
       {/* SECTION A: PERSONNEL & RESERVES                                           */}
       {/* ========================================================================= */}
-      {(subTab === 'all' || subTab === 'personnel') && (
+      {!noForces && (subTab === 'all' || subTab === 'personnel') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -284,7 +297,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {/* ========================================================================= */}
       {/* SECTION B: LAND VEHICLES & GROUND FORCES                                  */}
       {/* ========================================================================= */}
-      {(subTab === 'all' || subTab === 'vehicles') && (
+      {!noForces && (subTab === 'all' || subTab === 'vehicles') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -367,7 +380,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {/* ========================================================================= */}
       {/* SECTION C: AIRCRAFT FLEET & AIR COMBAT WING                               */}
       {/* ========================================================================= */}
-      {(subTab === 'all' || subTab === 'aircraft') && (
+      {!noForces && (subTab === 'all' || subTab === 'aircraft') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -461,7 +474,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {/* ========================================================================= */}
       {/* SECTION D: NAVAL FLEET & WARSHIPS                                         */}
       {/* ========================================================================= */}
-      {(subTab === 'all' || subTab === 'naval') && (
+      {!noForces && (subTab === 'all' || subTab === 'naval') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -564,11 +577,12 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {(subTab === 'all' || subTab === 'defense') && (
         <div className="space-y-3">
           {/* Air & Missile Defense System */}
+          {(!noForces || details.missileDefense) && (
           <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
               <Radio className="w-4 h-4 text-sky-400" /> Air & Missile Defense Infrastructure
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            {!noForces && <div className="flex flex-wrap gap-1.5">
               {mil.airDefenseSystems.map((sys, idx) => (
                 <span
                   key={idx}
@@ -578,65 +592,78 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
                   <span>{sys}</span>
                 </span>
               ))}
-            </div>
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mt-1">
-              {details.missileDefense}
-            </p>
+            </div>}
+            {details.missileDefense && (
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mt-1">
+                {details.missileDefense}
+              </p>
+            )}
           </div>
+          )}
 
           {/* Strategic Doctrine & Cyber Command */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-1.5">
-              <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-                <Crosshair className="w-4 h-4 text-rose-400" /> Strategic Military Doctrine
-              </div>
-              <p className="text-slate-300 leading-relaxed text-xs">
-                {details.strategicDoctrine}
-              </p>
-            </div>
+          {(details.strategicDoctrine || details.cyberSpaceCapability) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              {details.strategicDoctrine && (
+                <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-1.5">
+                  <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                    <Crosshair className="w-4 h-4 text-rose-400" /> Strategic Military Doctrine
+                  </div>
+                  <p className="text-slate-300 leading-relaxed text-xs">
+                    {details.strategicDoctrine}
+                  </p>
+                </div>
+              )}
 
-            <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-1.5">
-              <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-                <Cpu className="w-4 h-4 text-purple-400" /> Space & Cyberspace Defense
-              </div>
-              <p className="text-slate-300 leading-relaxed text-xs">
-                {details.cyberSpaceCapability}
-              </p>
+              {details.cyberSpaceCapability && (
+                <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-1.5">
+                  <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                    <Cpu className="w-4 h-4 text-purple-400" /> Space & Cyberspace Defense
+                  </div>
+                  <p className="text-slate-300 leading-relaxed text-xs">
+                    {details.cyberSpaceCapability}
+                  </p>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Armed Forces Branches */}
-          <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
-            <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
-              <Sword className="w-4 h-4 text-amber-400" /> Armed Forces Service Branches
+          {details.armedForcesBranches && (
+            <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
+              <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
+                <Sword className="w-4 h-4 text-amber-400" /> Military & Security Forces
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {details.armedForcesBranches.map((branch, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-[11px] font-semibold flex items-center gap-1.5"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    <span>{branch}</span>
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {details.armedForcesBranches.map((branch, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-[11px] font-semibold flex items-center gap-1.5"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span>{branch}</span>
-                </span>
-              ))}
-            </div>
-          </div>
+          )}
 
           {/* Defense Contractors */}
-          <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
-            <div className="font-bold text-slate-200 text-xs">Leading Defense Industry & Contractors</div>
-            <div className="flex flex-wrap gap-1.5">
-              {details.defenseContractors.map((c, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px]"
-                >
-                  {c}
-                </span>
-              ))}
+          {details.defenseContractors && (
+            <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
+              <div className="font-bold text-slate-200 text-xs">Leading Defense Industry & Contractors</div>
+              <div className="flex flex-wrap gap-1.5">
+                {details.defenseContractors.map((c, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[11px]"
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -657,10 +684,21 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           {alliances.length === 0 ? (
             <div className="p-4 rounded-3xl bg-slate-900/60 border border-slate-800 text-center space-y-1.5">
               <div className="text-2xl">🕊️</div>
-              <div className="font-bold text-slate-200 text-xs">Neutral / Non-Aligned Sovereign State</div>
-              <p className="text-slate-400 text-xs max-w-md mx-auto">
-                {country.name} does not hold formal binding mutual defense commitments with external military pacts, maintaining independent foreign and security policy.
-              </p>
+              {getUnStatus(country) !== 'Not a UN Member' || country.longevity.sovereignEra === 'Sovereign State' ? (
+                <>
+                  <div className="font-bold text-slate-200 text-xs">Neutral / Non-Aligned Sovereign State</div>
+                  <p className="text-slate-400 text-xs max-w-md mx-auto">
+                    {country.name} does not hold formal binding mutual defense commitments with external military pacts, maintaining independent foreign and security policy.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-slate-200 text-xs">No Alliance Memberships of Its Own</div>
+                  <p className="text-slate-400 text-xs max-w-md mx-auto">
+                    {country.name} is not a sovereign state and holds no defence pacts in its own name.
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <div className="space-y-3">

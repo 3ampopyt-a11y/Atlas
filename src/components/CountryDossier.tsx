@@ -6,6 +6,7 @@ import {
   formatPersonnel,
   formatPopulation,
   getNuclearBadge,
+  getUnStatus,
 } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo, fetchLiveCountryUpdate } from '../utils/sovereignData.ts';
 import { getAlliancesFor } from '../utils/allianceData.ts';
@@ -295,9 +296,11 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                       {country.code3}
                     </span>
                   )}
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
-                    GFP #{country.military.globalRank}
-                  </span>
+                  {country.military.powerIndex > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
+                      GFP #{country.military.globalRank}
+                    </span>
+                  )}
                   {leadingProfile && (
                     <button
                       onClick={() => {
@@ -347,7 +350,11 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                       ))
                     ) : (
                       <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                        <span>🕊️ Neutral State</span>
+                        <span>
+                          {getUnStatus(country) !== 'Not a UN Member' || country.longevity.sovereignEra === 'Sovereign State'
+                            ? '🕊️ Neutral State'
+                            : 'No alliances of its own'}
+                        </span>
                       </span>
                     )}
                     {alliances.length > 3 && (
@@ -484,9 +491,11 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                     <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/30">
                       Alive {country.longevity.yearsAlive.toLocaleString()} yrs
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono text-[11px] font-bold border border-cyan-500/30">
-                      GFP #{country.military.globalRank}
-                    </span>
+                    {country.military.powerIndex > 0 && (
+                      <span className="px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono text-[11px] font-bold border border-cyan-500/30">
+                        GFP #{country.military.globalRank}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -523,7 +532,7 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                   <div className="flex justify-between py-1 border-b border-slate-800">
                     <span className="text-slate-400">Languages:</span>
                     <span className="font-semibold text-slate-200 text-right max-w-[170px] truncate" title={sovereignState.languages.join(', ')}>
-                      {sovereignState.languages.join(', ')}
+                      {sovereignState.languages.join(', ') || 'None'}
                     </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-800">
@@ -538,17 +547,19 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                       {country.military.nuclearStatus}
                     </span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-800">
-                    <span className="text-slate-400">National Sport:</span>
-                    <button
-                      onClick={() => setActiveTab('culture')}
-                      className="font-semibold text-emerald-400 hover:underline text-right max-w-[160px] truncate flex items-center gap-1 justify-end"
-                      title={nationalSport.sportName}
-                    >
-                      <span>{nationalSport.emoji}</span>
-                      <span className="truncate">{nationalSport.sportName.split('(')[0].trim()}</span>
-                    </button>
-                  </div>
+                  {nationalSport && (
+                    <div className="flex justify-between py-1 border-b border-slate-800">
+                      <span className="text-slate-400">National Sport:</span>
+                      <button
+                        onClick={() => setActiveTab('culture')}
+                        className="font-semibold text-emerald-400 hover:underline text-right max-w-[160px] truncate flex items-center gap-1 justify-end"
+                        title={nationalSport.sportName}
+                      >
+                        <span>{nationalSport.emoji}</span>
+                        <span className="truncate">{nationalSport.sportName.split('(')[0].trim()}</span>
+                      </button>
+                    </div>
+                  )}
                   {leadingProfile && (
                     <div className="flex justify-between py-1">
                       <span className="text-amber-400 flex items-center gap-1 font-semibold">

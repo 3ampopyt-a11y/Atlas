@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CountryData, ContinentFilter, MapMetricMode } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
 import { CountryFlag } from './CountryFlag.tsx';
+import { formatGfpRank } from '../utils/formatters.ts';
 import {
   Search,
   Shuffle,
@@ -272,7 +273,7 @@ export const TopNav: React.FC<TopNavProps> = ({
                   </div>
                   <div className="text-right text-[10px]">
                     <span className="text-amber-400 font-mono font-semibold block">
-                      GFP #{c.military.globalRank}
+                      {formatGfpRank(c.military)}
                     </span>
                     <span className="text-emerald-400 font-medium">
                       Alive {c.longevity.yearsAlive.toLocaleString()} yrs

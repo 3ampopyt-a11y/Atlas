@@ -4,20 +4,25 @@ import { getUnStatus } from '../utils/formatters.ts';
 export interface HistoricalMilestone {
   year: string;
   title: string;
-  description: string;
+  description?: string;
 }
 
 export interface EconomicSectors {
   agriculture: number; // % of GDP
   industry: number; // % of GDP
   services: number; // % of GDP
+  year?: number;
 }
 
 export interface InfrastructureHighlights {
-  mainAirports: string[];
-  majorPorts: string[];
-  highSpeedRailStatus: string;
-  cleanEnergyPercent: number;
+  mainAirports?: string[];
+  airportCount?: number;
+  majorPorts?: string[];
+  highSpeedRailStatus?: string;
+  railwaysKm?: number;
+  cleanEnergyPercent?: number;
+  // 'generation': share of electricity generated (curated); 'capacity': non-fossil share of installed capacity (Factbook)
+  cleanEnergyBasis?: 'generation' | 'capacity';
 }
 
 export interface CulturalHeritageHighlights {
@@ -26,35 +31,40 @@ export interface CulturalHeritageHighlights {
   globalContributions: string[];
 }
 
+// Hand-written profiles fill every field; for other countries a field is only set when a source has it
 export interface ExtendedCountryDetails {
   overview: string;
-  foundingFigures: string[];
-  historicalPredecessors: string[];
-  strategicDoctrine: string;
-  missileDefense: string;
-  cyberSpaceCapability: string;
-  defenseContractors: string[];
-  naturalResources: string[];
-  topTradingPartners: string[];
-  hdiScore: number;
-  hdiTier: 'Very High' | 'High' | 'Medium' | 'Low';
-  drivingSide: 'Right' | 'Left';
-  callingCode: string;
-  tld: string;
-  timeZones: string[];
-  majorRivers: string[];
-  majorMountainRanges: string[];
+  foundingFigures?: string[];
+  historicalPredecessors?: string[];
+  strategicDoctrine?: string;
+  missileDefense?: string;
+  cyberSpaceCapability?: string;
+  defenseContractors?: string[];
+  naturalResources?: string[];
+  topTradingPartners?: string[];
+  exportPartners?: string[];
+  importPartners?: string[];
+  hdiScore?: number;
+  hdiYear?: number;
+  hdiTier?: 'Very High' | 'High' | 'Medium' | 'Low';
+  drivingSide?: 'Right' | 'Left';
+  callingCode?: string;
+  tld?: string;
+  timeZones?: string[];
+  timeZoneNote?: string;
+  majorRivers?: string[];
+  majorMountainRanges?: string[];
   nationalAnimal?: string;
   nationalSymbol?: string;
   nationalSport?: string;
   // Extended intelligence fields:
-  armedForcesBranches: string[];
-  primaryWeapons: string[];
+  armedForcesBranches?: string[];
+  primaryWeapons?: string[];
   historicalMilestones: HistoricalMilestone[];
-  economicSectors: EconomicSectors;
-  infrastructureHighlights: InfrastructureHighlights;
-  culturalHeritageHighlights: CulturalHeritageHighlights;
-  climateBiomes: string[];
+  economicSectors?: EconomicSectors;
+  infrastructureHighlights?: InfrastructureHighlights;
+  culturalHeritageHighlights?: CulturalHeritageHighlights;
+  climateBiomes?: string[];
   internationalMemberships: string[];
 }
 
@@ -453,232 +463,112 @@ const CURATED_DETAILS: Record<string, Partial<ExtendedCountryDetails>> = {
   },
 };
 
-// Procedural generator to provide rich, coherent data for every country on Earth
+// Alliance short names that the organisation list spells out
+const MEMBERSHIP_NAMES: Record<string, string> = {
+  GCC: 'Gulf Cooperation Council',
+  OAS: 'Organization of American States',
+  Commonwealth: 'Commonwealth of Nations',
+  CIS: 'Commonwealth of Independent States',
+  SCO: 'Shanghai Cooperation Organisation',
+};
+
+// UNDP Human Development Report tiers
+const hdiTierFor = (score: number): ExtendedCountryDetails['hdiTier'] =>
+  score >= 0.8 ? 'Very High' : score >= 0.7 ? 'High' : score >= 0.55 ? 'Medium' : 'Low';
+
+const yearLabel = (year: number) => (year < 0 ? `${Math.abs(year)} BCE` : `${year} CE`);
+const nonEmpty = <T,>(list?: T[]) => (list && list.length ? list : undefined);
+
+// Dossier details: hand-written profiles for the countries in CURATED_DETAILS; for every other country only
+// what countryFacts.json has from a source (CIA World Factbook, Wikidata). Missing fields stay undefined and
+// the dossier hides them.
 export function getDetailedCountryInfo(country: CountryData): ExtendedCountryDetails {
   const curated = CURATED_DETAILS[country.id];
+  const facts = country.details || {};
+  const { longevity, geography, demographics, military } = country;
 
-  // Base fallback logic for any of the 240+ countries
   // Territories, dependencies and unrecognised states carry their status in sovereignEra
-  const isSovereign = getUnStatus(country) !== 'Not a UN Member' || country.longevity.sovereignEra === 'Sovereign State';
-  const era = country.longevity.sovereignEra;
+  const isSovereign = getUnStatus(country) !== 'Not a UN Member' || longevity.sovereignEra === 'Sovereign State';
+  const era = longevity.sovereignEra;
   const fullName = country.officialName && country.officialName !== country.name ? `${country.name} (${country.officialName})` : country.name;
-  const foundedIn = country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE';
-  const defaultOverview =
+  const people = demographics.population > 0 ? `a population of ${demographics.population.toLocaleString()}` : 'no permanent population';
+  const status = isSovereign
+    ? `a sovereign state in ${country.subregion}, ${country.continent}`
+    : `${/^[aeiou]/i.test(era) ? 'an' : 'a'} ${/^[A-Z][a-z]/.test(era) && !/^British\b/.test(era) ? era.charAt(0).toLowerCase() + era.slice(1) : era} in ${country.subregion}, ${country.continent}`;
+  // Countries Global Firepower does not rank carry powerIndex 0
+  const firepower = military.powerIndex > 0 ? ` Global Firepower ranks its military #${military.globalRank}.` : '';
+  const overview =
     curated?.overview ||
-    (isSovereign ? null : `${fullName} is ${/^[aeiou]/i.test(era) ? 'an' : 'a'} ${/^[A-Z][a-z]/.test(era) && !/^British\b/.test(era) ? era.charAt(0).toLowerCase() + era.slice(1) : era} in ${country.subregion}, ${country.continent}. Its current status dates from ${foundedIn}: ${country.longevity.foundationEvent}. It covers ${country.geography.areaKm2.toLocaleString()} km² with a population of ${country.demographics.population.toLocaleString()}.`) ||
-    `${fullName} is a sovereign nation located in ${country.subregion}, ${country.continent}. Founded as a sovereign state in ${country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE'} (${country.longevity.foundationEvent}), it has maintained continuous sovereign continuity for over ${country.longevity.yearsAlive.toLocaleString()} years. With an area of ${country.geography.areaKm2.toLocaleString()} km² and a population of ${country.demographics.population.toLocaleString()}, it ranks #${country.military.globalRank} in global firepower with a defense budget of $${country.military.defenseBudgetUSD}B USD.`;
+    `${fullName} is ${status}. Its current status dates from ${yearLabel(longevity.foundationYear)}: ${longevity.foundationEvent}. It covers ${geography.areaKm2.toLocaleString()} km² and has ${people}.${firepower}`;
 
-  const defaultFoundingFigures =
-    curated?.foundingFigures || [
-      `Signatories of the ${country.longevity.foundationEvent}`,
-      `Founding Council of ${country.capital}`,
-      `Historic Sovereigns of ${country.name}`,
-    ];
+  const milestones: HistoricalMilestone[] = curated?.historicalMilestones || [
+    { year: yearLabel(longevity.foundationYear), title: longevity.foundationEvent, _sort: longevity.foundationYear },
+    ...(longevity.constitutionYear
+      ? [{ year: `${longevity.constitutionYear}`, title: 'Current constitution in force', _sort: longevity.constitutionYear }]
+      : []),
+    ...(country.governance.unMemberSince > 0
+      ? [{ year: `${country.governance.unMemberSince}`, title: 'Admitted to the United Nations', _sort: country.governance.unMemberSince }]
+      : []),
+  ]
+    .sort((a, b) => a._sort - b._sort)
+    .map(({ year, title }) => ({ year, title }));
 
-  const defaultPredecessors =
-    curated?.historicalPredecessors || [
-      `Historic Territory of ${country.name}`,
-      `Traditional Kingdoms of ${country.subregion}`,
-      `Charter Era of ${country.longevity.foundationYear < 0 ? Math.abs(country.longevity.foundationYear) + ' BCE' : country.longevity.foundationYear + ' CE'}`,
-    ];
-
-  const defaultStrategicDoctrine =
-    curated?.strategicDoctrine ||
-    (country.military.alliances.includes('NATO')
-      ? 'NATO Collective Defense (Article 5), Interoperability with Allied Command Operations, and Territorial Sovereignty Defense.'
-      : country.military.tier === 'Superpower' || country.military.tier === 'Great Power'
-      ? 'Global Deterrence, Strategic Projection, and Advanced Anti-Access / Area Denial.'
-      : country.military.tier === 'Regional Power'
-      ? 'Regional Defense Deterrence, Border Protection, and Peacekeeping Operations.'
-      : 'Territorial Defense, National Sovereignty Protection, and International Peacekeeping under UN Mandates.');
-
-  const defaultMissileDefense =
-    curated?.missileDefense ||
-    (country.military.alliances.includes('NATO')
-      ? 'Integrated NATO Air and Missile Defense System (NATINAMDS) with Patriot and NASAMS batteries.'
-      : country.military.totalAircraft > 50
-      ? 'Integrated Medium-to-Short Range Surface-to-Air Missile (SAM) defense and mobile radar tracking batteries.'
-      : 'Short-range tactical air defense, man-portable air-defense systems (MANPADS), and early warning radar stations.');
-
-  const defaultCyber =
-    curated?.cyberSpaceCapability ||
-    `National Cyber Security Agency, Defense Forces Cyber Branch, and sovereign telecommunications defense.`;
-
-  const defaultContractors =
-    curated?.defenseContractors || [
-      `${country.name} State Defense Works`,
-      `National Ordnance & Aviation Works`,
-      `Maritime Systems of ${country.capital}`,
-    ];
-
-  const defaultResources =
-    curated?.naturalResources || [
-      ...country.economy.mainExports,
-      'Arable Land',
-      'Freshwater Reserves',
-      'Renewable Energy Potential',
-      'Mineral Deposits',
-    ];
-
-  const defaultTrading =
-    curated?.topTradingPartners || [
-      country.geography.borders[0] || 'Regional Neighbors',
-      country.geography.borders[1] || 'United States',
-      'European Union',
-      'China',
-      'United Kingdom',
-    ];
-
-  const defaultHdiScore =
-    curated?.hdiScore ||
-    (country.continent === 'Europe' || country.continent === 'North America' ? 0.905 : 0.745);
-
-  const defaultHdiTier =
-    curated?.hdiTier ||
-    (defaultHdiScore >= 0.8 ? 'Very High' : defaultHdiScore >= 0.7 ? 'High' : 'Medium');
-
-  const defaultDriving =
-    curated?.drivingSide ||
-    (['United Kingdom', 'Japan', 'Australia', 'India', 'South Africa', 'New Zealand', 'Ireland', 'Singapore', 'Malaysia', 'Pakistan', 'Cyprus', 'Malta'].includes(country.name)
-      ? 'Left'
-      : 'Right');
-
-  const defaultCallingCode =
-    curated?.callingCode ||
-    (country.code === 'US' ? '+1' : country.code === 'GB' ? '+44' : country.code === 'FR' ? '+33' : `+${Math.floor(country.coordinates[0] % 90 + 100)}`);
-
-  const defaultTld = curated?.tld || `.${country.code.toLowerCase()}`;
-
-  const defaultTimeZones =
-    curated?.timeZones || [
-      `UTC${country.coordinates[0] >= 0 ? '+' : ''}${Math.round(country.coordinates[0] / 15)}:00`,
-    ];
-
-  const defaultRivers =
-    curated?.majorRivers || [
-      `Principal waterways of ${country.name}`,
-      `Basins surrounding ${country.capital}`,
-    ];
-
-  const defaultMountains =
-    curated?.majorMountainRanges || [
-      `${country.geography.highestPoint.name} (${country.geography.highestPoint.elevationM}m)`,
-      `Highlands of ${country.subregion}`,
-    ];
-
-  const defaultBranches =
-    curated?.armedForcesBranches || [
-      `${country.name} Army / Land Forces`,
-      `${country.name} Air Force`,
-      ...(country.geography.coastlineKm > 0 ? [`${country.name} Navy / Coast Guard`] : []),
-      `National Reserve Corps`,
-    ];
-
-  const defaultWeapons =
-    curated?.primaryWeapons || [
-      ...(country.military.combatAircraft > 0 ? [`Multi-Role Tactical Combat Aircraft (${country.military.combatAircraft} units)`] : []),
-      ...(country.military.tanks > 0 ? [`Main Battle Tanks & Armored Combat Vehicles (${country.military.tanks} units)`] : []),
-      ...(country.military.navalFleetTotal > 0 ? [`Offshore Patrol Warships & Coastal Corvettes (${country.military.navalFleetTotal} vessels)`] : []),
-      `Mobile Artillery, Rocket Launchers & Air Defense Batteries`,
-      `Standard Infantry Assault Rifles & Anti-Armor Systems`,
-    ];
-
-  const foundationEra =
-    country.longevity.foundationYear < 0
-      ? `${Math.abs(country.longevity.foundationYear)} BCE`
-      : `${country.longevity.foundationYear} CE`;
-
-  const defaultMilestones =
-    curated?.historicalMilestones || [
-      {
-        year: foundationEra,
-        title: country.longevity.foundationEvent || 'Sovereign Foundation',
-        description: `Official founding and historic establishment of sovereign identity for ${country.name}.`,
-      },
-      {
-        year: country.longevity.constitutionYear ? `${country.longevity.constitutionYear}` : 'Modern Era',
-        title: 'Constitutional Charter & Modern Statehood',
-        description: `Codification of modern governance, borders, and national legal framework.`,
-      },
-      ...(country.governance.unMemberSince > 0
-        ? [{
-            year: `${country.governance.unMemberSince}`,
-            title: 'United Nations Accession',
-            description: `Formal entry into the United Nations, recognized internationally as a sovereign member state.`,
-          }]
-        : []),
-      {
-        year: '21st Century',
-        title: 'Modern Technological & Geopolitical Evolution',
-        description: `Expansion of national infrastructure, international diplomacy, and strategic regional alliances.`,
-      },
-    ];
-
-  const isDeveloped = country.continent === 'Europe' || country.continent === 'North America' || ['Japan', 'South Korea', 'Australia', 'New Zealand', 'Singapore'].includes(country.name);
-  const defaultSectors =
-    curated?.economicSectors || (isDeveloped
-      ? { agriculture: 2.1, industry: 23.4, services: 74.5 }
-      : { agriculture: 14.8, industry: 31.2, services: 54.0 });
-
-  const defaultInfrastructure =
-    curated?.infrastructureHighlights || {
-      mainAirports: [`${country.capital} International Airport`, `Regional Transit Hub`],
-      majorPorts: country.geography.coastlineKm > 0
-        ? [`Port of ${country.capital}`, `National Maritime Gateway`]
-        : [`Inland River & Dry Port Systems`],
-      highSpeedRailStatus: isDeveloped ? 'Standard Express Rail Network & High-Capacity Transit' : 'Intercity Rail Lines & Commercial Transport',
-      cleanEnergyPercent: Math.min(85, Math.max(12, Math.round((country.geography.areaKm2 % 40) + 20))),
-    };
-
-  const defaultHeritage =
-    curated?.culturalHeritageHighlights || {
-      nationalDish: `${country.name} National Dish`,
-      famousHistoricalFigures: [`Historic Leaders and Pioneers of ${country.name}`],
-      globalContributions: [`Cultural heritage, architecture, traditional arts, and scientific contributions`],
-    };
-
-  const defaultBiomes =
-    curated?.climateBiomes || [
-      country.geography.climate.split(',')[0] || 'Temperate Zone',
-      `Regional Forests and Plains of ${country.continent}`,
-    ];
-
-  const defaultMemberships =
+  const memberships =
     curated?.internationalMemberships || [
-      ...(country.governance.unMemberSince > 0 ? ['United Nations (UN)'] : []),
-      ...(country.military.alliances.length > 0 ? country.military.alliances : []),
-      `Regional Union of ${country.continent}`,
-      'World Trade Organization (WTO)',
+      ...new Set([
+        ...(country.governance.unMemberSince > 0 ? ['United Nations (UN)'] : []),
+        ...military.alliances.map((a) => MEMBERSHIP_NAMES[a] || a),
+        ...(facts.organizations || []),
+      ]),
     ];
+
+  const hdiScore = curated?.hdiScore ?? facts.hdi?.score;
+
+  const infrastructure: InfrastructureHighlights | undefined =
+    curated?.infrastructureHighlights
+      ? { ...curated.infrastructureHighlights, cleanEnergyBasis: 'generation' }
+      : facts.airports !== undefined || facts.keyPorts || facts.railwaysKm !== undefined || facts.nonFossilPowerPercent !== undefined
+        ? {
+            airportCount: facts.airports,
+            majorPorts: nonEmpty(facts.keyPorts),
+            railwaysKm: facts.railwaysKm,
+            cleanEnergyPercent: facts.nonFossilPowerPercent,
+            cleanEnergyBasis: 'capacity',
+          }
+        : undefined;
 
   return {
-    overview: defaultOverview,
-    foundingFigures: defaultFoundingFigures,
-    historicalPredecessors: defaultPredecessors,
-    strategicDoctrine: defaultStrategicDoctrine,
-    missileDefense: defaultMissileDefense,
-    cyberSpaceCapability: defaultCyber,
-    defenseContractors: defaultContractors,
-    naturalResources: defaultResources,
-    topTradingPartners: defaultTrading,
-    hdiScore: defaultHdiScore,
-    hdiTier: defaultHdiTier,
-    drivingSide: defaultDriving,
-    callingCode: defaultCallingCode,
-    tld: defaultTld,
-    timeZones: defaultTimeZones,
-    majorRivers: defaultRivers,
-    majorMountainRanges: defaultMountains,
+    overview,
+    foundingFigures: curated?.foundingFigures,
+    historicalPredecessors: curated?.historicalPredecessors,
+    strategicDoctrine: curated?.strategicDoctrine,
+    missileDefense: curated?.missileDefense,
+    cyberSpaceCapability: curated?.cyberSpaceCapability,
+    defenseContractors: curated?.defenseContractors,
+    naturalResources: nonEmpty(facts.naturalResources) || curated?.naturalResources,
+    topTradingPartners: curated?.topTradingPartners,
+    exportPartners: nonEmpty(facts.exportPartners),
+    importPartners: nonEmpty(facts.importPartners),
+    hdiScore,
+    hdiYear: curated?.hdiScore ? undefined : facts.hdi?.year,
+    hdiTier: curated?.hdiTier || (hdiScore !== undefined ? hdiTierFor(hdiScore) : undefined),
+    drivingSide: curated?.drivingSide || facts.drivingSide,
+    callingCode: curated?.callingCode || facts.callingCode,
+    tld: curated?.tld || facts.tld,
+    timeZones: curated?.timeZones || (facts.timeZone ? [`${facts.timeZone} (capital)`] : undefined),
+    timeZoneNote: curated?.timeZones ? undefined : facts.timeZoneNote,
+    majorRivers: curated?.majorRivers || nonEmpty(facts.majorRivers),
+    majorMountainRanges: curated?.majorMountainRanges,
     nationalAnimal: curated?.nationalAnimal,
     nationalSymbol: curated?.nationalSymbol,
     nationalSport: curated?.nationalSport,
-    armedForcesBranches: defaultBranches,
-    primaryWeapons: defaultWeapons,
-    historicalMilestones: defaultMilestones,
-    economicSectors: defaultSectors,
-    infrastructureHighlights: defaultInfrastructure,
-    culturalHeritageHighlights: defaultHeritage,
-    climateBiomes: defaultBiomes,
-    internationalMemberships: defaultMemberships,
+    armedForcesBranches: curated?.armedForcesBranches || nonEmpty(facts.armedForces),
+    primaryWeapons: curated?.primaryWeapons,
+    historicalMilestones: milestones,
+    economicSectors: curated?.economicSectors || facts.gdpBySector,
+    infrastructureHighlights: infrastructure,
+    culturalHeritageHighlights: curated?.culturalHeritageHighlights,
+    climateBiomes: curated?.climateBiomes,
+    internationalMemberships: memberships,
   };
 }
