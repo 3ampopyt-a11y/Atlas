@@ -1,6 +1,7 @@
 import React from 'react';
 import { CountryData, MapMetricMode } from '../types.ts';
 import { getCountryFillColor } from '../utils/mapColors.ts';
+import { getOwnFlagUrl, ownFlagPatternId } from '../utils/ownFlags.ts';
 
 export interface ProjectedCountry {
   id: string;
@@ -86,7 +87,9 @@ export const CountryLayer = React.memo(function CountryLayer({
         // Default color calculation
         let fillColor = getCountryFillColor(country, metricMode, isSelected, isHovered);
         if (metricMode === 'flags' && !isSpotterActive) {
-          if (flagFillEnabled && hasFlagPattern) {
+          if (flagFillEnabled && country && getOwnFlagUrl(country.name)) {
+            fillColor = `url(#${ownFlagPatternId(country.name)})`;
+          } else if (flagFillEnabled && hasFlagPattern) {
             fillColor = `url(#flag-pat-${code})`;
           }
         }

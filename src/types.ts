@@ -41,6 +41,30 @@ export interface MilitaryInfo {
   destroyersFrigates: number;
   alliances: string[];
   conscription: 'Voluntary' | 'Mandatory' | 'Selective / Hybrid' | 'Abolished / None';
+  // Global Firepower's per-category counts; missing where GFP doesn't rank the country
+  inventory?: MilitaryInventory;
+  serviceObligation?: string; // CIA World Factbook "military service age and obligation"
+}
+
+export interface MilitaryInventory {
+  availableManpower?: number;
+  fitForService?: number;
+  fighters?: number;
+  attackAircraft?: number;
+  transports?: number;
+  trainers?: number;
+  specialMission?: number;
+  tankers?: number;
+  helicopters?: number;
+  selfPropelledArtillery?: number;
+  towedArtillery?: number;
+  rocketArtillery?: number;
+  helicopterCarriers?: number;
+  destroyers?: number;
+  frigates?: number;
+  corvettes?: number;
+  patrolVessels?: number;
+  mineWarfare?: number;
 }
 
 export interface GeographyInfo {

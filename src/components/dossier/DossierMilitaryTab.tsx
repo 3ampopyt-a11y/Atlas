@@ -41,6 +41,9 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
   const mil = useMemo(() => getDetailedMilitary(country), [country]);
   // No forces of its own and no Global Firepower rank: show no estimated inventories
   const noForces = mil.totalMilitaryPersonnel === 0 && mil.powerIndex === 0;
+  // Equipment counts come from Global Firepower only; without a GFP entry there are none to show
+  const showInventory = !noForces && mil.hasInventory;
+  const showNavy = showInventory && mil.navalFleetTotal > 0;
 
   // Active / Reserve percentages for proportional display
   const activePct = mil.totalMilitaryPersonnel > 0
@@ -112,6 +115,13 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         </div>
       )}
 
+      {!noForces && !mil.hasInventory && (
+        <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+          Global Firepower doesn't rank {country.name}, so only the CIA World Factbook's personnel figure is shown and no
+          equipment, aircraft or fleet counts are available.
+        </div>
+      )}
+
       {/* 2. Quick Navigation Filter Chips */}
       {!noForces && (
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
@@ -135,6 +145,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         >
           👥 Reserves & Troops ({formatPersonnel(mil.reservePersonnel)} Res.)
         </button>
+        {showInventory && (
         <button
           onClick={() => setSubTab('vehicles')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border ${
@@ -145,6 +156,8 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         >
           🛡️ Vehicles & Armor ({mil.tanks.toLocaleString()} Tanks)
         </button>
+        )}
+        {showInventory && (
         <button
           onClick={() => setSubTab('aircraft')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border ${
@@ -155,6 +168,8 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         >
           ✈️ Aircraft ({mil.totalAircraft.toLocaleString()} Total)
         </button>
+        )}
+        {showNavy && (
         <button
           onClick={() => setSubTab('naval')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border ${
@@ -165,6 +180,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
         >
           ⚓ Ships & Fleet ({mil.navalFleetTotal} Ships)
         </button>
+        )}
         <button
           onClick={() => setSubTab('defense')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border ${
@@ -270,15 +286,17 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
 
           {/* Manpower Pool & Conscription details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+            {mil.availableManpower > 0 && (
             <div>
               <span className="text-slate-400 font-medium">Available Fit for Combat Service:</span>
               <div className="font-mono font-bold text-slate-200 mt-0.5">
                 {mil.fitForService.toLocaleString()} citizens ({formatPersonnel(mil.fitForService)})
               </div>
               <div className="text-[10.5px] text-slate-500">
-                Out of {mil.availableManpower.toLocaleString()} military-age population
+                Out of {mil.availableManpower.toLocaleString()} available manpower (Global Firepower)
               </div>
             </div>
+            )}
             <div>
               <div className="flex items-center gap-1 text-slate-400 font-medium">
                 <span>Conscription Policy:</span>
@@ -286,9 +304,11 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
                   {mil.conscription}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
-                {mil.conscriptionDetail}
-              </p>
+              {mil.conscriptionDetail && (
+                <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
+                  {mil.conscriptionDetail}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -297,7 +317,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {/* ========================================================================= */}
       {/* SECTION B: LAND VEHICLES & GROUND FORCES                                  */}
       {/* ========================================================================= */}
-      {!noForces && (subTab === 'all' || subTab === 'vehicles') && (
+      {showInventory && (subTab === 'all' || subTab === 'vehicles') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -358,6 +378,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           </div>
 
           {/* Key Armored Vehicle Models */}
+          {mil.flagshipVehicles.length > 0 && (
           <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1.5">
             <div className="text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold">
               Key Armored Combat Hardware & Vehicle Platforms:
@@ -374,13 +395,14 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
               ))}
             </div>
           </div>
+          )}
         </div>
       )}
 
       {/* ========================================================================= */}
       {/* SECTION C: AIRCRAFT FLEET & AIR COMBAT WING                               */}
       {/* ========================================================================= */}
-      {!noForces && (subTab === 'all' || subTab === 'aircraft') && (
+      {showInventory && (subTab === 'all' || subTab === 'aircraft') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -398,7 +420,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
             <div className="p-3 rounded-2xl bg-sky-500/10 border border-sky-500/30">
               <div className="text-[10px] uppercase font-mono text-sky-300 font-bold">Fighters & Interceptors</div>
               <div className="font-mono font-black text-sky-400 text-xl mt-0.5">
-                {mil.combatAircraft.toLocaleString()}
+                {mil.fighters.toLocaleString()}
               </div>
               <div className="text-[9.5px] text-slate-400 mt-0.5">Air superiority & multi-role</div>
             </div>
@@ -442,16 +464,17 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
               <div className="font-bold text-cyan-400 text-sm mt-0.5">{mil.tankerFleet}</div>
             </div>
             <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-              <div className="text-slate-400">Special Mission (AWACS)</div>
+              <div className="text-slate-400">Special Mission</div>
               <div className="font-bold text-amber-400 text-sm mt-0.5">{mil.specialMission}</div>
             </div>
             <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-              <div className="text-slate-400">Jet Trainers</div>
+              <div className="text-slate-400">Trainers</div>
               <div className="font-bold text-slate-300 text-sm mt-0.5">{mil.trainers}</div>
             </div>
           </div>
 
           {/* Flagship Aircraft Models */}
+          {mil.flagshipAircraft.length > 0 && (
           <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1.5">
             <div className="text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold">
               Signature Aircraft Platforms in Service:
@@ -468,13 +491,14 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
               ))}
             </div>
           </div>
+          )}
         </div>
       )}
 
       {/* ========================================================================= */}
       {/* SECTION D: NAVAL FLEET & WARSHIPS                                         */}
       {/* ========================================================================= */}
-      {!noForces && (subTab === 'all' || subTab === 'naval') && (
+      {showNavy && (subTab === 'all' || subTab === 'naval') && (
         <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
@@ -506,9 +530,11 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
                 {mil.submarines}
               </div>
               <div className="text-[9.5px] text-slate-400 mt-0.5">
-                {mil.nuclearSubmarines > 0
-                  ? `${mil.nuclearSubmarines} Nuclear / ${mil.dieselElectricSubmarines} AIP`
-                  : 'Diesel-Electric / AIP'}
+                {mil.nuclearSubmarines !== undefined && mil.nuclearSubmarines > 0
+                  ? `${mil.nuclearSubmarines} Nuclear / ${mil.dieselElectricSubmarines} Conventional`
+                  : mil.nuclearSubmarines === 0 || mil.nuclearStatus !== 'Declared Nuclear State'
+                  ? 'Diesel-Electric / AIP'
+                  : 'All types'}
               </div>
             </div>
 
@@ -536,22 +562,19 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           </div>
 
           {/* Secondary Naval Assets */}
-          <div className="grid grid-cols-3 gap-2 text-center text-[10px] font-mono">
+          <div className="grid grid-cols-2 gap-2 text-center text-[10px] font-mono">
             <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
               <div className="text-slate-400">Mine Warfare Ships</div>
               <div className="font-bold text-slate-200 text-sm mt-0.5">{mil.mineWarfare}</div>
             </div>
             <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-              <div className="text-slate-400">Auxiliary & Replenishment</div>
+              <div className="text-slate-400">Other Vessels (support & auxiliary)</div>
               <div className="font-bold text-slate-200 text-sm mt-0.5">{mil.auxiliaryVessels}</div>
-            </div>
-            <div className="p-2 rounded-xl bg-slate-950/60 border border-slate-800">
-              <div className="text-slate-400">Amphibious Assault Craft</div>
-              <div className="font-bold text-cyan-400 text-sm mt-0.5">{mil.helicopterCarriers}</div>
             </div>
           </div>
 
           {/* Flagship Vessels */}
+          {mil.flagshipVessels.length > 0 && (
           <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1.5">
             <div className="text-[10.5px] font-mono uppercase tracking-wider text-slate-400 font-bold">
               Flagship Naval Combatants & Vessel Classes:
@@ -568,6 +591,7 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
               ))}
             </div>
           </div>
+          )}
         </div>
       )}
 
@@ -577,12 +601,12 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
       {(subTab === 'all' || subTab === 'defense') && (
         <div className="space-y-3">
           {/* Air & Missile Defense System */}
-          {(!noForces || details.missileDefense) && (
+          {(mil.airDefenseSystems.length > 0 || details.missileDefense) && (
           <div className="p-4 rounded-3xl bg-slate-900/70 border border-slate-800 space-y-2">
             <div className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
               <Radio className="w-4 h-4 text-sky-400" /> Air & Missile Defense Infrastructure
             </div>
-            {!noForces && <div className="flex flex-wrap gap-1.5">
+            {mil.airDefenseSystems.length > 0 && <div className="flex flex-wrap gap-1.5">
               {mil.airDefenseSystems.map((sys, idx) => (
                 <span
                   key={idx}

@@ -204,19 +204,19 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     <div className="flex justify-between items-center">
                       <span className="text-slate-400">Global Firepower:</span>
                       <span className="font-mono font-bold text-amber-400 text-sm">
-                        Rank #{mil.globalRank} ({mil.tier})
+                        {formatGfpRank(mil)} ({mil.tier})
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
                       <span className="text-slate-400">PowerIndex:</span>
                       <span className="font-mono text-slate-200 font-semibold">
-                        {mil.powerIndex.toFixed(4)}
+                        {mil.powerIndex > 0 ? mil.powerIndex.toFixed(4) : '—'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
                       <span className="text-slate-400">Annual Defense Budget:</span>
                       <span className="font-mono font-bold text-cyan-400">
-                        {formatBudget(mil.defenseBudgetUSD)} ({mil.defenseBudgetPercentGDP}% GDP)
+                        {mil.defenseBudgetUSD > 0 ? `${formatBudget(mil.defenseBudgetUSD)} (${mil.defenseBudgetPercentGDP}% GDP)` : 'Not listed'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-[11px]">
@@ -257,6 +257,10 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 const mil = getDetailedMilitary(c);
                 return (
                   <div key={c.id} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1.5 text-[11px]">
+                    {!mil.hasInventory ? (
+                      <div className="text-slate-400">No equipment counts: Global Firepower doesn't rank {c.name}.</div>
+                    ) : (
+                    <>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Main Battle Tanks:</span>
                       <span className="font-mono font-bold text-emerald-400">{mil.tanks.toLocaleString()}</span>
@@ -294,9 +298,11 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     <div className="flex justify-between">
                       <span className="text-slate-400">Submarines:</span>
                       <span className="font-mono font-bold text-blue-400">
-                        {mil.submarines} {mil.nuclearSubmarines > 0 ? `(${mil.nuclearSubmarines} Nuclear)` : ''}
+                        {mil.submarines} {mil.nuclearSubmarines ? `(${mil.nuclearSubmarines} Nuclear)` : ''}
                       </span>
                     </div>
+                    </>
+                    )}
                   </div>
                 );
               })}
@@ -464,7 +470,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                     </div>
                   </div>
                   <div className="text-right text-[10px]">
-                    <span className="text-amber-400 font-mono">Rank #{c.military.globalRank}</span>
+                    <span className="text-amber-400 font-mono">{formatGfpRank(c.military)}</span>
                     <span className="block text-emerald-400">Alive {c.longevity.yearsAlive} yrs</span>
                   </div>
                 </button>

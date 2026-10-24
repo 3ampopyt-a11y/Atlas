@@ -46,6 +46,7 @@ import { TECTONIC_PLATES, FAULT_LINES, SEISMIC_HOTSPOTS, TectonicPlate, FaultLin
 import { BIOMES_FEATURES, BiomeFeature } from '../data/biomesData.ts';
 import { CLIMATE_ZONES, getCountryClimateZone } from '../data/climateData.ts';
 import { FeatureDetailModal, SelectedMapFeature } from './FeatureDetailModal.tsx';
+import { OWN_FLAG_NAMES, getOwnFlagUrl, ownFlagPatternId } from '../utils/ownFlags.ts';
 
 interface WorldMapProps {
   selectedCountry: CountryData | null;
@@ -747,6 +748,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
               <image
                 href={`https://flagcdn.com/w320/${code}.png`}
                 xlinkHref={`https://flagcdn.com/w320/${code}.png`}
+                crossOrigin="anonymous"
+                x="0"
+                y="0"
+                width="1"
+                height="1"
+                preserveAspectRatio="none"
+              />
+            </pattern>
+          ))}
+          {metricMode === 'flags' && flagFillEnabled && OWN_FLAG_NAMES.map((name) => (
+            <pattern
+              id={ownFlagPatternId(name)}
+              key={ownFlagPatternId(name)}
+              patternContentUnits="objectBoundingBox"
+              width="1"
+              height="1"
+            >
+              <rect width="1" height="1" fill="#1e293b" />
+              <image
+                href={getOwnFlagUrl(name)}
+                xlinkHref={getOwnFlagUrl(name)}
                 crossOrigin="anonymous"
                 x="0"
                 y="0"

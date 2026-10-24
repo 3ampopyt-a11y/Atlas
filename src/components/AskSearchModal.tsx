@@ -4,6 +4,7 @@ import { countryList, getCountryByName } from '../data/countriesData.ts';
 import { findVisualMedia, fetchDynamicWikiMedia } from '../utils/visualMediaRegistry.ts';
 import { answerFromLocalData } from '../utils/localSearch.ts';
 import { CountryFlag } from './CountryFlag.tsx';
+import { formatGfpRank } from '../utils/formatters.ts';
 import {
   Search,
   Sparkles,
@@ -283,7 +284,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
             ? "Portugal ranks #23 globally in total naval fleet assets (with 107 total naval vessels) and #44 overall in Global Firepower military strength (PowerIndex 0.6865). The Portuguese Navy (Marinha Portuguesa) operates 2 modern Tridente-class AIP attack submarines, 5 guided missile frigates, 2 corvettes, and over 21 patrol vessels safeguarding the 3rd-largest maritime Exclusive Economic Zone in the EU."
             : matchedMedia
             ? `${matchedMedia.title} (${matchedMedia.subtitle || 'Defense asset'}): ${matchedMedia.specs?.[1]?.value || ''}. ${matchedMedia.specs?.[2]?.value || ''}. Operated by ${matchedMedia.specs?.[7]?.value || 'allied nations'}.`
-            : `${matched?.name} is a sovereign nation in ${matched?.continent} with capital at ${matched?.capital}. Its total territorial area is ${matched?.geography.areaKm2.toLocaleString()} km² and population is ${matched?.demographics.population.toLocaleString()}. Global Firepower military ranking: #${matched?.military.globalRank}.`,
+            : `${matched?.name} is a sovereign nation in ${matched?.continent} with capital at ${matched?.capital}. Its total territorial area is ${matched?.geography.areaKm2.toLocaleString()} km² and population is ${matched?.demographics.population.toLocaleString()}. Global Firepower military ranking: ${matched ? formatGfpRank(matched.military) : 'n/a'}.`,
           targetCountry: isPortugalNaval ? 'Portugal' : (matched?.name || (matchedMedia ? 'United States' : null)),
           targetCountryCode: isPortugalNaval ? 'PT' : (matched?.code || (matchedMedia ? 'US' : null)),
           directRank: isPortugalNaval
@@ -314,7 +315,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
             : [
                 `Capital: ${matched?.capital}`,
                 `Land Area: ${matched?.geography.areaKm2.toLocaleString()} km²`,
-                `GFP Military Rank: #${matched?.military.globalRank}`,
+                `Military: ${matched ? formatGfpRank(matched.military) : 'n/a'}`,
                 `Population: ${matched?.demographics.population.toLocaleString()}`,
               ],
           source: 'intelligence-registry',
@@ -926,7 +927,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
                           📐 Area: <strong className="text-white font-mono">{targetCountryData.geography.areaKm2.toLocaleString()} km²</strong>
                         </span>
                         <span>
-                          🎖️ Military: <strong className="text-white font-mono">#{targetCountryData.military.globalRank}</strong>
+                          🎖️ Military: <strong className="text-white font-mono">{formatGfpRank(targetCountryData.military)}</strong>
                         </span>
                       </div>
                     </div>
@@ -979,7 +980,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
                         className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-cyan-300 transition-colors text-xs font-medium"
                       >
                         {found?.code && (
-                          <CountryFlag countryCode={found.code} size="sm" className="rounded-xs" />
+                          <CountryFlag countryCode={found.code} countryName={found.name} size="sm" className="rounded-xs" />
                         )}
                         <span>{cName}</span>
                         <ExternalLink className="w-3 h-3 opacity-60" />

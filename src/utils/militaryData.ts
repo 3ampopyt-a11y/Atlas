@@ -2,6 +2,8 @@ import { CountryData } from '../types.ts';
 import { SHARED_ISO_ENTRIES } from './allianceData.ts';
 
 export interface DetailedMilitaryData {
+  hasInventory: boolean; // Global Firepower ranks it, so the per-category counts are real
+
   // Global & Budget
   globalRank: number;
   powerIndex: number;
@@ -32,7 +34,8 @@ export interface DetailedMilitaryData {
 
   // Aircraft Fleet & Air Wing
   totalAircraft: number; // Total Aircraft
-  combatAircraft: number; // Fighters / Interceptors / Multi-role
+  fighters: number; // Fighters / Interceptors / Multi-role
+  combatAircraft: number; // Fighters plus dedicated attack aircraft
   dedicatedAttackCAS: number; // Close Air Support / Dedicated Ground Attack
   transports: number; // Cargo / Strategic Airlift
   trainers: number; // Jet Trainers
@@ -50,11 +53,11 @@ export interface DetailedMilitaryData {
   frigates: number; // Guided Missile Frigates
   corvettes: number; // Corvettes & Light Surface Combatants
   submarines: number; // Total Submarines
-  nuclearSubmarines: number; // Nuclear Ballistic SSBN / Nuclear Attack SSN
-  dieselElectricSubmarines: number; // AIP & Conventional Attack Subs
+  nuclearSubmarines?: number; // Nuclear Ballistic SSBN / Nuclear Attack SSN (curated profiles only)
+  dieselElectricSubmarines?: number; // AIP & Conventional Attack Subs
   patrolCraft: number; // Offshore & Coastal Patrol Boats / Fast Missile Craft
   mineWarfare: number; // Minesweepers & Minehunters
-  auxiliaryVessels: number; // Fleet Replenishment & Support Ships
+  auxiliaryVessels: number; // Ships in the fleet total but in no named class
   flagshipVessels: string[]; // Key flagship ships & naval classes
 
   // Strategic & Air Defense
@@ -729,11 +732,10 @@ const CURATED_MILITARY_PROFILES: Record<string, Partial<DetailedMilitaryData>> =
 };
 
 /**
- * Universal Military Data Generator:
- * Generates an exhaustive, high-fidelity breakdown for ANY country in the atlas.
- * Uses curated real-world figures if available, or dynamically derives realistic,
- * calibrated numbers from the country's baseline stats so that reserves, vehicles,
- * ships, and aircraft details are never missing or empty.
+ * Military profile for any country in the atlas. Counts come from Global Firepower 2026 and
+ * personnel from GFP or the CIA World Factbook; the curated profiles above add equipment names,
+ * doctrine and the nuclear-submarine split. Nothing is estimated: a figure no source gives stays
+ * 0 (or undefined), and hasInventory is false when GFP doesn't rank the country.
  */
 export function getDetailedMilitary(country: CountryData): DetailedMilitaryData {
   const code = country.code.toUpperCase();
@@ -741,103 +743,56 @@ export function getDetailedMilitary(country: CountryData): DetailedMilitaryData 
   const curated = SHARED_ISO_ENTRIES.has(country.id) ? undefined : CURATED_MILITARY_PROFILES[code];
 
   const m = country.military;
+  const inv = m.inventory;
   const pop = country.demographics?.population || 0;
   const gdp = country.economy?.gdpNominalUSD || 0;
   const budget = m.defenseBudgetUSD || gdp * (m.defenseBudgetPercentGDP / 100);
   const perCapitaBudget = pop > 0 ? Math.round((budget * 1_000_000_000) / pop) : 0;
 
-  // Active, Reserve, and Paramilitary calculations
-  // Measured figures only: a place with no listed forces shows none
-  const active = curated?.activePersonnel ?? m.activePersonnel;
-  const reserve = curated?.reservePersonnel ?? m.reservePersonnel;
-  const paramilitary = curated?.paramilitary ?? m.paramilitary;
+  // Personnel: measured figures only, so a place with no listed forces shows none
+  const active = m.activePersonnel || curated?.activePersonnel || 0;
+  const reserve = m.reservePersonnel || curated?.reservePersonnel || 0;
+  const paramilitary = m.paramilitary || curated?.paramilitary || 0;
   const totalPersonnel = active + reserve + paramilitary;
   const reserveRatio = totalPersonnel > 0 ? Math.round((reserve / totalPersonnel) * 100) : 0;
 
-  const availableManpower = curated?.availableManpower ?? Math.round(pop * 0.45);
-  const fitForService = curated?.fitForService ?? Math.round(availableManpower * 0.8);
+  // Land
+  const tanks = m.tanks || 0;
+  const armoredVehicles = m.armoredVehicles || 0;
+  const selfPropelledArtillery = inv?.selfPropelledArtillery ?? 0;
+  const towedArtillery = inv?.towedArtillery ?? 0;
+  const rocketArtilleryMLRS = inv?.rocketArtillery ?? 0;
 
-  // Land Vehicles breakdown
-  const tanks = curated?.tanks ?? (m.tanks || 0);
-  const armoredVehicles = curated?.armoredVehicles ?? (m.armoredVehicles || Math.round(active * 0.08));
-  const selfPropelledArtillery = curated?.selfPropelledArtillery ?? Math.round(tanks * 0.25);
-  const towedArtillery = curated?.towedArtillery ?? Math.round(tanks * 0.35);
-  const rocketArtilleryMLRS = curated?.rocketArtilleryMLRS ?? Math.round(tanks * 0.12);
-  const totalGroundVehicles = tanks + armoredVehicles + selfPropelledArtillery + towedArtillery + rocketArtilleryMLRS;
+  // Air
+  const fighters = inv?.fighters ?? 0;
+  const dedicatedAttackCAS = inv?.attackAircraft ?? 0;
 
-  // Aircraft Fleet breakdown
-  const totalAircraft = curated?.totalAircraft ?? (m.totalAircraft || 0);
-  const combatAircraft = curated?.combatAircraft ?? (m.combatAircraft || Math.round(totalAircraft * 0.35));
-  const dedicatedAttackCAS = curated?.dedicatedAttackCAS ?? Math.round(combatAircraft * 0.2);
-  const transports = curated?.transports ?? Math.round(totalAircraft * 0.12);
-  const trainers = curated?.trainers ?? Math.round(totalAircraft * 0.22);
-  const specialMission = curated?.specialMission ?? Math.round(totalAircraft * 0.04);
-  const tankerFleet = curated?.tankerFleet ?? Math.max(0, Math.round(totalAircraft * 0.015));
-  const attackHelicopters = curated?.attackHelicopters ?? (m.attackHelicopters || Math.round(totalAircraft * 0.15));
-  const totalHelicopters = curated?.totalHelicopters ?? Math.round(totalAircraft * 0.45);
-
-  // Naval Fleet breakdown
-  const navalFleetTotal = curated?.navalFleetTotal ?? (m.navalFleetTotal || 0);
-  const aircraftCarriers = curated?.aircraftCarriers ?? (m.aircraftCarriers || 0);
-  const helicopterCarriers = curated?.helicopterCarriers ?? Math.min(2, Math.round(aircraftCarriers * 0.5));
-  const submarines = curated?.submarines ?? (m.submarines || 0);
-  const nuclearSubmarines = curated?.nuclearSubmarines ?? (m.nuclearStatus.includes('Declared') ? Math.min(submarines, Math.round(submarines * 0.6)) : 0);
-  const dieselElectricSubmarines = Math.max(0, submarines - nuclearSubmarines);
-  const destroyersFrigates = m.destroyersFrigates || 0;
-  const destroyers = curated?.destroyers ?? Math.round(destroyersFrigates * 0.4);
-  const frigates = curated?.frigates ?? Math.round(destroyersFrigates * 0.6);
-  const corvettes = curated?.corvettes ?? Math.max(0, Math.round(navalFleetTotal * 0.15));
-  const patrolCraft = curated?.patrolCraft ?? Math.max(0, Math.round(navalFleetTotal * 0.45));
-  const mineWarfare = curated?.mineWarfare ?? Math.max(0, Math.round(navalFleetTotal * 0.08));
-  const auxiliaryVessels = curated?.auxiliaryVessels ?? Math.max(0, navalFleetTotal - (aircraftCarriers + destroyers + frigates + corvettes + submarines + patrolCraft + mineWarfare));
-
-  // Conscription details
-  let conscriptionDetail = curated?.conscriptionDetail || '';
-  if (!conscriptionDetail) {
-    if (m.conscription === 'Mandatory') {
-      conscriptionDetail = 'Compulsory national military service for adult citizens (12-24 months active obligation followed by reserve assignment)';
-    } else if (m.conscription === 'Selective / Hybrid') {
-      conscriptionDetail = 'Selective national service combined with professional volunteer enlistments and reserve readiness';
-    } else if (m.conscription === 'Voluntary') {
-      conscriptionDetail = 'All-Volunteer professional standing force with dedicated reserve units';
-    } else {
-      conscriptionDetail = 'No active conscription; demilitarized, neutral, or collective protection under partner pacts';
-    }
-  }
-
-  // Flagships & signature equipment
-  const flagshipVehicles = curated?.flagshipVehicles || [
-    `${country.name} Main Battle Tank Fleet`,
-    'Armored Personnel Carriers (APC/IFV)',
-    'Self-Propelled Field Artillery',
-    'Mobile Reconnaissance & Logistics Armor',
-  ];
-
-  const flagshipAircraft = curated?.flagshipAircraft || [
-    `${country.name} Multi-role Combat Fighters`,
-    'Rotary Wing Reconnaissance & Transport Helicopters',
-    'Military Tactical Cargo & Airlift',
-  ];
-
-  const flagshipVessels = curated?.flagshipVessels || (navalFleetTotal > 0 ? [
-    `${country.name} Naval Flagship & Coastal Patrol Flotilla`,
-    'Fast Attack Patrol Boats & Interceptors',
-    'Offshore Maritime Border Protection Ships',
-  ] : ['Landlocked state with no dedicated maritime fleet (Riverine guard units only)']);
+  // Sea (landlocked countries have no naval entries)
+  const navalFleetTotal = m.navalFleetTotal || 0;
+  const aircraftCarriers = m.aircraftCarriers || 0;
+  const helicopterCarriers = inv?.helicopterCarriers ?? 0;
+  const submarines = m.submarines || 0;
+  const destroyers = inv?.destroyers ?? 0;
+  const frigates = inv?.frigates ?? 0;
+  const corvettes = inv?.corvettes ?? 0;
+  const patrolCraft = inv?.patrolVessels ?? 0;
+  const mineWarfare = inv?.mineWarfare ?? 0;
+  // Ships GFP counts in the fleet total but in none of its named classes
+  const otherVessels = Math.max(
+    0,
+    navalFleetTotal - (aircraftCarriers + helicopterCarriers + destroyers + frigates + corvettes + submarines + patrolCraft + mineWarfare),
+  );
+  // GFP doesn't split submarines by propulsion; only the curated profiles do
+  const nuclearSubmarines = curated?.nuclearSubmarines !== undefined ? Math.min(submarines, curated.nuclearSubmarines) : undefined;
 
   const nuclearTriad = curated?.nuclearTriad || (m.nuclearWarheads > 0
-    ? `${m.nuclearStatus} with ~${m.nuclearWarheads} operational warheads`
+    ? `${m.nuclearStatus} with ~${m.nuclearWarheads} warheads`
     : m.nuclearStatus === 'Nuclear Sharing / NATO'
-    ? 'NATO Nuclear Sharing arrangement: Access to allied tactical B61 nuclear weapons under dual-key authorization'
-    : 'Strict non-nuclear status: Full commitment to Non-Proliferation Treaty (NPT)');
-
-  const airDefenseSystems = curated?.airDefenseSystems || [
-    'Integrated National Radar & Early Warning Network',
-    'Medium-Range Surface-to-Air Missile (SAM) Batteries',
-    'Point-Defense Anti-Aircraft Artillery & MANPADS',
-  ];
+    ? 'Hosts US B61 nuclear bombs under NATO nuclear sharing'
+    : 'Holds no nuclear weapons');
 
   return {
+    hasInventory: !!inv,
     globalRank: m.globalRank,
     powerIndex: m.powerIndex,
     tier: m.tier,
@@ -848,28 +803,29 @@ export function getDetailedMilitary(country: CountryData): DetailedMilitaryData 
     reservePersonnel: reserve,
     paramilitary: paramilitary,
     totalMilitaryPersonnel: totalPersonnel,
-    availableManpower,
-    fitForService,
+    availableManpower: inv?.availableManpower ?? 0,
+    fitForService: inv?.fitForService ?? 0,
     reserveRatioPercent: reserveRatio,
     conscription: m.conscription,
-    conscriptionDetail,
+    conscriptionDetail: m.serviceObligation || curated?.conscriptionDetail || '',
     tanks,
     armoredVehicles,
     selfPropelledArtillery,
     towedArtillery,
     rocketArtilleryMLRS,
-    totalGroundVehicles,
-    flagshipVehicles,
-    totalAircraft,
-    combatAircraft,
+    totalGroundVehicles: tanks + armoredVehicles + selfPropelledArtillery + towedArtillery + rocketArtilleryMLRS,
+    flagshipVehicles: curated?.flagshipVehicles || [],
+    totalAircraft: m.totalAircraft || 0,
+    fighters,
+    combatAircraft: inv ? fighters + dedicatedAttackCAS : m.combatAircraft || 0,
     dedicatedAttackCAS,
-    transports,
-    trainers,
-    specialMission,
-    tankerFleet,
-    totalHelicopters,
-    attackHelicopters,
-    flagshipAircraft,
+    transports: inv?.transports ?? 0,
+    trainers: inv?.trainers ?? 0,
+    specialMission: inv?.specialMission ?? 0,
+    tankerFleet: inv?.tankers ?? 0,
+    totalHelicopters: inv?.helicopters ?? 0,
+    attackHelicopters: m.attackHelicopters || 0,
+    flagshipAircraft: curated?.flagshipAircraft || [],
     navalFleetTotal,
     aircraftCarriers,
     helicopterCarriers,
@@ -878,17 +834,17 @@ export function getDetailedMilitary(country: CountryData): DetailedMilitaryData 
     corvettes,
     submarines,
     nuclearSubmarines,
-    dieselElectricSubmarines,
+    dieselElectricSubmarines: nuclearSubmarines !== undefined ? submarines - nuclearSubmarines : undefined,
     patrolCraft,
     mineWarfare,
-    auxiliaryVessels: Math.max(0, auxiliaryVessels),
-    flagshipVessels,
+    auxiliaryVessels: otherVessels,
+    flagshipVessels: curated?.flagshipVessels || [],
     nuclearStatus: m.nuclearStatus,
     nuclearWarheads: m.nuclearWarheads,
     nuclearTriad,
-    airDefenseSystems,
-    strategicDoctrine: `National territorial defense, sovereign airspace and territorial waters protection for ${country.name}, supporting regional stability and collective security.`,
-    spaceAndCyber: `Cyber defense center, military command-and-control communications, and space-based reconnaissance integration.`,
+    airDefenseSystems: curated?.airDefenseSystems || [],
+    strategicDoctrine: curated?.strategicDoctrine || '',
+    spaceAndCyber: curated?.spaceAndCyber || '',
     alliances: m.alliances,
   };
 }

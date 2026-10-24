@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getCountryFlagEmoji } from '../utils/sovereignData.ts';
+import { getOwnFlagUrl } from '../utils/ownFlags.ts';
 
 interface CountryFlagProps {
   countryCode?: string; // 2-letter ISO code, e.g. "US", "FR"
@@ -39,16 +40,17 @@ export const CountryFlag: React.FC<CountryFlagProps> = ({
 
   // If code is valid 2-letter, try rendering genuine high-res national flag image from FlagCDN
   const isValidCode = code.length === 2 && /^[a-z]{2}$/.test(code);
+  const ownFlagUrl = getOwnFlagUrl(countryName);
 
-  if (isValidCode && !hasError) {
+  if ((ownFlagUrl || isValidCode) && !hasError) {
     return (
       <div
         className={`relative inline-flex items-center justify-center shrink-0 overflow-hidden rounded-md shadow-sm border border-slate-700/60 bg-slate-800 ${sizeClasses.split(' ')[0]} ${sizeClasses.split(' ')[1]} ${className}`}
         title={`${countryName} National Flag`}
       >
         <img
-          src={`https://flagcdn.com/${imgWidth}/${code}.png`}
-          srcSet={`https://flagcdn.com/${imgWidth === 'w40' ? 'w80' : 'w160'}/${code}.png 2x`}
+          src={ownFlagUrl || `https://flagcdn.com/${imgWidth}/${code}.png`}
+          srcSet={ownFlagUrl ? undefined : `https://flagcdn.com/${imgWidth === 'w40' ? 'w80' : 'w160'}/${code}.png 2x`}
           alt={`${countryName} National Flag`}
           className="w-full h-full object-cover select-none"
           loading="lazy"

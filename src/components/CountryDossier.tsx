@@ -7,6 +7,7 @@ import {
   formatPopulation,
   getNuclearBadge,
   getUnStatus,
+  formatGfpRank,
 } from '../utils/formatters.ts';
 import { getVerifiedSovereignInfo, fetchLiveCountryUpdate } from '../utils/sovereignData.ts';
 import { getAlliancesFor } from '../utils/allianceData.ts';
@@ -134,7 +135,7 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
           <div className="font-bold text-sm text-slate-100 flex items-center gap-2 min-w-0">
             <span className="truncate">{sovereignState.name}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
-              #{country.military.globalRank} GFP
+              {formatGfpRank(country.military)}
             </span>
           </div>
           <div className="text-xs text-slate-300 font-medium truncate">

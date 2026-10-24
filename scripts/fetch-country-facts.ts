@@ -504,6 +504,9 @@ function factbookFacts(fb: any) {
     exports: eco['Exports - commodities']?.text ? parseList(eco['Exports - commodities'].text, 5) : [],
     activePersonnel: num(clean(mil['Military and security service personnel strengths']?.text).match(/[\d,]{3,}/)?.[0]),
     conscription: parseConscription(mil['Military service age and obligation']?.text || '', mil['Military and security forces']?.text || ''),
+    serviceObligation: mil['Military service age and obligation']?.text
+      ? capitalize(shorten(dropYear(dropNotes(clean(mil['Military service age and obligation'].text)).replace(/\s*\(\s*$/, '')), 260))
+      : undefined,
     noMilitary: /no regular (military|armed)|has no (military|armed)|defen[cs]e is the responsibility/i.test(clean(mil['Military and security forces']?.text)),
     notes,
     details: {
@@ -588,6 +591,26 @@ async function loadGfp(nameToIso: (name: string) => string | undefined) {
       submarines: after('Submarines:'),
       destroyersFrigates: (after('Destroyers:') ?? 0) + (after('Frigates:') ?? 0),
       budgetUSD: after('Defense Budget:'),
+      inventory: {
+        availableManpower: after('Available Manpower'),
+        fitForService: after('Fit-for-Service'),
+        fighters,
+        attackAircraft: attack,
+        transports: after('Transports (Fixed-Wing):'),
+        trainers: after('Trainers:'),
+        specialMission: after('Special-Mission:'),
+        tankers: after('Tanker Fleet:'),
+        helicopters: after('Helicopters:'),
+        selfPropelledArtillery: after('Self-Propelled Artillery:'),
+        towedArtillery: after('Towed Artillery:'),
+        rocketArtillery: after('MLRS (Rocket Artillery):'),
+        helicopterCarriers: after('Helicopter Carriers:'),
+        destroyers: after('Destroyers:'),
+        frigates: after('Frigates:'),
+        corvettes: after('Corvettes:'),
+        patrolVessels: after('Patrol Vessels:'),
+        mineWarfare: after('Mine Warfare:'),
+      },
     };
   }
   return { byIso: out, unmatched };
@@ -1069,10 +1092,17 @@ async function main() {
     else if (patch.military.defenseBudgetUSD && gdpBillions) patch.military.defenseBudgetPercentGDP = round((patch.military.defenseBudgetUSD / gdpBillions) * 100, 2);
     if (g) {
       for (const k of ['globalRank', 'powerIndex', 'activePersonnel', 'reservePersonnel', 'paramilitary', 'totalAircraft', 'combatAircraft', 'attackHelicopters', 'tanks', 'armoredVehicles', 'navalFleetTotal', 'aircraftCarriers', 'submarines', 'destroyersFrigates']) {
-        if (g[k] !== undefined) patch.military[k] = g[k];
+        patch.military[k] = g[k] ?? 0; // GFP leaves out categories a country has none of (e.g. a navy)
       }
+      patch.military.inventory = g.inventory;
       if (template && g.globalRank) patch.military.tier = tierFor(g.globalRank);
-    } else if (template) {
+    } else {
+      // Global Firepower doesn't rank it: no per-category inventory
+      patch.military.inventory = null;
+      if (fb?.activePersonnel) patch.military.activePersonnel = fb.activePersonnel;
+    }
+    patch.military.serviceObligation = fb?.serviceObligation || null;
+    if (!g && template) {
       // Not ranked by Global Firepower: no invented inventories
       Object.assign(patch.military, {
         globalRank: 146, powerIndex: 0, activePersonnel: fb?.activePersonnel ?? 0, reservePersonnel: 0, paramilitary: 0,
