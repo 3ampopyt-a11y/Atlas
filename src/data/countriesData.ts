@@ -1,7 +1,10 @@
 // Generated Country Atlas Dataset
 import { CountryData } from '../types.ts';
+import countryFacts from './countryFacts.json';
 
-export const countriesData: Record<string, CountryData> = {
+// Base profiles. Measured figures and current office-holders come from countryFacts.json
+// (scripts/fetch-country-facts.ts), which is merged over these below.
+export const baseCountriesData: Record<string, CountryData> = {
   "100": {
     "id": "100",
     "code": "BG",
@@ -29528,6 +29531,23 @@ export const countriesData: Record<string, CountryData> = {
     }
   }
 };
+
+// Objects merge field by field; arrays and plain values replace; null removes the field
+function mergeFacts(base: any, patch: any): any {
+  const out = { ...base };
+  for (const [key, value] of Object.entries(patch)) {
+    if (value === null) delete out[key];
+    else if (typeof value === 'object' && !Array.isArray(value) && typeof out[key] === 'object' && out[key] !== null) out[key] = mergeFacts(out[key], value);
+    else out[key] = value;
+  }
+  return out;
+}
+
+const factPatches = countryFacts.countries as Record<string, unknown>;
+
+export const countriesData: Record<string, CountryData> = Object.fromEntries(
+  Object.entries(baseCountriesData).map(([id, country]) => [id, factPatches[id] ? mergeFacts(country, factPatches[id]) : country]),
+);
 
 export const countryList: CountryData[] = Object.values(countriesData);
 

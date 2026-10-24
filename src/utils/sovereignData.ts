@@ -388,7 +388,7 @@ const CURATED_SOVEREIGN_REGISTRY: Record<string, CuratedSovereignty> = {
   // Iran
   '364': {
     president: 'Masoud Pezeshkian',
-    headOfStateRole: 'Supreme Leader Ali Khamenei (Head of State)',
+    headOfStateRole: 'Supreme Leader (Head of State)',
     headOfGovernment: 'Masoud Pezeshkian (President of Iran)',
     governmentType: 'Unitary Islamic theocratic-presidential republic',
     capital: 'Tehran',
@@ -895,12 +895,9 @@ export async function fetchLiveCountryUpdate(country: CountryData): Promise<Veri
     if (res.ok) {
       const result = await res.json();
       if (result.data) {
+        // Only the headline comes from the AI: without live search it can name an outdated
+        // leader, so names, capital and figures stay on the verified registry.
         const patch: Partial<VerifiedSovereignInfo> = {
-          leader: result.data.leader || base.leader,
-          leaderRole: result.data.leaderRole || base.leaderRole,
-          capital: result.data.capital || base.capital,
-          governmentType: result.data.governmentType || base.governmentType,
-          population: result.data.population || base.population,
           recentDevelopments: result.data.recentDevelopments || base.recentDevelopments,
           lastUpdated: `Today (${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
           isLiveUpdated: true,
@@ -927,28 +924,32 @@ export async function fetchLiveCountryUpdate(country: CountryData): Promise<Veri
  * Flag, Capital, President / Head of State, Head of Government,
  * Leader (in executive control), Government Type, Population, Area, and Languages.
  */
+const SHARED_ISO_ENTRIES = new Set(['Somaliland', 'N. Cyprus', 'Indian Ocean Ter.', 'Siachen Glacier']);
+
 export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereignInfo {
-  const curated = CURATED_SOVEREIGN_REGISTRY[country.id] || CURATED_SOVEREIGN_REGISTRY[country.code3] || CURATED_SOVEREIGN_REGISTRY[country.code] || {};
+  // Entries such as Somaliland or N. Cyprus share an ISO code (and, fuzzily, a name) with another country, so skip the registries for them
+  const ownCodes = !SHARED_ISO_ENTRIES.has(country.id);
+  const curated = CURATED_SOVEREIGN_REGISTRY[country.id] || (ownCodes && (CURATED_SOVEREIGN_REGISTRY[country.code3] || CURATED_SOVEREIGN_REGISTRY[country.code])) || {};
   const cached = getLiveCachedIntelligence(country.id) || {};
-  const leaderEntry = getCuratedLeader(country.name) || getCuratedLeader(country.officialName) || getCuratedLeader(country.code3);
+  const leaderEntry = ownCodes ? getCuratedLeader(country.name) || getCuratedLeader(country.officialName) || getCuratedLeader(country.code3) : null;
 
   // Flag
   const flag = getCountryFlagEmoji(country);
 
   // Capital
-  const capital = cached.capital || curated.capital || country.capital || 'National Capital';
+  const capital = curated.capital || country.capital || 'National Capital';
 
   // Head of state / President
   let rawHeadOfState = country.governance?.headOfState || '';
   if (!rawHeadOfState || rawHeadOfState === 'Head of State' || rawHeadOfState.includes('Generic') || rawHeadOfState.startsWith('President of')) {
     rawHeadOfState = curated.president || leaderEntry?.president || country.name;
   }
-  let president = cached.president || curated.president || leaderEntry?.president || rawHeadOfState;
+  let president = curated.president || leaderEntry?.president || rawHeadOfState;
   if (president.startsWith('President of ')) {
     president = leaderEntry?.president || president.replace('President of ', '');
   }
 
-  const headOfStateRole = curated.headOfStateRole || (president.startsWith('King') ? 'Monarch' : president.startsWith('Emperor') ? 'Emperor' : president.startsWith('Emir') ? 'Emir' : president.startsWith('Sultan') ? 'Sultan' : president.startsWith('Prince') ? 'Prince' : 'President');
+  const headOfStateRole = curated.headOfStateRole || (president.startsWith('King') || president.startsWith('Charles III') ? 'Monarch' : president.startsWith('Emperor') ? 'Emperor' : president.startsWith('Emir') ? 'Emir' : president.startsWith('Sultan') ? 'Sultan' : president.startsWith('Prince') ? 'Prince' : 'President');
 
   // Head of Government
   let rawHeadOfGov = country.governance?.headOfGovernment || '';
@@ -957,9 +958,15 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
   }
   const headOfGovernment = curated.headOfGovernment || leaderEntry?.headOfGov || rawHeadOfGov;
 
+  // The country record carries the current office-holders (Wikidata, via scripts/fetch-country-facts.ts).
+  // Those fields can also hold a role label ("Administrator (appointed by Australia)") instead of a name.
+  const isPerson = (s?: string) => !!s && !/^(President|Prime Minister|Premier|Monarch|Emperor|Supreme Leader|Chancellor|Head of|Administrator|Administered|Commissioner|Prefect|Disputed|None)\b/.test(s);
+  const currentHos = country.governance?.headOfState;
+  const currentHog = country.governance?.headOfGovernment;
+
   // Primary Leader (the person who basically controls / leads the country today)
-  let leader = cached.leader || curated.leader || leaderEntry?.leader || '';
-  let leaderRole = cached.leaderRole || curated.leaderRole || leaderEntry?.leaderRole || '';
+  let leader = curated.leader || leaderEntry?.leader || '';
+  let leaderRole = curated.leaderRole || leaderEntry?.leaderRole || '';
 
   if (!leader || leader.startsWith('Leader of') || leader.startsWith('National Executive')) {
     if (leaderEntry?.leader) {
@@ -971,12 +978,16 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
     } else if (curated.president) {
       leader = curated.president;
       leaderRole = curated.headOfStateRole || 'President & Chief Executive';
-    } else if (president && !president.startsWith('President of')) {
+    } else if (ownCodes && isPerson(currentHog) && currentHog !== currentHos) {
+      // Dependent territories: the head of state is the sovereign's, the local head of government runs the territory
+      leader = currentHog!;
+      leaderRole = 'Head of Government';
+    } else if (isPerson(president) && !president.startsWith('President of')) {
       leader = president;
       leaderRole = headOfStateRole || 'President & Chief Executive';
     } else {
       leader = president;
-      leaderRole = 'Head of State';
+      leaderRole = 'Status';
     }
   }
 
@@ -985,7 +996,7 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
   if (!rawGovType || rawGovType === 'Constitutional Democratic State') {
     rawGovType = curated.governmentType || 'Constitutional Republic';
   }
-  const governmentType = cached.governmentType || curated.governmentType || rawGovType;
+  const governmentType = curated.governmentType || rawGovType;
 
   // Area: authoritative verified real-world area in square kilometers
   const areaKm2 = curated.areaKm2 || country.geography.areaKm2 || 1;
@@ -993,7 +1004,7 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
   const areaFormatted = `${areaKm2.toLocaleString()} km² (${areaSqMi.toLocaleString()} sq mi)`;
 
   // Population
-  const population = cached.population || curated.population || country.demographics.population;
+  const population = country.demographics.population || curated.population || 0;
   let popStr = '';
   if (population >= 1000000000) {
     popStr = `${(population / 1000000000).toFixed(2)} Billion`;
@@ -1012,6 +1023,22 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
   // Density
   const densityPerKm2 = areaKm2 > 0 ? Math.max(1, Math.round(population / areaKm2)) : country.demographics.densityPerKm2;
 
+  // The curated text above can still name a predecessor, so swap any outdated name for the current one
+  const nameOf = (s?: string) => (s || '').split(' (')[0].trim();
+  const pastHos = [curated.president, leaderEntry?.president].map(nameOf).filter(Boolean);
+  const pastHog = [curated.headOfGovernment, leaderEntry?.headOfGov].map(nameOf).filter(Boolean);
+  // A leader written as "A & B" names both offices; each part is updated on its own
+  const currentHolder = (name: string) => {
+    const n = nameOf(name);
+    if (isPerson(currentHos) && pastHos.includes(n)) return currentHos!;
+    if (isPerson(currentHog) && pastHog.includes(n)) return currentHog!;
+    return name;
+  };
+  leader = [...new Set(leader.split(' & ').map(currentHolder))].join(' & ');
+  if (isPerson(currentHos)) president = currentHos!;
+  const roleNote = headOfGovernment.match(/ \((.*)\)$/)?.[1];
+  const currentHeadOfGovernment = isPerson(currentHog) ? (roleNote && !currentHog!.includes(' (') ? `${currentHog} (${roleNote})` : currentHog!) : headOfGovernment;
+
   const lastUpdated = cached.lastUpdated || 'Today (2025/2026 Verified)';
   const recentDevelopments = cached.recentDevelopments || curated.recentDevelopments || `Active sovereign governance and regional security cooperation.`;
 
@@ -1025,7 +1052,7 @@ export function getVerifiedSovereignInfo(country: CountryData): VerifiedSovereig
     leaderRole,
     president,
     headOfStateRole,
-    headOfGovernment,
+    headOfGovernment: currentHeadOfGovernment,
     governmentType,
     population,
     populationFormatted: popStr,

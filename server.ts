@@ -2,7 +2,88 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, ThinkingLevel } from '@google/genai';
+
+// Fastest models first. With minimal thinking these answer in ~2-3s; default thinking took 20s+.
+// The list runs twice: "high demand" 503s often hit every model at once and clear within seconds.
+const FAST_MODELS = ['gemini-3.5-flash', 'gemini-3-flash-preview', 'gemini-3.6-flash'];
+const ATTEMPTS = [...FAST_MODELS, ...FAST_MODELS];
+const HEDGE_DELAY_MS = 5000; // start the next model if the current one is still silent
+const RETRY_PAUSE_MS = 1500; // pause before the second round so a demand spike can pass
+const TOTAL_BUDGET_MS = 20000;
+
+// Races the models with staggered starts: the next one starts as soon as the previous fails
+// (429/503 come back fast) or has been silent for HEDGE_DELAY_MS. First non-empty answer wins
+// and the rest are aborted.
+async function generateJsonFast(ai: GoogleGenAI, prompt: string, temperature = 0.1): Promise<string> {
+  const controllers: AbortController[] = [];
+  const errors: string[] = [];
+  const deadline = AbortSignal.timeout(TOTAL_BUDGET_MS);
+
+  try {
+    return await new Promise<string>((resolve, reject) => {
+      let next = 0;
+      let running = 0;
+      let settled = false;
+      let hedgeTimer: ReturnType<typeof setTimeout> | null = null;
+
+      const finish = (err?: Error, text?: string) => {
+        if (settled) return;
+        settled = true;
+        if (hedgeTimer) clearTimeout(hedgeTimer);
+        deadline.removeEventListener('abort', onDeadline);
+        if (text) resolve(text);
+        else reject(err);
+      };
+      const onDeadline = () => finish(new Error(`AI models timed out after ${TOTAL_BUDGET_MS / 1000}s (${errors.join('; ') || 'no response'})`));
+      deadline.addEventListener('abort', onDeadline);
+
+      const launchNext = () => {
+        if (next === FAST_MODELS.length && running === 0) setTimeout(launch, RETRY_PAUSE_MS);
+        else launch();
+      };
+      const launch = () => {
+        if (settled || next >= ATTEMPTS.length) return;
+        const model = ATTEMPTS[next++];
+        const controller = new AbortController();
+        controllers.push(controller);
+        running++;
+        if (hedgeTimer) clearTimeout(hedgeTimer);
+        hedgeTimer = setTimeout(launch, HEDGE_DELAY_MS);
+
+        ai.models
+          .generateContent({
+            model,
+            contents: prompt,
+            config: {
+              responseMimeType: 'application/json',
+              temperature,
+              thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+              abortSignal: controller.signal,
+            },
+          })
+          .then((response) => {
+            const text = response.text?.trim() || '';
+            if (text) return finish(undefined, text);
+            throw new Error('empty response');
+          })
+          .catch((err: any) => {
+            if (settled) return;
+            const reason = String(err?.message || err).slice(0, 160);
+            console.warn(`Model ${model} failed: ${reason}`);
+            errors.push(`${model}: ${reason}`);
+            running--;
+            if (next < ATTEMPTS.length) launchNext();
+            else if (running === 0) finish(new Error(`All AI models failed (${errors.join('; ')})`));
+          });
+      };
+
+      launch();
+    });
+  } finally {
+    controllers.forEach((c) => c.abort());
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -48,9 +129,9 @@ async function startServer() {
 
     try {
       const prompt = `You are an authoritative global intelligence officer. Return current, accurate present-day facts for the country: "${countryName || 'Unknown'}" (ISO code: "${code || ''}").
-The current local date is ${today}. Do NOT provide outdated information from past years.
+The current local date is ${today}. Do NOT provide outdated information from past years.${currentLeader ? `\nThe verified current leader is ${currentLeader}; keep the headline consistent with that.` : ''}
 Specifically:
-1. Who is the person in actual political executive control of the country today? (For example, in the United States today the leader is Donald Trump; in the UK it is Keir Starmer; in Germany it is Olaf Scholz).
+1. Who is the person in actual political executive control of the country today?
 2. What is their exact official title and role?
 3. What is the latest population estimate for today?
 4. What is the capital city?
@@ -67,16 +148,8 @@ Respond strictly in valid JSON with this exact schema:
   "recentDevelopments": "string (1 concise sentence describing present-day focus)"
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json',
-        },
-      });
-
-      const text = response.text?.trim() || '{}';
-      const parsed = JSON.parse(text);
+      const text = await generateJsonFast(ai, prompt, 0.2);
+      const parsed = JSON.parse(text.replace(/^```(?:json)?\s*|\s*```$/g, ''));
 
       return res.json({
         success: true,
@@ -1751,35 +1824,7 @@ Respond STRICTLY in valid JSON matching this schema:
   "keyFacts": ["string"]
 }`;
 
-      // Model priority list: gemini-3.8-flash first, gemini-flash-latest as fallback.
-      // Each call is capped so an overloaded model fails over quickly instead of hanging for minutes.
-      const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
-      const MODEL_TIMEOUT_MS = 20000;
-      let lastError: any = null;
-      let rawText = '';
-
-      for (const modelName of candidateModels) {
-        try {
-          const response = await ai.models.generateContent({
-            model: modelName,
-            contents: prompt,
-            config: {
-              responseMimeType: 'application/json',
-              temperature: 0.1,
-              abortSignal: AbortSignal.timeout(MODEL_TIMEOUT_MS),
-            },
-          });
-          rawText = response.text?.trim() || '';
-          if (rawText) break;
-        } catch (err: any) {
-          console.warn(`Model ${modelName} call failed, trying next:`, err?.message || err);
-          lastError = err;
-        }
-      }
-
-      if (!rawText) {
-        throw lastError || new Error('No response from AI models');
-      }
+      const rawText = await generateJsonFast(ai, prompt);
 
       // Clean potential markdown fences (e.g. ```json ... ```)
       let cleanedJson = rawText;
@@ -1793,9 +1838,19 @@ Respond STRICTLY in valid JSON matching this schema:
       try {
         parsed = JSON.parse(cleanedJson);
       } catch (jsonErr) {
-        // Fallback: use rawText as the direct answer
+        // The model sometimes wraps the object in extra text or leaves a trailing comma
+        const objectText = cleanedJson.slice(cleanedJson.indexOf('{'), cleanedJson.lastIndexOf('}') + 1).replace(/,\s*([}\]])/g, '$1');
+        try {
+          parsed = JSON.parse(objectText);
+        } catch {
+          parsed = null;
+        }
+      }
+      if (!parsed || typeof parsed.answer !== 'string') {
+        // Fallback: use the answer text (or the raw reply) as the direct answer
+        const answerMatch = cleanedJson.match(/"answer"\s*:\s*"((?:[^"\\]|\\.)*)"/);
         parsed = {
-          answer: rawText,
+          answer: answerMatch ? JSON.parse(`"${answerMatch[1]}"`) : rawText,
           subjectTitle: cleanQuery,
           wikiQuery: cleanQuery,
           targetCountry: null,

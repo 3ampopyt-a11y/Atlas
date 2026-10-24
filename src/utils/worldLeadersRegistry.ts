@@ -85,7 +85,7 @@ const LEADERS_BY_NAME: Record<string, LeaderRecord> = {
   "Iceland": { president: "Halla Tómasdóttir", leader: "Bjarni Benediktsson", leaderRole: "Prime Minister & Chief Executive", headOfGov: "Bjarni Benediktsson (Prime Minister)" },
   "India": { president: "Droupadi Murmu", leader: "Narendra Modi", leaderRole: "Prime Minister & Chief Executive", headOfGov: "Narendra Modi (Prime Minister)" },
   "Indonesia": { president: "Prabowo Subianto", leader: "Prabowo Subianto", leaderRole: "President of Indonesia", headOfGov: "Prabowo Subianto (Executive President)" },
-  "Iran": { president: "Masoud Pezeshkian", leader: "Ali Khamenei", leaderRole: "Supreme Leader of Iran", headOfGov: "Masoud Pezeshkian (President & Head of Executive)" },
+  "Iran": { president: "Masoud Pezeshkian", leader: "Mojtaba Khamenei", leaderRole: "Supreme Leader of Iran", headOfGov: "Masoud Pezeshkian (President & Head of Executive)" },
   "Iraq": { president: "Abdul Latif Rashid", leader: "Mohammed Shia' al-Sudani", leaderRole: "Prime Minister & Chief Executive", headOfGov: "Mohammed Shia' al-Sudani (Prime Minister)" },
   "Ireland": { president: "Michael D. Higgins", leader: "Simon Harris", leaderRole: "Taoiseach (Prime Minister)", headOfGov: "Simon Harris (Taoiseach)" },
   "Israel": { president: "Isaac Herzog", leader: "Benjamin Netanyahu", leaderRole: "Prime Minister & Chief Executive", headOfGov: "Benjamin Netanyahu (Prime Minister)" },
@@ -125,7 +125,7 @@ const LEADERS_BY_NAME: Record<string, LeaderRecord> = {
   "Montenegro": { president: "Jakov Milatović", leader: "Milojko Spajić", leaderRole: "Prime Minister & Chief Executive", headOfGov: "Milojko Spajić (Prime Minister)" },
   "Morocco": { president: "King Mohammed VI", leader: "King Mohammed VI & Aziz Akhannouch", leaderRole: "King & Supreme Commander", headOfGov: "Aziz Akhannouch (Head of Government / Prime Minister)" },
   "Mozambique": { president: "Filipe Nyusi", leader: "Filipe Nyusi", leaderRole: "President of Mozambique", headOfGov: "Adriano Maleiane (Prime Minister)" },
-  "Myanmar": { president: "Min Aung Hlaing", leader: "Min Aung Hlaing", leaderRole: "SAC Chairman & Prime Minister (Military Ruler)", headOfGov: "Min Aung Hlaing (Prime Minister)" },
+  "Myanmar": { president: "Min Aung Hlaing", leader: "Min Aung Hlaing", leaderRole: "President (former military junta chief)", headOfGov: "Min Aung Hlaing (President & Head of Government)" },
   "Namibia": { president: "Nangolo Mbumba", leader: "Nangolo Mbumba", leaderRole: "President of Namibia", headOfGov: "Saara Kuugongelwa-Amadhila (Prime Minister)" },
   "Nauru": { president: "David Adeang", leader: "David Adeang", leaderRole: "President of Nauru", headOfGov: "David Adeang (Executive President)" },
   "Nepal": { president: "Ram Chandra Poudel", leader: "K.P. Sharma Oli", leaderRole: "Prime Minister & Chief Executive", headOfGov: "K.P. Sharma Oli (Prime Minister)" },
@@ -233,7 +233,7 @@ const LEADERS_BY_NAME: Record<string, LeaderRecord> = {
   "Somaliland": { president: "Abdirahman Mohamed Abdullahi", leader: "Abdirahman Mohamed Abdullahi", leaderRole: "President of Somaliland", headOfGov: "Abdirahman Mohamed Abdullahi (Executive President)" },
   "W. Sahara": { president: "Brahim Ghali", leader: "Brahim Ghali", leaderRole: "President of the SADR", headOfGov: "Bouchraya Hammoudi Bayoun (Prime Minister)" },
   "Cook Is.": { president: "King Charles III", leader: "Mark Brown", leaderRole: "Prime Minister of Cook Islands", headOfGov: "Mark Brown (Prime Minister)" },
-  "Niue": { president: "King Charles III", leader: "Dalton Tagelagi", leaderRole: "Premier of Niue", headOfGov: "Dalton Tagelagi (Premier)" },
+  "Niue": { president: "King Charles III", leader: "Dalton Tagelagi", leaderRole: "Prime Minister of Niue", headOfGov: "Dalton Tagelagi (Prime Minister)" },
   "Turks and Caicos Is.": { president: "King Charles III", leader: "Washington Misick", leaderRole: "Premier of Turks and Caicos", headOfGov: "Washington Misick (Premier)" },
   "British Virgin Is.": { president: "King Charles III", leader: "Natalio Wheatley", leaderRole: "Premier of British Virgin Islands", headOfGov: "Natalio Wheatley (Premier)" },
   "Anguilla": { president: "King Charles III", leader: "Ellis Webster", leaderRole: "Premier of Anguilla", headOfGov: "Ellis Webster (Premier)" },
@@ -246,11 +246,15 @@ export function getCuratedLeader(countryName: string) {
   if (!countryName) return null;
   if (LEADERS_BY_NAME[countryName]) return LEADERS_BY_NAME[countryName];
   
-  // Normalize string for fuzzy matching
-  const clean = countryName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  // Loose matching for official names ("Republic of Bulgaria") and abbreviations ("Cayman Islands" / "Cayman Is.").
+  // A plain substring test would hand American Samoa to Samoa, or a 3-letter code like GHA to Afghanistan.
+  const norm = (s: string) => s.toLowerCase().replace(/islands?/g, 'is').replace(/[^a-z0-9]/g, '');
+  const clean = norm(countryName);
   for (const [key, val] of Object.entries(LEADERS_BY_NAME)) {
-    const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (clean === cleanKey || clean.includes(cleanKey) || cleanKey.includes(clean)) {
+    const cleanKey = norm(key);
+    const officialForm = clean.endsWith(cleanKey) && /of(the)?$/.test(clean.slice(0, -cleanKey.length));
+    const shortForm = clean.length >= 6 && cleanKey.startsWith(clean);
+    if (clean === cleanKey || officialForm || shortForm) {
       return val;
     }
   }

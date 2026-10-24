@@ -1,7 +1,7 @@
 import React from 'react';
 import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
-import { formatBudget, formatPersonnel } from '../../utils/formatters.ts';
+import { formatBudget, formatGdp, formatPerCapita, formatPersonnel } from '../../utils/formatters.ts';
 import { getVerifiedSovereignInfo } from '../../utils/sovereignData.ts';
 import { getCountryAlliances } from '../../utils/allianceData.ts';
 import { getCountryCulinaryProfile } from '../../utils/nationalFoodsData.ts';
@@ -499,10 +499,10 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
           <div className="text-[10px] text-slate-400">Nominal GDP</div>
           <div className="text-base font-bold text-emerald-400 font-mono">
-            {formatBudget(country.economy.gdpNominalUSD)}
+            {formatGdp(country.economy.gdpNominalUSD)}
           </div>
           <div className="text-[10px] text-slate-400">
-            ${country.economy.gdpPerCapitaUSD.toLocaleString()} / capita
+            {formatPerCapita(country.economy.gdpPerCapitaUSD)} / capita
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CountryData } from '../types.ts';
 import { countryList } from '../data/countriesData.ts';
-import { formatBudget, formatPersonnel, formatPopulation, formatArea, formatLongevity, getNuclearBadge } from '../utils/formatters.ts';
+import { formatBudget, formatGdp, formatPerCapita, formatPersonnel, formatPopulation, formatArea, formatLongevity, getNuclearBadge } from '../utils/formatters.ts';
 import { getCountryAlliances } from '../utils/allianceData.ts';
 import { getCountryCulinaryProfile } from '../utils/nationalFoodsData.ts';
 import { getDetailedMilitary } from '../utils/militaryData.ts';
@@ -313,11 +313,11 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 <div key={c.id} className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1.5 text-[11px]">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Nominal GDP:</span>
-                    <span className="font-mono font-bold text-emerald-400">{formatBudget(c.economy.gdpNominalUSD)}</span>
+                    <span className="font-mono font-bold text-emerald-400">{formatGdp(c.economy.gdpNominalUSD)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">GDP Per Capita:</span>
-                    <span className="font-mono text-slate-200">${c.economy.gdpPerCapitaUSD.toLocaleString()}</span>
+                    <span className="font-mono text-slate-200">{formatPerCapita(c.economy.gdpPerCapitaUSD)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Population:</span>

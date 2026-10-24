@@ -1,7 +1,7 @@
 import React from 'react';
 import { CountryData } from '../../types.ts';
 import { ExtendedCountryDetails } from '../../data/countryDetails.ts';
-import { formatBudget } from '../../utils/formatters.ts';
+import { formatGdp, formatPerCapita } from '../../utils/formatters.ts';
 import {
   DollarSign,
   PieChart,
@@ -37,14 +37,14 @@ export const DossierEconomyTab: React.FC<DossierEconomyTabProps> = ({
           <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
             <div className="text-slate-400">Nominal GDP</div>
             <div className="font-mono font-bold text-emerald-400 text-sm mt-0.5">
-              {formatBudget(country.economy.gdpNominalUSD)}
+              {formatGdp(country.economy.gdpNominalUSD)}
             </div>
             <div className="text-[10px] text-slate-500">Global economic output</div>
           </div>
           <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
             <div className="text-slate-400">GDP Per Capita</div>
             <div className="font-mono font-bold text-slate-200 text-sm mt-0.5">
-              ${country.economy.gdpPerCapitaUSD.toLocaleString()}
+              {formatPerCapita(country.economy.gdpPerCapitaUSD)}
             </div>
             <div className="text-[10px] text-slate-500">Per citizen standard</div>
           </div>
