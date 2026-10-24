@@ -1,5 +1,14 @@
 import { CountryData } from '../types.ts';
 
+// GDP is 0 for places no source measures (uninhabited territories, the Vatican)
+export function formatGdp(gdpUSD: number): string {
+  return gdpUSD > 0 ? formatBudget(gdpUSD) : 'N/A';
+}
+
+export function formatPerCapita(perCapitaUSD: number): string {
+  return perCapitaUSD > 0 ? `$${perCapitaUSD.toLocaleString()}` : 'N/A';
+}
+
 export function formatBudget(budgetUSD: number): string {
   if (budgetUSD >= 1000) {
     return `$${(budgetUSD / 1000).toFixed(2)}T`;

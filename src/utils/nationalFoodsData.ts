@@ -1,5 +1,6 @@
 import { CountryData, CulinaryProfile, NationalFoodItem } from '../types.ts';
 import { getDetailedCountryInfo } from '../data/countryDetails.ts';
+import nationalDishes from '../data/nationalDishes.json';
 
 // Comprehensive National Food & Culinary Heritage Registry with REAL FOOD NAMES (never generic descriptors)
 export const CURATED_CULINARY_REGISTRY: Record<string, Partial<CulinaryProfile>> = {
@@ -1431,7 +1432,32 @@ export const GLOBAL_AUTHENTIC_DISHES: Record<string, AuthenticDishSet> = {
  * Never uses generic descriptive placeholders like "Hearth Stew" or "Sweet Pastry".
  * Always provides genuine, verified real food names.
  */
+// Named dishes for every inhabited country the two tables above don't cover, keyed by ISO code
+// (or by id for entries such as N. Cyprus that share a code with another country)
+const NATIONAL_DISHES = nationalDishes as Record<string, AuthenticDishSet>;
+
+const UNINHABITED_PROFILE: CulinaryProfile = {
+  culinaryTraditions: 'There is no permanent population, so there is no local cuisine. Visiting scientists, crews and personnel eat supplied provisions.',
+  stapleIngredients: [],
+  dietaryHeritage: 'None (no permanent population).',
+  nationalDishes: [
+    {
+      name: 'None (no permanent population)',
+      category: 'National Dish',
+      description: 'No national dish: the territory has no permanent residents.',
+      keyIngredients: [],
+      flavorProfile: 'N/A',
+      iconEmoji: '🏝️',
+    },
+  ],
+  popularStreetFoods: [],
+  dessertsAndPastries: [],
+  signatureBeverages: [],
+};
+
 export function getCountryCulinaryProfile(country: CountryData): CulinaryProfile {
+  if (!country.demographics?.population) return UNINHABITED_PROFILE;
+
   // 1. Check curated registry first
   const curated = CURATED_CULINARY_REGISTRY[country.id] || CURATED_CULINARY_REGISTRY[country.code];
   if (curated && curated.nationalDishes && curated.nationalDishes.length > 0) {
@@ -1449,7 +1475,7 @@ export function getCountryCulinaryProfile(country: CountryData): CulinaryProfile
   // 2. Check global authentic dish catalog
   const code2 = country.code.toUpperCase().slice(0, 2);
   const code3 = country.code.toUpperCase();
-  const auth = GLOBAL_AUTHENTIC_DISHES[code2] || GLOBAL_AUTHENTIC_DISHES[code3];
+  const auth = GLOBAL_AUTHENTIC_DISHES[code2] || GLOBAL_AUTHENTIC_DISHES[code3] || NATIONAL_DISHES[country.id] || NATIONAL_DISHES[code2];
 
   if (auth) {
     return {

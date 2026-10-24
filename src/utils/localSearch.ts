@@ -9,18 +9,15 @@ import { formatArea, formatBudget, formatPopulation } from './formatters.ts';
  * Answers common country questions instantly from the atlas's own data, so the search only
  * goes to the server (and Gemini) for questions the app can't answer itself.
  *
- * Many country records still hold generated placeholder values (e.g. a population of exactly
- * 5,000,000 or a currency of "National Currency"). A fact is only answered locally when the
- * value is real; otherwise this returns null and the server answers instead.
+ * Measured figures come from src/data/countryFacts.json (scripts/fetch-country-facts.ts). A figure
+ * that isn't measured for a place (no GDP for an overseas collectivity, no life expectancy for a
+ * territory of a few hundred people) is stored as 0, and the question then goes to the server.
+ * The text checks below still guard against the generic labels the base profiles were seeded with.
  */
 
 // ---------- Placeholder detection ----------
 
-const PLACEHOLDER_POPULATION = 5_000_000;
-const PLACEHOLDER_GDP = 25;
-const PLACEHOLDER_LIFE_EXPECTANCY = 76.5;
-
-const isRealPopulation = (pop: number) => pop > 0 && pop !== PLACEHOLDER_POPULATION;
+const isRealPopulation = (pop: number) => pop > 0;
 const isRealText = (value: string | undefined, placeholder: string) => Boolean(value && value !== placeholder);
 const isRealList = (values: string[] | undefined, placeholder: string) =>
   Boolean(values && values.length > 0 && !values.some((v) => v === placeholder || v.startsWith(`${placeholder} of`)));
@@ -118,6 +115,9 @@ const EXTRA_TERMS: Record<string, string[]> = {
   PK: ['pakistani'],
   UA: ['ukrainian'],
   KR: ['south korean'],
+  // Keyed by id: these share an ISO code with another country
+  'N. Cyprus': ['northern cyprus', 'trnc', 'turkish republic of northern cyprus'],
+  'Indian Ocean Ter.': ['christmas island', 'cocos islands', 'cocos keeling islands'],
 };
 
 // Phrases that contain a country name but mean something else
@@ -144,10 +144,11 @@ const getTermIndex = () => {
   if (termIndex) return termIndex;
   const entries: TermEntry[] = [];
   for (const country of countryList) {
-    const names = new Set([country.name, country.officialName, expandAbbreviations(country.name), ...(EXTRA_TERMS[country.code] || [])]);
+    const extra = EXTRA_TERMS[country.id] || EXTRA_TERMS[country.code] || [];
+    const names = new Set([country.name, country.officialName, expandAbbreviations(country.name), ...extra]);
     for (const name of names) {
       const term = normalize(name);
-      if (term.trim().length >= 3 || EXTRA_TERMS[country.code]?.includes(name)) {
+      if (term.trim().length >= 3 || extra.includes(name)) {
         entries.push({ term, country });
       }
     }
@@ -268,7 +269,7 @@ const realCurrency = (c: CountryData) =>
 const realDishes = (c: CountryData) => {
   const profile = getCountryCulinaryProfile(c);
   const dishes = [...profile.nationalDishes, ...profile.popularStreetFoods, ...profile.dessertsAndPastries].filter(
-    (d) => d?.name && !/national dish/i.test(d.name)
+    (d) => d?.name && !/national dish/i.test(d.name) && !d.name.startsWith('None')
   );
   return dishes.length > 0 ? dishes : null;
 };
@@ -379,7 +380,7 @@ const answerForCountry = (c: CountryData, intents: Intent[]): AskSearchResponse 
       }
 
       case 'gdp':
-        if (c.economy.gdpNominalUSD === PLACEHOLDER_GDP) return null;
+        if (!c.economy.gdpNominalUSD) return null;
         return answer(
           c,
           `${Name}'s nominal GDP is about ${formatBudget(c.economy.gdpNominalUSD)}${
@@ -414,7 +415,7 @@ const answerForCountry = (c: CountryData, intents: Intent[]): AskSearchResponse 
         );
 
       case 'lifeExpectancy':
-        if (!c.demographics.lifeExpectancy || c.demographics.lifeExpectancy === PLACEHOLDER_LIFE_EXPECTANCY) return null;
+        if (!c.demographics.lifeExpectancy) return null;
         return answer(c, `Life expectancy in ${name} is about ${c.demographics.lifeExpectancy} years.`, [`Life expectancy: ${c.demographics.lifeExpectancy} years`]);
 
       case 'food': {
@@ -440,8 +441,8 @@ const answerForCountry = (c: CountryData, intents: Intent[]): AskSearchResponse 
       }
 
       case 'defenseBudget':
-        // Generated records share a 0.5B placeholder budget; only answer for countries with real military data
-        if (c.military.defenseBudgetUSD === 0.5 || c.economy.gdpNominalUSD === PLACEHOLDER_GDP) return null;
+        // Places without a published defence budget hold 0
+        if (!c.military.defenseBudgetUSD) return null;
         return answer(c, `${Name} spends about ${formatBudget(c.military.defenseBudgetUSD)} a year on defence (${c.military.defenseBudgetPercentGDP}% of GDP).`, [
           `Defence budget: ${formatBudget(c.military.defenseBudgetUSD)}`,
           `Share of GDP: ${c.military.defenseBudgetPercentGDP}%`,
@@ -488,7 +489,7 @@ const compareCountries = (a: CountryData, b: CountryData, q: string): AskSearchR
 
   const value = (c: CountryData) => {
     if (metric === 'population') return realPopulation(c);
-    if (metric === 'gdp') return c.economy.gdpNominalUSD === PLACEHOLDER_GDP ? null : c.economy.gdpNominalUSD;
+    if (metric === 'gdp') return c.economy.gdpNominalUSD || null;
     return getVerifiedSovereignInfo(c).areaKm2;
   };
   const va = value(a);
@@ -531,10 +532,6 @@ const rankCountries = (q: string, continent: CountryData['continent'] | null): A
   const topMatch = q.match(/\btop (\d+)\b/);
   const requested = topMatch ? parseInt(topMatch[1], 10) : has(q, /\btop ten\b/) ? 10 : has(q, /\btop five\b/) ? 5 : 10;
   const count = Math.min(Math.max(requested, 1), 50);
-
-  // 103 records carry a placeholder population; only world-wide top-10 population lists are
-  // safe, because every country that large has real data
-  if (metric === 'population' && (continent || ascending || count > 10)) return null;
 
   const pool = countryList
     .filter((c) => !NON_SOVEREIGN.has(c.name) && (!continent || c.continent === continent))

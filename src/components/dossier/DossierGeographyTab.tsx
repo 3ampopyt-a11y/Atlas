@@ -110,7 +110,7 @@ export const DossierGeographyTab: React.FC<DossierGeographyTabProps> = ({
               {country.demographics.urbanPercentage}% Urban
             </div>
             <div className="text-[10px] text-slate-500">
-              Life Expectancy: {country.demographics.lifeExpectancy} yrs
+              Life Expectancy: {country.demographics.lifeExpectancy ? `${country.demographics.lifeExpectancy} yrs` : 'N/A'}
             </div>
           </div>
         </div>
