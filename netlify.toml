@@ -1,0 +1,13 @@
+[build]
+  # Only the static site is published; the API runs as the function below.
+  # (npm run build also bundles server.ts into dist/, which would make it publicly downloadable.)
+  command = "vite build"
+  publish = "dist"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
