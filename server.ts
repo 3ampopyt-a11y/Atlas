@@ -1864,8 +1864,8 @@ Respond STRICTLY in valid JSON matching this schema:
   "keyFacts": ["string"]
 }`;
 
-      // Model priority list: gemini-3.1-flash-lite is fastest and avoids 503 capacity limits, followed by gemini-3.8-flash
-      const candidateModels = ['gemini-3.1-flash-lite', 'gemini-3.8-flash', 'gemini-flash-latest'];
+      // Model priority list: gemini-3.8-flash first, gemini-flash-latest as fallback
+      const candidateModels = ['gemini-3.8-flash', 'gemini-flash-latest'];
       let lastError: any = null;
       let rawText = '';
 
