@@ -81,7 +81,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
         <button
           id="btn-close-compare"
           onClick={onClose}
-          className="sticky top-3 right-3 self-end -mb-9 mr-3 z-30 p-1.5 sm:p-2 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700/80 shadow-md backdrop-blur-sm transition-colors"
+          className={`${searchPickerIndex !== null ? 'invisible' : ''} sticky top-3 right-3 self-end -mb-9 mr-3 z-30 p-1.5 sm:p-2 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700/80 shadow-md backdrop-blur-sm transition-colors`}
           title="Close comparison"
         >
           <X className="w-5 h-5" />
@@ -435,46 +435,57 @@ export const CompareModal: React.FC<CompareModalProps> = ({
 
         {/* Picker Modal Overlay if user clicked "Change" or "Add" */}
         {searchPickerIndex !== null && (
-          <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md z-20 p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-slate-100 text-sm">Select a Country to Compare</h3>
-              <button
-                onClick={() => setSearchPickerIndex(null)}
-                className="p-1 text-slate-400 hover:text-slate-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search country..."
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200 mb-3 focus:outline-none focus:border-cyan-500"
-              autoFocus
-            />
-            <div className="flex-1 overflow-y-auto divide-y divide-slate-800">
-              {filteredPickerList.slice(0, 30).map((c) => (
+          <div
+            className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center p-4"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSearchPickerIndex(null);
+            }}
+          >
+            <div
+              className="w-full max-w-md max-h-[70vh] bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl p-5 flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-slate-100 text-sm">Select a Country to Compare</h3>
                 <button
-                  key={c.id}
-                  onClick={() => handleAddCountry(c)}
-                  className="w-full py-2.5 px-3 flex items-center justify-between hover:bg-slate-900 rounded-lg text-left"
+                  onClick={() => setSearchPickerIndex(null)}
+                  className="p-1 text-slate-400 hover:text-slate-200"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{c.flag}</span>
-                    <div>
-                      <div className="font-bold text-slate-200 text-xs">{c.name}</div>
-                      <div className="text-[10px] text-slate-400">
-                        {c.capital} • {c.continent}
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search country..."
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200 mb-3 focus:outline-none focus:border-cyan-500"
+                autoFocus
+              />
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-800">
+                {filteredPickerList.slice(0, 30).map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => handleAddCountry(c)}
+                    className="w-full py-2.5 px-3 flex items-center justify-between hover:bg-slate-900 rounded-lg text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <CountryFlag countryCode={c.code} countryName={c.name} flagEmoji={c.flag} size="md" />
+                      <div>
+                        <div className="font-bold text-slate-200 text-xs">{c.name}</div>
+                        <div className="text-[10px] text-slate-400">
+                          {c.capital} • {c.continent}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right text-[10px]">
-                    <span className="text-amber-400 font-mono">{formatGfpRank(c.military)}</span>
-                    <span className="block text-emerald-400">Alive {c.longevity.yearsAlive} yrs</span>
-                  </div>
-                </button>
-              ))}
+                    <div className="text-right text-[10px]">
+                      <span className="text-amber-400 font-mono">{formatGfpRank(c.military)}</span>
+                      <span className="block text-emerald-400">Alive {c.longevity.yearsAlive} yrs</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
