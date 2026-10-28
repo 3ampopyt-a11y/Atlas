@@ -283,13 +283,13 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                   countryCode={country.code}
                   countryName={country.name}
                   flagEmoji={sovereignState.flag}
-                  size={isFullscreen ? "md" : "lg"}
+                  size="md"
                   className="border-2 border-slate-700/80 shadow-md shrink-0"
                 />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h2 className="text-base sm:text-lg font-bold text-slate-100 tracking-tight max-w-[150px] sm:max-w-xs md:max-w-sm truncate">
+                <div className="flex items-center gap-2 min-w-0">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-100 tracking-tight truncate">
                     {sovereignState.name}
                   </h2>
                   {country.code3 && (
@@ -297,6 +297,81 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                       {country.code3}
                     </span>
                   )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons: icon-only in the side panel, labelled in full screen */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              {/* Update Intelligence Button */}
+              <button
+                id="btn-update-country-intel"
+                onClick={handleLiveUpdate}
+                disabled={isUpdatingLive}
+                className={`${isFullscreen ? 'p-1.5 sm:px-2.5 sm:py-1.5' : 'p-1.5'} rounded-xl bg-slate-800/90 hover:bg-cyan-950/60 border border-slate-700/80 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-xs font-semibold`}
+                title="Update with live current-day leadership & intelligence"
+              >
+                <RefreshCw className={`w-4 h-4 text-cyan-400 ${isUpdatingLive ? 'animate-spin' : ''}`} />
+                <span className={isFullscreen ? 'hidden sm:inline' : 'sr-only'}>
+                  {isUpdatingLive ? 'Updating...' : 'Update'}
+                </span>
+              </button>
+
+              {/* Fullscreen Toggle Button */}
+              <button
+                id="btn-toggle-fullscreen"
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className={`${isFullscreen ? 'p-1.5 sm:px-2.5 sm:py-1.5' : 'p-1.5'} rounded-xl transition-colors flex items-center gap-1.5 border text-xs font-semibold ${
+                  isFullscreen
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 hover:bg-cyan-500/30'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:text-cyan-300 hover:bg-slate-800'
+                }`}
+                title={isFullscreen ? 'Exit Full Screen' : 'View Full Screen Dossier'}
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="w-4 h-4 text-cyan-400" />
+                ) : (
+                  <Maximize2 className="w-4 h-4 text-cyan-400" />
+                )}
+                <span className={isFullscreen ? 'hidden sm:inline' : 'sr-only'}>
+                  {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                </span>
+              </button>
+              {!isFullscreen && (
+                <button
+                  id="btn-minimize-dossier"
+                  onClick={() => setIsMinimized(true)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-colors"
+                  title="Minimize panel to view full map"
+                >
+                  <Minimize2 className="w-4 h-4" />
+                </button>
+              )}
+
+              <button
+                id="btn-close-dossier"
+                onClick={onClose}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                title="Close dossier"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Leader and capital get the full width so they aren't cut short by the buttons */}
+          <p
+            className="text-[11px] sm:text-xs text-slate-300 font-light truncate mt-1.5"
+            title={`${sovereignState.leaderRole || 'Leader'}: ${sovereignState.leader || sovereignState.president} • Capital: ${sovereignState.capital}`}
+          >
+            <span className="text-amber-400 font-medium">{sovereignState.leaderRole || 'Leader'}:</span>{' '}
+            <span className="text-slate-100 font-semibold">{sovereignState.leader || sovereignState.president}</span> •{' '}
+            <span className="text-slate-400">Capital:</span> {sovereignState.capital}
+          </p>
+
+          {/* Badges on one full-width row under the name: rank, world records, sport, then alliances (side panel only) */}
+          {(country.military.powerIndex > 0 || leadingProfile || nationalSport || !isFullscreen) && (
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                   {country.military.powerIndex > 0 && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 font-mono font-semibold border border-cyan-500/30 shrink-0">
                       GFP #{country.military.globalRank}
@@ -327,16 +402,13 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                       <span className="max-w-[110px] truncate">{nationalSport.sportName.split('(')[0].trim()}</span>
                     </button>
                   )}
-                </div>
-                <p className="text-[11px] sm:text-xs text-slate-300 font-light truncate mt-0.5">
-                  <span className="text-amber-400 font-medium">{sovereignState.leaderRole || 'Leader'}:</span>{' '}
-                  <span className="text-slate-100 font-semibold">{sovereignState.leader || sovereignState.president}</span> •{' '}
-                  <span className="text-slate-400">Capital:</span> {sovereignState.capital}
-                </p>
 
-                {/* Alliance Flags Ribbon in Header (only in normal side-panel) */}
-                {!isFullscreen && (
-                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  {/* Alliance flags (side panel only; full screen has its own alliance section) */}
+                  {!isFullscreen && (
+                  <>
+                    {(country.military.powerIndex > 0 || leadingProfile || nationalSport) && (
+                      <span className="w-px h-3.5 bg-slate-700 mx-0.5" aria-hidden="true" />
+                    )}
                     {alliances.length > 0 ? (
                       alliances.slice(0, 3).map((a) => (
                         <button
@@ -366,68 +438,10 @@ export const CountryDossier: React.FC<CountryDossierProps> = ({
                         +{alliances.length - 3} more
                       </button>
                     )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action Buttons: Live Update, Fullscreen */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {/* Update Intelligence Button */}
-              <button
-                id="btn-update-country-intel"
-                onClick={handleLiveUpdate}
-                disabled={isUpdatingLive}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-800/90 hover:bg-cyan-950/60 border border-slate-700/80 hover:border-cyan-500/50 text-slate-300 hover:text-cyan-300 transition-colors flex items-center gap-1.5 text-xs font-semibold"
-                title="Update with live current-day leadership & intelligence"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isUpdatingLive ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">
-                  {isUpdatingLive ? 'Updating...' : 'Update'}
-                </span>
-              </button>
-
-              {/* Fullscreen Toggle Button */}
-              <button
-                id="btn-toggle-fullscreen"
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl transition-colors flex items-center gap-1.5 border text-xs font-semibold ${
-                  isFullscreen
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 hover:bg-cyan-500/30'
-                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:text-cyan-300 hover:bg-slate-800'
-                }`}
-                title={isFullscreen ? 'Exit Full Screen' : 'View Full Screen Dossier'}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-4 h-4 text-cyan-400" />
-                ) : (
-                  <Maximize2 className="w-4 h-4 text-cyan-400" />
-                )}
-                <span className="hidden sm:inline">
-                  {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-                </span>
-              </button>
-              {!isFullscreen && (
-                <button
-                  id="btn-minimize-dossier"
-                  onClick={() => setIsMinimized(true)}
-                  className="p-1.5 rounded-xl text-slate-400 hover:text-cyan-300 hover:bg-slate-800 transition-colors"
-                  title="Minimize panel to view full map"
-                >
-                  <Minimize2 className="w-4 h-4" />
-                </button>
-              )}
-
-              <button
-                id="btn-close-dossier"
-                onClick={onClose}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
-                title="Close dossier"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+                  </>
+                  )}
+                </div>
+          )}
 
           {/* Live Notification Bar if updated */}
           {liveNotice && (
