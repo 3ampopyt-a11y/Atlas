@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { CountryData, AskSearchResponse, AskSearchHistoryItem, VisualMedia, RankedListItem } from '../types.ts';
 import { countryList, getCountryByName } from '../data/countriesData.ts';
-import { findVisualMedia, fetchDynamicWikiMedia } from '../utils/visualMediaRegistry.ts';
+import { findVisualMedia, fetchWikiMediaFor } from '../utils/visualMediaRegistry.ts';
+import { getOwnFlagUrl } from '../utils/ownFlags.ts';
 import { answerFromLocalData } from '../utils/localSearch.ts';
 import { CountryFlag } from './CountryFlag.tsx';
 import { formatGfpRank } from '../utils/formatters.ts';
@@ -75,6 +76,8 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
   const [imgLoadError, setImgLoadError] = useState(false);
   const [rankFilterTab, setRankFilterTab] = useState<'all' | 'top10' | '11-25' | '26-50'>('all');
   const [rankFilterQuery, setRankFilterQuery] = useState('');
+  // Photos that failed to load for the answer on screen, so the next lookup skips them
+  const failedMedia = useRef<{ query: string; urls: string[] }>({ query: '', urls: [] });
   const inputRef = useRef<HTMLInputElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
@@ -180,7 +183,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
       findCountry(data.targetCountryCode) ||
       findCountry(trimmed);
 
-    const matchedMedia = data.media || findVisualMedia(trimmed, data.answer);
+    const matchedMedia = data.media || findVisualMedia(trimmed);
 
     const historyItem: AskSearchHistoryItem = {
       id: `${Date.now()}-${idSuffix}`,
@@ -196,19 +199,12 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
       source: data.source || 'gemini-ai',
       matchedCountry: matched,
       media: matchedMedia,
+      mediaQuery: data.mediaQuery || null,
       timestamp: Date.now(),
     };
 
     setCurrentResult(historyItem);
     setHistory((prev) => [historyItem, ...prev.filter((h) => h.query !== trimmed).slice(0, 8)]);
-
-    if (!matchedMedia) {
-      fetchDynamicWikiMedia(data.mediaQuery || data.targetCountry || trimmed).then((asyncMedia) => {
-        if (asyncMedia) {
-          setCurrentResult((prev) => (prev && prev.query === trimmed ? { ...prev, media: asyncMedia } : prev));
-        }
-      });
-    }
   };
 
   const handleAsk = async (searchQuery: string) => {
@@ -324,20 +320,53 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
           timestamp: Date.now(),
         };
         setCurrentResult(fallbackItem);
-
-        if (!matchedMedia) {
-          fetchDynamicWikiMedia(matched?.name || trimmed).then((asyncMedia) => {
-            if (asyncMedia) {
-              setCurrentResult((prev) => (prev && prev.query === trimmed ? { ...prev, media: asyncMedia } : prev));
-            }
-          });
-        }
       } else {
         setError('Could not reach the AI service to answer your question. Please try asking again.');
       }
     } finally {
       setLoading(false);
     }
+  };
+
+  // Every answer gets a picture: a Wikipedia photo of the subject, else the country's flag, else Earth
+  const findMediaFor = async (result: AskSearchHistoryItem, skip: string[]): Promise<VisualMedia | null> => {
+    const wiki = await fetchWikiMediaFor([result.mediaQuery, result.targetCountry, result.query], skip);
+    if (wiki) return wiki;
+    const country = result.matchedCountry || findCountry(result.targetCountry);
+    if (country) {
+      const flagUrl = getOwnFlagUrl(country.name) || `https://flagcdn.com/w1280/${country.code.toLowerCase()}.png`;
+      if (!skip.includes(flagUrl)) {
+        return { title: country.name, subtitle: 'National flag', imageUrl: flagUrl, category: 'National Symbols', badge: 'National Flag' };
+      }
+    }
+    return fetchWikiMediaFor(['Earth'], skip);
+  };
+
+  // Looks a picture up whenever the answer on screen has none (including after one failed to load)
+  useEffect(() => {
+    if (!currentResult || currentResult.media) return;
+    const forQuery = currentResult.query;
+    if (failedMedia.current.query !== forQuery) failedMedia.current = { query: forQuery, urls: [] };
+    let cancelled = false;
+    findMediaFor(currentResult, failedMedia.current.urls).then((media) => {
+      if (cancelled) return;
+      if (media) setCurrentResult((prev) => (prev && prev.query === forQuery && !prev.media ? { ...prev, media } : prev));
+      else setImgLoadError(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentResult]);
+
+  useEffect(() => {
+    setImgLoadError(false);
+  }, [currentResult?.query]);
+
+  const handleMediaError = (imageUrl: string) => {
+    if (!currentResult) return;
+    if (failedMedia.current.query !== currentResult.query) failedMedia.current = { query: currentResult.query, urls: [] };
+    failedMedia.current.urls.push(imageUrl);
+    setCurrentResult((prev) => (prev ? { ...prev, media: null } : prev));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -353,7 +382,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
   if (!isOpen) return null;
 
   const targetCountryData = currentResult?.matchedCountry || findCountry(currentResult?.targetCountry);
-  const visualMedia = currentResult?.media || (currentResult ? findVisualMedia(currentResult.query, currentResult.answer) : null);
+  const visualMedia = currentResult?.media || null;
 
   return (
     <div
@@ -526,7 +555,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
                         src={visualMedia.imageUrl}
                         alt={visualMedia.title}
                         referrerPolicy="no-referrer"
-                        onError={() => setImgLoadError(true)}
+                        onError={() => handleMediaError(visualMedia.imageUrl)}
                         className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                       />
                     ) : (

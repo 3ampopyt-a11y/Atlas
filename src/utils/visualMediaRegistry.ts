@@ -3,6 +3,7 @@ import { VisualMedia } from '../types.ts';
 export const KNOWN_VISUAL_ASSETS: {
   id: string;
   keywords: string[];
+  excludes?: string[]; // a query containing any of these never gets this picture
   media: VisualMedia;
 }[] = [
   {
@@ -22,10 +23,12 @@ export const KNOWN_VISUAL_ASSETS: {
       'heaviest plane',
       'heaviest aircraft',
     ],
+    // "largest aircraft carrier" is a ship
+    excludes: ['carrier'],
     media: {
       title: 'Antonov An-225 Mriya ("Dream")',
       subtitle: 'World\'s Heaviest & Largest Cargo Transport Aircraft Ever Built',
-      imageUrl: '/src/assets/images/antonov_an225_plane_1790846553224.jpg',
+      imageUrl: '/media/antonov_an225_plane_1790846553224.jpg',
       category: 'Military & Strategic Aerospace / Super-Heavy Airlift',
       badge: 'World\'s Largest Plane',
       specs: [
@@ -45,7 +48,7 @@ export const KNOWN_VISUAL_ASSETS: {
     media: {
       title: 'Boeing C-17 Globemaster III',
       subtitle: 'Strategic Heavy Military Transport & Airlift Aircraft',
-      imageUrl: '/src/assets/images/c17_globemaster_aircraft_1790844391224.jpg',
+      imageUrl: '/media/c17_globemaster_aircraft_1790844391224.jpg',
       category: 'Military Aviation / Strategic Transport',
       badge: 'Heavy Airlifter',
       specs: [
@@ -66,7 +69,7 @@ export const KNOWN_VISUAL_ASSETS: {
     media: {
       title: '5th-Generation Stealth Multirole Fighter',
       subtitle: 'Advanced Air Superiority & Precision Strike Combat Aircraft',
-      imageUrl: '/src/assets/images/stealth_fighter_jet_1790844403054.jpg',
+      imageUrl: '/media/stealth_fighter_jet_1790844403054.jpg',
       category: 'Military Aviation / Combat',
       badge: '5th Gen Fighter',
       specs: [
@@ -85,7 +88,7 @@ export const KNOWN_VISUAL_ASSETS: {
     media: {
       title: 'Fleet Aircraft Carrier (Supercarrier)',
       subtitle: 'Capital Naval Surface Warship & Mobile Maritime Airbase',
-      imageUrl: '/src/assets/images/naval_aircraft_carrier_1790844415538.jpg',
+      imageUrl: '/media/naval_aircraft_carrier_1790844415538.jpg',
       category: 'Naval Warfare / Capital Ships',
       badge: 'Fleet Flagship',
       specs: [
@@ -104,7 +107,7 @@ export const KNOWN_VISUAL_ASSETS: {
     media: {
       title: 'Main Battle Tank (MBT)',
       subtitle: 'Heavy Armored Front-Line Ground Combat Vehicle',
-      imageUrl: '/src/assets/images/main_battle_tank_1790844425943.jpg',
+      imageUrl: '/media/main_battle_tank_1790844425943.jpg',
       category: 'Ground Forces / Armored Warfare',
       badge: 'Armored Cavalry',
       specs: [
@@ -135,7 +138,7 @@ export const KNOWN_VISUAL_ASSETS: {
     media: {
       title: 'Multi-Role Guided Missile Frigate',
       subtitle: 'Modern Naval Surface Combatant & Maritime Patrol Warship',
-      imageUrl: '/src/assets/images/naval_frigate_warship_1791545175618.jpg',
+      imageUrl: '/media/naval_frigate_warship_1791545175618.jpg',
       category: 'Naval Warfare / Surface Combatants',
       badge: 'Fleet Warship',
       specs: [
@@ -150,91 +153,80 @@ export const KNOWN_VISUAL_ASSETS: {
   },
 ];
 
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Whole words only, so "tank" doesn't fire inside "tanker"
+const hasKeyword = (text: string, keyword: string) =>
+  new RegExp(`(^|[^a-z0-9])${escapeRegExp(keyword)}($|[^a-z0-9])`).test(text);
+
 /**
- * Finds matching visual media for a user query and/or AI response text
+ * The curated picture for a question, matched on the question alone (answers mention too much
+ * in passing); the longest matching keyword wins
  */
-export function findVisualMedia(query: string, answer?: string): VisualMedia | null {
-  const qLower = query.toLowerCase();
-
-  // 1. Direct match on user query takes priority
+export function findVisualMedia(query: string): VisualMedia | null {
+  const q = query.toLowerCase();
+  let best: { media: VisualMedia; length: number } | null = null;
   for (const asset of KNOWN_VISUAL_ASSETS) {
-    if (asset.keywords.some((k) => qLower.includes(k))) {
-      return asset.media;
+    if (asset.excludes?.some((x) => q.includes(x))) continue;
+    for (const k of asset.keywords) {
+      if (k.length > (best?.length ?? 0) && hasKeyword(q, k)) best = { media: asset.media, length: k.length };
     }
   }
+  return best?.media ?? null;
+}
 
-  // 2. Fallback to combined text
-  const combined = `${query} ${answer || ''}`.toLowerCase();
-  for (const asset of KNOWN_VISUAL_ASSETS) {
-    if (asset.keywords.some((k) => combined.includes(k))) {
-      return asset.media;
-    }
+const toWikiMedia = (title: string, description: string | undefined, imageUrl: string): VisualMedia => ({
+  title,
+  subtitle: description || 'Wikipedia',
+  imageUrl,
+  category: 'Encyclopedic Visual Intelligence',
+  badge: 'Verified Photo',
+});
+
+// The lead image of the Wikipedia article with exactly this title
+async function wikiArticleImage(title: string, skip: string[]): Promise<VisualMedia | null> {
+  const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!res.ok) return null;
+  const data: any = await res.json();
+  if (data.type === 'disambiguation') return null;
+  const img = data.originalimage?.source || data.thumbnail?.source;
+  return img && !skip.includes(img) ? toWikiMedia(data.title || title, data.description, img) : null;
+}
+
+// The best-ranked of the top search results that has a lead image
+async function wikiSearchImage(text: string, skip: string[]): Promise<VisualMedia | null> {
+  const url =
+    'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=6' +
+    `&gsrsearch=${encodeURIComponent(text)}&prop=pageimages|description&piprop=original|thumbnail&pithumbsize=1280`;
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  const data: any = await res.json();
+  const pages: any[] = Object.values(data.query?.pages || {}).sort((a: any, b: any) => a.index - b.index);
+  for (const p of pages) {
+    const img = p.original?.source || p.thumbnail?.source;
+    if (img && !skip.includes(img)) return toWikiMedia(p.title, p.description, img);
   }
-
   return null;
 }
 
 /**
- * Dynamically queries Wikipedia summary & image APIs to fetch real, verified encyclopedic photos for any subject.
+ * A Wikipedia photo for the first subject that has one: each subject is tried as an exact
+ * article title, then as a search. Images in skip (ones that failed to load) are passed over.
  */
-export async function fetchDynamicWikiMedia(subject: string): Promise<VisualMedia | null> {
-  if (!subject || typeof subject !== 'string') return null;
-  const clean = subject.trim();
-  if (!clean || clean.length < 2) return null;
-
-  try {
-    // 1. Direct summary fetch
-    const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(clean)}`;
-    const res = await fetch(summaryUrl, {
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-
-    if (res.ok) {
-      const data: any = await res.json();
-      const img = data.originalimage?.source || data.thumbnail?.source;
-      if (img) {
-        return {
-          title: data.title || clean,
-          subtitle: data.description || 'Verified Global Visual Reference',
-          imageUrl: img,
-          category: 'Encyclopedic Visual Intelligence',
-          badge: 'Verified Photo',
-        };
-      }
+export async function fetchWikiMediaFor(subjects: (string | null | undefined)[], skip: string[] = []): Promise<VisualMedia | null> {
+  const tried = new Set<string>();
+  for (const raw of subjects) {
+    const subject = raw?.trim();
+    if (!subject || subject.length < 2 || tried.has(subject.toLowerCase())) continue;
+    tried.add(subject.toLowerCase());
+    try {
+      const media = (await wikiArticleImage(subject, skip)) || (await wikiSearchImage(subject, skip));
+      if (media) return media;
+    } catch (err) {
+      console.warn('Wikipedia photo lookup failed:', err);
     }
-
-    // 2. OpenSearch / Search fallback
-    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(clean)}&utf8=&format=json&origin=*`;
-    const searchRes = await fetch(searchUrl);
-    if (searchRes.ok) {
-      const searchData: any = await searchRes.json();
-      const firstHit = searchData.query?.search?.[0];
-      if (firstHit?.title) {
-        const pageSumUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(firstHit.title)}`;
-        const pageRes = await fetch(pageSumUrl, {
-          headers: { 'Accept': 'application/json' },
-        });
-        if (pageRes.ok) {
-          const pageData: any = await pageRes.json();
-          const img = pageData.originalimage?.source || pageData.thumbnail?.source;
-          if (img) {
-            return {
-              title: pageData.title || firstHit.title,
-              subtitle: pageData.description || 'Verified Global Visual Reference',
-              imageUrl: img,
-              category: 'Encyclopedic Visual Intelligence',
-              badge: 'Verified Photo',
-            };
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('Wiki dynamic media fetch notice:', err);
   }
-
   return null;
 }
-

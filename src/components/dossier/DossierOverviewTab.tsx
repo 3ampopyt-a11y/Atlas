@@ -64,7 +64,8 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
   const nationalSport = getCountryNationalSport(country);
 
   return (
-    <div id="section-overview" className="space-y-4 animate-in fade-in duration-150">
+    // Grids size by this tab's own width (@container), not the window's: the side panel is narrow on a wide screen
+    <div id="section-overview" className="@container space-y-4 animate-in fade-in duration-150">
       {/* Fullscreen Callout Banner (only if not fullscreen) */}
       {!isFullscreen && (
         <div className="p-3 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900 to-indigo-950/50 border border-cyan-500/30 flex items-center justify-between gap-3">
@@ -90,8 +91,8 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
         id="card-sovereign-identity"
         className="p-4 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/95 to-slate-950 border border-cyan-500/30 shadow-xl space-y-3.5"
       >
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80 ${isFullscreen ? 'lg:hidden' : ''}`}>
-          <div className="flex items-center gap-3.5">
+        <div className={`flex flex-col @sm:flex-row @sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80 ${isFullscreen ? 'lg:hidden' : ''}`}>
+          <div className="flex items-center gap-3.5 min-w-0">
             <CountryFlag
               countryCode={country.code}
               countryName={country.name}
@@ -99,7 +100,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               size="xl"
               className="border-2 border-slate-700/80 shadow-md shrink-0"
             />
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-lg sm:text-xl font-extrabold text-slate-100 tracking-tight">
                   {sovereign.name}
@@ -119,9 +120,9 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 bg-slate-800/70 border border-slate-700/60 rounded-xl px-3 py-1.5">
-            <MapPin className="w-4 h-4 text-rose-400" />
-            <div className="text-left">
+          <div className="flex items-center gap-2 self-start @sm:self-auto min-w-0 max-w-full bg-slate-800/70 border border-slate-700/60 rounded-xl px-3 py-1.5">
+            <MapPin className="w-4 h-4 text-rose-400 shrink-0" />
+            <div className="text-left min-w-0 break-words">
               <div className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">
                 Capital City
               </div>
@@ -133,22 +134,24 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
         </div>
 
         {/* Vital Sovereign Facts Matrix: President, Government, Population, Area, Languages */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-1 @sm:grid-cols-2 @3xl:grid-cols-3 gap-2.5">
           {/* President / Head of State Card */}
           <div
             id="card-head-of-state"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/40 transition-colors space-y-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-amber-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-amber-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Crown className="w-3.5 h-3.5 text-amber-400" />
-                <span>{sovereign.leaderRole || sovereign.headOfStateRole || 'Executive Leader'}</span>
+            <div className="flex items-start justify-between gap-2 text-[11px] text-amber-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-px" />
+                <span className="line-clamp-2" title={sovereign.leaderRole || sovereign.headOfStateRole || 'Executive Leader'}>
+                  {sovereign.leaderRole || sovereign.headOfStateRole || 'Executive Leader'}
+                </span>
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
+              <span className="shrink-0 whitespace-nowrap text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold">
                 Leader
               </span>
             </div>
-            <div className="text-sm font-bold text-slate-100 leading-snug">
+            <div className="text-sm font-bold text-slate-100 leading-snug break-words">
               {sovereign.leader || sovereign.president}
             </div>
             {sovereign.headOfGovernment && sovereign.headOfGovernment !== sovereign.leader && (
@@ -162,21 +165,22 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           {/* Government Type Card */}
           <div
             id="card-government-type"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-500/40 transition-colors space-y-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-cyan-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-cyan-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Scale className="w-3.5 h-3.5" />
+            <div className="flex items-start justify-between gap-2 text-[11px] text-cyan-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Scale className="w-3.5 h-3.5 shrink-0 mt-px" />
                 <span>Government Structure</span>
               </span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
+              <span className="shrink-0 whitespace-nowrap text-[10px] px-1.5 py-0.2 rounded bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">
                 Regime
               </span>
             </div>
-            <div className="text-sm font-bold text-slate-100 leading-snug">
+            {/* Some territories' government types run to a paragraph; the full text is on hover */}
+            <div className="text-sm font-bold text-slate-100 leading-snug break-words line-clamp-3" title={sovereign.governmentType}>
               {sovereign.governmentType}
             </div>
-            <div className="text-[11px] text-slate-400">
+            <div className="text-[11px] text-slate-400 break-words">
               {getUnStatus(country)} • {country.governance.unMemberSince > 0 ? 'Sovereign Era' : 'Status'}: {country.longevity.sovereignEra}
             </div>
           </div>
@@ -184,23 +188,23 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           {/* Population Card */}
           <div
             id="card-population-stat"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/40 transition-colors space-y-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-emerald-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-emerald-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5" />
+            <div className="flex items-start justify-between gap-2 text-[11px] text-emerald-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Users className="w-3.5 h-3.5 shrink-0 mt-px" />
                 <span>National Population</span>
               </span>
               {sovereign.population > 0 && (
-                <span className="text-[10px] font-mono text-emerald-300">
+                <span className="shrink-0 whitespace-nowrap text-[10px] font-mono text-emerald-300">
                   {sovereign.densityPerKm2}/km²
                 </span>
               )}
             </div>
-            <div className="text-base font-bold text-emerald-300 font-mono">
+            <div className="text-base font-bold text-emerald-300 font-mono break-words">
               {sovereign.populationFormatted}
             </div>
-            <div className="text-[11px] text-slate-400 font-mono">
+            <div className="text-[11px] text-slate-400 font-mono break-words">
               {sovereign.population > 0
                 ? `${sovereign.populationExact} citizens${sovereign.urbanPercentage ? ` (${sovereign.urbanPercentage}% urban)` : ''}`
                 : 'No permanent population'}
@@ -210,19 +214,19 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           {/* Land Area Card */}
           <div
             id="card-area-stat"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/40 transition-colors space-y-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-indigo-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-indigo-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Maximize className="w-3.5 h-3.5" />
+            <div className="flex items-start justify-between gap-2 text-[11px] text-indigo-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Maximize className="w-3.5 h-3.5 shrink-0 mt-px" />
                 <span>Geographic Land Area</span>
               </span>
-              <span className="text-[10px] text-indigo-300 font-mono">Territory</span>
+              <span className="shrink-0 whitespace-nowrap text-[10px] text-indigo-300 font-mono">Territory</span>
             </div>
-            <div className="text-sm sm:text-base font-bold text-slate-100 font-mono">
+            <div className="text-sm @md:text-base font-bold text-slate-100 font-mono whitespace-nowrap">
               {sovereign.areaKm2.toLocaleString()} km²
             </div>
-            <div className="text-[11px] text-slate-400 font-mono flex items-center justify-between">
+            <div className="text-[11px] text-slate-400 font-mono flex flex-wrap items-center justify-between gap-x-2">
               <span>≈ {sovereign.areaSqMi.toLocaleString()} sq miles</span>
               {sovereign.areaKm2 >= 1000000 && (
                 <span className="text-indigo-400 font-semibold text-[10px]">
@@ -235,19 +239,19 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           {/* Capital City Card */}
           <div
             id="card-capital-city"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-rose-500/40 transition-colors space-y-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-rose-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-rose-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Landmark className="w-3.5 h-3.5" />
+            <div className="flex items-start justify-between gap-2 text-[11px] text-rose-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Landmark className="w-3.5 h-3.5 shrink-0 mt-px" />
                 <span>Capital City & Seat</span>
               </span>
-              <span className="text-[10px] text-rose-300">Metro Hub</span>
+              <span className="shrink-0 whitespace-nowrap text-[10px] text-rose-300">Metro Hub</span>
             </div>
-            <div className="text-base font-bold text-slate-100">
+            <div className="text-base font-bold text-slate-100 break-words">
               {sovereign.capital}
             </div>
-            <div className="text-[11px] text-slate-400">
+            <div className="text-[11px] text-slate-400 break-words">
               Subregion: {country.subregion}
             </div>
           </div>
@@ -255,14 +259,14 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           {/* Official Languages Card */}
           <div
             id="card-languages-list"
-            className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-purple-500/40 transition-colors space-y-1 sm:col-span-2 lg:col-span-1"
+            className="min-w-0 p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-purple-500/40 transition-colors space-y-1"
           >
-            <div className="flex items-center justify-between text-[11px] text-purple-400 font-semibold">
-              <span className="flex items-center gap-1.5">
-                <Languages className="w-3.5 h-3.5" />
+            <div className="flex items-start justify-between gap-2 text-[11px] text-purple-400 font-semibold">
+              <span className="flex items-start gap-1.5 min-w-0">
+                <Languages className="w-3.5 h-3.5 shrink-0 mt-px" />
                 <span>Official & National Languages</span>
               </span>
-              <span className="text-[10px] text-purple-300">Linguistic</span>
+              <span className="shrink-0 whitespace-nowrap text-[10px] text-purple-300">Linguistic</span>
             </div>
             <div className="flex flex-wrap gap-1 pt-0.5">
               {sovereign.languages.length === 0 && (
@@ -283,11 +287,11 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
 
       {/* National Food & Culinary Identity Highlight */}
       <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/40 via-slate-900 to-slate-950 border border-amber-500/30 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <span className="text-2xl p-2 rounded-xl bg-slate-950 border border-amber-500/30 shrink-0">
             {primaryDish?.iconEmoji || '🍲'}
           </span>
-          <div>
+          <div className="min-w-0">
             <div className="text-[10px] uppercase font-bold tracking-wider text-amber-400">
               National Dish & Culinary Identity
             </div>
@@ -397,7 +401,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 @lg:grid-cols-2 gap-2.5">
             {leadingProfile.records.map((rec, idx) => (
               <div
                 key={idx}
@@ -433,12 +437,12 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
       {/* Considered World Accolades Highlight */}
       {countryAccolades.length > 0 && (
         <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/30 via-slate-900 to-slate-950 border border-amber-500/40 space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
+          <div className="flex items-start justify-between gap-2">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 flex items-start gap-1.5 min-w-0">
+              <Award className="w-3.5 h-3.5 text-amber-400 shrink-0" />
               <span>Considered Best in the World Accolades</span>
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-semibold border border-amber-500/30">
+            <span className="shrink-0 whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono font-semibold border border-amber-500/30">
               {countryAccolades.length} World Title{countryAccolades.length > 1 ? 's' : ''}
             </span>
           </div>
@@ -476,8 +480,8 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
       </div>
 
       {/* Quick Metrics Matrix */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+      <div className="grid grid-cols-2 @2xl:grid-cols-4 gap-2.5">
+        <div className="min-w-0 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1 break-words">
           <div className="text-[10px] text-slate-400">Global Firepower</div>
           {/* powerIndex 0: not in the Global Firepower ranking */}
           <div className="text-base font-bold text-amber-400 font-mono">
@@ -490,7 +494,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           )}
         </div>
 
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="min-w-0 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1 break-words">
           <div className="text-[10px] text-slate-400">Annual Defense Budget</div>
           <div className="text-base font-bold text-cyan-400 font-mono">
             {country.military.defenseBudgetUSD > 0 ? formatBudget(country.military.defenseBudgetUSD) : 'Not listed'}
@@ -502,7 +506,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           )}
         </div>
 
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="min-w-0 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1 break-words">
           <div className="text-[10px] text-slate-400">Active Armed Forces</div>
           <div className="text-base font-bold text-rose-400 font-mono">
             {country.military.activePersonnel > 0 ? formatPersonnel(country.military.activePersonnel) : 'None listed'}
@@ -514,7 +518,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           )}
         </div>
 
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+        <div className="min-w-0 p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1 break-words">
           <div className="text-[10px] text-slate-400">Nominal GDP</div>
           <div className="text-base font-bold text-emerald-400 font-mono">
             {formatGdp(country.economy.gdpNominalUSD)}
@@ -527,9 +531,9 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
 
       {/* DEDICATED ALLIANCES & TREATY FLAGS SECTION */}
       <div id="section-alliances-overview" className="space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-cyan-400" />
+            <Shield className="w-4 h-4 text-cyan-400 shrink-0" />
             <h4 className="font-bold text-slate-100 text-xs sm:text-sm">
               Military & Geopolitical Alliances & Flags
             </h4>
@@ -653,9 +657,9 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
           <div className="font-bold text-slate-200 text-xs flex items-center gap-1.5">
             <Gauge className="w-4 h-4 text-cyan-400" /> Infrastructure & Society Standards
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 @2xl:grid-cols-4 gap-2">
             {details.hdiScore !== undefined && (
-              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div className="min-w-0 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 break-words">
                 <div className="text-slate-400 text-[10px]">Human Dev. Index{details.hdiYear ? ` (${details.hdiYear})` : ''}</div>
                 <div className="font-mono font-bold text-cyan-300 text-sm mt-0.5">
                   {details.hdiScore.toFixed(3)}{' '}
@@ -664,7 +668,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               </div>
             )}
             {details.drivingSide && (
-              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div className="min-w-0 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 break-words">
                 <div className="text-slate-400 text-[10px]">Driving Side</div>
                 <div className="font-bold text-slate-200 text-sm mt-0.5">
                   {details.drivingSide} Side
@@ -672,7 +676,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               </div>
             )}
             {(details.callingCode || details.tld) && (
-              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div className="min-w-0 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 break-words">
                 <div className="text-slate-400 text-[10px]">
                   {details.callingCode && details.tld ? 'Calling Code & TLD' : details.callingCode ? 'Calling Code' : 'Internet Domain'}
                 </div>
@@ -682,7 +686,7 @@ export const DossierOverviewTab: React.FC<DossierOverviewTabProps> = ({
               </div>
             )}
             {details.timeZones && (
-              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800">
+              <div className="min-w-0 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 break-words">
                 <div className="text-slate-400 text-[10px]">Time Zone(s)</div>
                 <div className="font-mono text-slate-300 text-[11px] truncate mt-0.5" title={details.timeZoneNote}>
                   {details.timeZones[0]}

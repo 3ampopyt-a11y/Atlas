@@ -52,10 +52,10 @@ export const DossierCultureTab: React.FC<DossierCultureTabProps> = ({
 
         {/* Primary National Dish Feature */}
         <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{primaryDish?.iconEmoji || '🍲'}</span>
-              <div>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-2xl shrink-0">{primaryDish?.iconEmoji || '🍲'}</span>
+              <div className="min-w-0">
                 <span className="text-[10px] text-amber-400 uppercase font-bold tracking-wider block">
                   Crown National Dish
                 </span>

@@ -219,6 +219,7 @@ Respond strictly in valid JSON with this exact schema:
   // Visual Media definitions for instant local lookup
   const LOCAL_VISUAL_ASSETS: {
     keywords: string[];
+    excludes?: string[]; // a query containing any of these never gets this picture
     media: VisualMediaItem;
   }[] = [
     {
@@ -237,10 +238,12 @@ Respond strictly in valid JSON with this exact schema:
         'heaviest plane',
         'heaviest aircraft',
       ],
+      // "largest aircraft carrier" is a ship
+      excludes: ['carrier'],
       media: {
         title: 'Antonov An-225 Mriya ("Dream")',
         subtitle: 'World\'s Heaviest & Largest Cargo Transport Aircraft Ever Built',
-        imageUrl: '/src/assets/images/antonov_an225_plane_1790846553224.jpg',
+        imageUrl: '/media/antonov_an225_plane_1790846553224.jpg',
         category: 'Military & Strategic Aerospace / Super-Heavy Airlift',
         badge: 'World\'s Largest Plane',
         specs: [
@@ -258,7 +261,7 @@ Respond strictly in valid JSON with this exact schema:
       media: {
         title: 'Boeing C-17 Globemaster III',
         subtitle: 'Strategic Heavy Military Transport & Tactical Airlift Aircraft',
-        imageUrl: '/src/assets/images/c17_globemaster_aircraft_1790844391224.jpg',
+        imageUrl: '/media/c17_globemaster_aircraft_1790844391224.jpg',
         category: 'Military Aviation / Strategic Transport',
         badge: 'Heavy Airlifter',
         specs: [
@@ -276,7 +279,7 @@ Respond strictly in valid JSON with this exact schema:
       media: {
         title: '5th-Generation Stealth Multirole Fighter',
         subtitle: 'Advanced Air Superiority & Precision Strike Combat Aircraft',
-        imageUrl: '/src/assets/images/stealth_fighter_jet_1790844403054.jpg',
+        imageUrl: '/media/stealth_fighter_jet_1790844403054.jpg',
         category: 'Military Aviation / Combat',
         badge: '5th Gen Fighter',
         specs: [
@@ -292,7 +295,7 @@ Respond strictly in valid JSON with this exact schema:
       media: {
         title: 'Fleet Aircraft Carrier (Supercarrier)',
         subtitle: 'Capital Naval Surface Warship & Mobile Maritime Airbase',
-        imageUrl: '/src/assets/images/naval_aircraft_carrier_1790844415538.jpg',
+        imageUrl: '/media/naval_aircraft_carrier_1790844415538.jpg',
         category: 'Naval Warfare / Capital Ships',
         badge: 'Fleet Flagship',
         specs: [
@@ -308,7 +311,7 @@ Respond strictly in valid JSON with this exact schema:
       media: {
         title: 'Main Battle Tank (MBT)',
         subtitle: 'Heavy Armored Front-Line Ground Combat Vehicle',
-        imageUrl: '/src/assets/images/main_battle_tank_1790844425943.jpg',
+        imageUrl: '/media/main_battle_tank_1790844425943.jpg',
         category: 'Ground Forces / Armored Warfare',
         badge: 'Armored Cavalry',
         specs: [
@@ -335,7 +338,7 @@ Respond strictly in valid JSON with this exact schema:
       media: {
         title: 'Multi-Role Guided Missile Frigate',
         subtitle: 'Modern Naval Surface Combatant & Maritime Patrol Warship',
-        imageUrl: '/src/assets/images/naval_frigate_warship_1791545175618.jpg',
+        imageUrl: '/media/naval_frigate_warship_1791545175618.jpg',
         category: 'Naval Warfare / Surface Combatants',
         badge: 'Fleet Warship',
         specs: [
@@ -806,22 +809,21 @@ Respond strictly in valid JSON with this exact schema:
     { rank: 50, name: 'Finland', countryCode: 'FI', stat: 'PwrIndx: 0.7842 • 24K Troops • 900K Reserve Force', detail: 'NATO’s longest border with Russia (1,340 km), procuring 64 F-35A jets, massive artillery park.', badge: 'Nordic Artillery Titan' },
   ];
 
-  const findLocalMedia = (queryText: string, extraText?: string) => {
-    const qLower = queryText.toLowerCase();
-    // 1. Direct match on user query takes top priority
+  // Whole-word keyword match on the question (or the answer's subject), longest keyword wins;
+  // the answer text itself mentions too much in passing to pick a picture from
+  const findLocalMedia = (queryText: string): VisualMediaItem | null => {
+    const q = queryText.toLowerCase();
+    let best: { media: VisualMediaItem; length: number } | null = null;
     for (const item of LOCAL_VISUAL_ASSETS) {
-      if (item.keywords.some((k) => qLower.includes(k))) {
-        return item.media;
+      if (item.excludes?.some((x) => q.includes(x))) continue;
+      for (const k of item.keywords) {
+        const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        if (k.length > (best?.length ?? 0) && new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(q)) {
+          best = { media: item.media, length: k.length };
+        }
       }
     }
-    // 2. Check combined text if query was general
-    const combined = `${queryText} ${extraText || ''}`.toLowerCase();
-    for (const item of LOCAL_VISUAL_ASSETS) {
-      if (item.keywords.some((k) => combined.includes(k))) {
-        return item.media;
-      }
-    }
-    return null;
+    return best?.media ?? null;
   };
 
   // Fast in-memory caches for sub-millisecond responses
@@ -884,7 +886,9 @@ Respond strictly in valid JSON with this exact schema:
       const lower = q.toLowerCase();
 
       // Example 1: Biggest plane in the world / Antonov An-225 / Stratolaunch
+      // ("largest aircraft carrier" is a ship, so it goes to the AI instead)
       if (
+        !lower.includes('carrier') && (
         lower.includes('biggest plane') ||
         lower.includes('largest plane') ||
         lower.includes('biggest airplane') ||
@@ -894,7 +898,7 @@ Respond strictly in valid JSON with this exact schema:
         lower.includes('an 225') ||
         lower.includes('antonov') ||
         lower.includes('mriya') ||
-        lower.includes('stratolaunch')
+        lower.includes('stratolaunch'))
       ) {
         return {
           answer:
@@ -1683,8 +1687,13 @@ Respond strictly in valid JSON with this exact schema:
         };
       }
 
-      // Dedicated General Top 10 fallback
-      if (lower.startsWith('top 10') || lower.startsWith('top ten') || lower.includes('top 10 countries')) {
+      // Dedicated General Top 10 fallback: a bare "top 10 countries" or a power ranking only;
+      // "top 10 countries by lakes" and the like go to the AI
+      const isBareTopTen = lower.replace(/top (10|ten)|countries|country|in the world|world|[?!.]/g, '').trim() === '';
+      if (
+        (lower.startsWith('top 10') || lower.startsWith('top ten') || lower.includes('top 10 countries')) &&
+        (isBareTopTen || isMilQuestion || lower.includes('power') || lower.includes('strongest'))
+      ) {
         return {
           answer:
             "Here are the Top 10 global military and defense powers according to the Global Firepower Index. The United States leads at #1, followed by Russia (#2), China (#3), India (#4), and South Korea (#5).",
@@ -1900,7 +1909,7 @@ Respond STRICTLY in valid JSON matching this schema:
       }
 
       // Built-in photos and specs only; anything else is fetched by the browser after the answer shows
-      const resolvedMedia: VisualMediaItem | null = findLocalMedia(cleanQuery, `${parsed.subjectTitle || ''} ${parsed.answer || ''}`);
+      const resolvedMedia: VisualMediaItem | null = findLocalMedia(cleanQuery) || (parsed.subjectTitle ? findLocalMedia(parsed.subjectTitle) : null);
 
       return sendCachedResponse({
         mediaQuery: resolvedMedia ? null : parsed.wikiQuery || parsed.subjectTitle || parsed.targetCountry || cleanQuery,
