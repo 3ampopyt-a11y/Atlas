@@ -168,7 +168,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
     const subMatch = countryList.find(
       (c) =>
         c.name.toLowerCase().includes(lower) ||
-        lower.includes(c.name.toLowerCase()) ||
+        new RegExp(`(?:^|[^a-z])${c.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:$|[^a-z])`).test(lower) ||
         c.code.toLowerCase() === lower ||
         c.code3.toLowerCase() === lower
     );

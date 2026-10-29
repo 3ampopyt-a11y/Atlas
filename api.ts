@@ -884,21 +884,24 @@ Respond strictly in valid JSON with this exact schema:
     // Helper: Local fallback knowledge resolver for edge cases
     const getLocalFallback = async (q: string) => {
       const lower = q.toLowerCase();
+      // Keyword must start a word, so "eat" doesn't fire on "death" or "ship" on "championship"
+      const has = (term: string) =>
+        new RegExp(`(?:^|[^a-z0-9])${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(lower);
 
       // Example 1: Biggest plane in the world / Antonov An-225 / Stratolaunch
       // ("largest aircraft carrier" is a ship, so it goes to the AI instead)
       if (
-        !lower.includes('carrier') && (
-        lower.includes('biggest plane') ||
-        lower.includes('largest plane') ||
-        lower.includes('biggest airplane') ||
-        lower.includes('largest aircraft') ||
-        lower.includes('biggest aircraft') ||
-        lower.includes('an-225') ||
-        lower.includes('an 225') ||
-        lower.includes('antonov') ||
-        lower.includes('mriya') ||
-        lower.includes('stratolaunch'))
+        !has('carrier') && (
+        has('biggest plane') ||
+        has('largest plane') ||
+        has('biggest airplane') ||
+        has('largest aircraft') ||
+        has('biggest aircraft') ||
+        has('an-225') ||
+        has('an 225') ||
+        has('antonov') ||
+        has('mriya') ||
+        has('stratolaunch'))
       ) {
         return {
           answer:
@@ -918,7 +921,7 @@ Respond strictly in valid JSON with this exact schema:
       }
 
       // Example 2: Does Russia have C-17?
-      if ((lower.includes('c-17') || lower.includes('c 17') || lower.includes('c17')) && lower.includes('russia')) {
+      if ((has('c-17') || has('c 17') || has('c17')) && has('russia')) {
         return {
           answer:
             "No, Russia does not have or operate the Boeing C-17 Globemaster III. The C-17 is an American heavy strategic airlifter produced by Boeing for the United States Air Force and key allied militaries (including the UK, Australia, Canada, India, Qatar, and UAE). Russia relies instead on its own domestic heavy strategic airlifters, primarily the Ilyushin Il-76 'Candid' and the Antonov An-124 'Ruslan'.",
@@ -1001,7 +1004,7 @@ Respond strictly in valid JSON with this exact schema:
         ];
 
         for (const [terms, name, code] of aliases) {
-          if (terms.some((term) => new RegExp(`\\b${term}\\b`, 'i').test(t) || t.includes(term))) {
+          if (terms.some((term) => new RegExp(`\\b${term}\\b`, 'i').test(t))) {
             return { name, code };
           }
         }
@@ -1010,22 +1013,22 @@ Respond strictly in valid JSON with this exact schema:
 
       // 0. Dedicated Food & National Cuisine Handler (Instant <2ms, says the REAL NAME of the food, never generic descriptions)
       const isFoodQuestion =
-        lower.includes('food') ||
-        lower.includes('foods') ||
-        lower.includes('dish') ||
-        lower.includes('dishes') ||
-        lower.includes('cuisine') ||
-        lower.includes('cuisines') ||
-        lower.includes('eat') ||
-        lower.includes('eating') ||
-        lower.includes('recipe') ||
-        lower.includes('culinary') ||
-        lower.includes('gastronomy') ||
-        lower.includes('national dish') ||
-        lower.includes('traditional food') ||
-        lower.includes('street food') ||
-        lower.includes('naem of the food') ||
-        lower.includes('name of the food');
+        has('food') ||
+        has('foods') ||
+        has('dish') ||
+        has('dishes') ||
+        has('cuisine') ||
+        has('cuisines') ||
+        has('eat') ||
+        has('eating') ||
+        has('recipe') ||
+        has('culinary') ||
+        has('gastronomy') ||
+        has('national dish') ||
+        has('traditional food') ||
+        has('street food') ||
+        has('naem of the food') ||
+        has('name of the food');
 
       if (isFoodQuestion) {
         const countryMatch = findCountryInQuery(lower);
@@ -1357,27 +1360,27 @@ Respond strictly in valid JSON with this exact schema:
 
       // 1. Universal Country Naval Rank Check (Instant <2ms accurate response for ANY nation)
       const isNavalQuestion =
-        lower.includes('naval') ||
-        lower.includes('navy') ||
-        lower.includes('fleet') ||
-        lower.includes('marinha') ||
-        lower.includes('armada') ||
-        lower.includes('sea power') ||
-        lower.includes('warship') ||
-        lower.includes('submarines');
+        has('naval') ||
+        has('navy') ||
+        has('fleet') ||
+        has('marinha') ||
+        has('armada') ||
+        has('sea power') ||
+        has('warship') ||
+        has('submarines');
 
       const isRankQuestion =
-        lower.includes('rank') ||
-        lower.includes('standing') ||
-        lower.includes('position') ||
-        lower.includes('place') ||
-        lower.includes('where does') ||
-        lower.includes('what is the rank') ||
-        lower.includes('how strong') ||
-        lower.includes('how powerful') ||
-        lower.includes('number');
+        has('rank') ||
+        has('standing') ||
+        has('position') ||
+        has('place') ||
+        has('where does') ||
+        has('what is the rank') ||
+        has('how strong') ||
+        has('how powerful') ||
+        has('number');
 
-      if (isNavalQuestion && (isRankQuestion || lower.startsWith('what rank') || lower.startsWith('what is') || lower.includes('what is the rank'))) {
+      if (isNavalQuestion && (isRankQuestion || lower.startsWith('what rank') || lower.startsWith('what is') || has('what is the rank'))) {
         const countryMatch = findCountryInQuery(lower);
         if (countryMatch) {
           const navalItem = TOP_50_NAVAL_FORCES.find(
@@ -1428,14 +1431,14 @@ Respond strictly in valid JSON with this exact schema:
 
       // 2. Universal Country Military Rank Check (Instant <2ms accurate response for ANY nation)
       const isMilQuestion =
-        lower.includes('military') ||
-        lower.includes('army') ||
-        lower.includes('armed force') ||
-        lower.includes('firepower') ||
-        lower.includes('defense force') ||
-        lower.includes('gfp');
+        has('military') ||
+        has('army') ||
+        has('armed force') ||
+        has('firepower') ||
+        has('defense force') ||
+        has('gfp');
 
-      if (isMilQuestion && (isRankQuestion || lower.startsWith('what rank') || lower.startsWith('what is') || lower.includes('what is the rank'))) {
+      if (isMilQuestion && (isRankQuestion || lower.startsWith('what rank') || lower.startsWith('what is') || has('what is the rank'))) {
         const countryMatch = findCountryInQuery(lower);
         if (countryMatch) {
           const milItem = TOP_50_MILITARY_POWERS.find(
@@ -1486,8 +1489,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Direct Rank: What rank is Portugal in naval force / Portuguese Navy rank
       if (
-        lower.includes('portugal') &&
-        (lower.includes('naval') || lower.includes('navy') || lower.includes('marinha') || lower.includes('fleet') || lower.includes('sea power'))
+        has('portugal') &&
+        (has('naval') || has('navy') || has('marinha') || has('fleet') || has('sea power'))
       ) {
         return {
           answer:
@@ -1529,8 +1532,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Top 50 Naval Forces in the World
       if (
-        (lower.includes('50') || lower.includes('fifty') || lower.includes('top 50') || lower.includes('all naval') || lower.includes('full list')) &&
-        (lower.includes('naval') || lower.includes('navy') || lower.includes('navies') || lower.includes('fleet') || lower.includes('sea power') || lower.includes('boat') || lower.includes('ship'))
+        (has('50') || has('fifty') || has('top 50') || has('all naval') || has('full list')) &&
+        (has('naval') || has('navy') || has('navies') || has('fleet') || has('sea power') || has('boat') || has('ship'))
       ) {
         return {
           answer:
@@ -1558,8 +1561,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Top 10 / General Naval Forces
       if (
-        (lower.includes('naval') || lower.includes('navy') || lower.includes('navies') || lower.includes('fleet') || lower.includes('sea power')) &&
-        (lower.includes('top 10') || lower.includes('top ten') || lower.includes('strongest') || lower.includes('biggest') || lower.includes('rank') || lower.includes('best') || lower.includes('world'))
+        (has('naval') || has('navy') || has('navies') || has('fleet') || has('sea power')) &&
+        (has('top 10') || has('top ten') || has('strongest') || has('biggest') || has('rank') || has('best') || has('world'))
       ) {
         return {
           answer:
@@ -1586,8 +1589,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Top 50 Military Powers in the World
       if (
-        (lower.includes('50') || lower.includes('fifty') || lower.includes('top 50')) &&
-        (lower.includes('military') || lower.includes('army') || lower.includes('armies') || lower.includes('power') || lower.includes('firepower'))
+        (has('50') || has('fifty') || has('top 50')) &&
+        (has('military') || has('army') || has('armies') || has('power') || has('firepower'))
       ) {
         return {
           answer:
@@ -1613,8 +1616,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Top 10 Military / Armies
       if (
-        (lower.includes('top 10') || lower.includes('top ten')) &&
-        (lower.includes('military') || lower.includes('army') || lower.includes('armies') || lower.includes('power') || lower.includes('firepower'))
+        (has('top 10') || has('top ten')) &&
+        (has('military') || has('army') || has('armies') || has('power') || has('firepower'))
       ) {
         return {
           answer:
@@ -1651,8 +1654,8 @@ Respond strictly in valid JSON with this exact schema:
 
       // Dedicated Top 10 Air Forces
       if (
-        (lower.includes('top 10') || lower.includes('top ten')) &&
-        (lower.includes('air force') || lower.includes('air forces') || lower.includes('aviation') || lower.includes('planes'))
+        (has('top 10') || has('top ten')) &&
+        (has('air force') || has('air forces') || has('aviation') || has('planes'))
       ) {
         return {
           answer:
@@ -1691,8 +1694,8 @@ Respond strictly in valid JSON with this exact schema:
       // "top 10 countries by lakes" and the like go to the AI
       const isBareTopTen = lower.replace(/top (10|ten)|countries|country|in the world|world|[?!.]/g, '').trim() === '';
       if (
-        (lower.startsWith('top 10') || lower.startsWith('top ten') || lower.includes('top 10 countries')) &&
-        (isBareTopTen || isMilQuestion || lower.includes('power') || lower.includes('strongest'))
+        (lower.startsWith('top 10') || lower.startsWith('top ten') || has('top 10 countries')) &&
+        (isBareTopTen || isMilQuestion || has('power') || has('strongest'))
       ) {
         return {
           answer:
@@ -1727,7 +1730,7 @@ Respond strictly in valid JSON with this exact schema:
       }
 
       // Example 3: Where is Australia?
-      if (lower.includes('australia') && (lower.includes('where') || lower.includes('location') || lower.includes('find'))) {
+      if (has('australia') && (has('where') || has('location') || has('find'))) {
         return {
           answer:
             'Australia is a continent and sovereign nation situated in the Southern Hemisphere, lying between the Indian Ocean and the South Pacific Ocean. It comprises mainland Australia, the island state of Tasmania, and several peripheral islands in Oceania. Its national capital is Canberra, and its largest cities are Sydney and Melbourne.',
@@ -1746,22 +1749,22 @@ Respond strictly in valid JSON with this exact schema:
 
       // Example 4: Portugal vs Mauritania land area
       if (
-        (lower.includes('portugal') || lower.includes('mauritania')) &&
-        (lower.includes('area') || lower.includes('big') || lower.includes('square') || lower.includes('size'))
+        (has('portugal') || has('mauritania')) &&
+        (has('area') || has('big') || has('square') || has('size'))
       ) {
         return {
           answer:
             "Mauritania is vastly larger than Portugal. Mauritania spans approximately 1,030,700 km² (397,955 sq mi) across the Sahara and Sahel in West Africa, making it over 11 times the size of Portugal. Portugal's total territorial land area is 92,226 km² (35,609 sq mi), including mainland Portugal (89,015 km²) and the Atlantic archipelagos of Madeira and the Azores.",
-          targetCountry: lower.includes('mauritania') ? 'Mauritania' : 'Portugal',
-          targetCountryCode: lower.includes('mauritania') ? 'MR' : 'PT',
-          otherCountries: lower.includes('mauritania') ? ['Portugal'] : ['Mauritania'],
+          targetCountry: has('mauritania') ? 'Mauritania' : 'Portugal',
+          targetCountryCode: has('mauritania') ? 'MR' : 'PT',
+          otherCountries: has('mauritania') ? ['Portugal'] : ['Mauritania'],
           keyFacts: [
             'Mauritania Area: 1,030,700 km² (~1.03M km² / 397,955 sq mi).',
             'Portugal Area: 92,226 km² (35,609 sq mi) including Azores & Madeira.',
             'Mauritania ranks 28th globally by land area, while Portugal ranks 109th.',
           ],
           source: 'intelligence-registry',
-          media: matchedLocalMedia || deferMedia(lower.includes('mauritania') ? 'Mauritania' : 'Portugal'),
+          media: matchedLocalMedia || deferMedia(has('mauritania') ? 'Mauritania' : 'Portugal'),
         };
       }
 
