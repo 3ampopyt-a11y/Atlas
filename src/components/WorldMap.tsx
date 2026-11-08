@@ -210,6 +210,24 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   const [showPlateBadges, setShowPlateBadges] = useState(true);
   const [activePlateId, setActivePlateId] = useState<string | null>(null);
 
+  // War & Troops mode interactive state & filters (including small wars & insurgencies)
+  const [warFilter, setWarFilter] = useState<'all' | 'major' | 'civil' | 'small' | 'border'>('all');
+
+  const filteredHotspots = useMemo(() => {
+    if (warFilter === 'all') return MILITARY_HOTSPOTS;
+    if (warFilter === 'major') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Major Interstate War');
+    if (warFilter === 'civil') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Civil War');
+    if (warFilter === 'small') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Insurgency & Guerrilla War');
+    if (warFilter === 'border')
+      return MILITARY_HOTSPOTS.filter(
+        (h) =>
+          h.conflictType === 'Territorial & Border Dispute' ||
+          h.conflictType === 'Strategic Maritime Chokepoint' ||
+          h.conflictType === 'Frozen Conflict & Armistice'
+      );
+    return MILITARY_HOTSPOTS;
+  }, [warFilter]);
+
   // Animation frame throttled drag rotation for 60fps/120fps performance
   const dragRafId = useRef<number | null>(null);
   const pendingRotation = useRef<{ yaw: number; pitch: number } | null>(null);
@@ -1272,13 +1290,23 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           </g>
         )}
 
-        {/* WAR & MILITARY HOTSPOTS (Visible in 'war' mode) */}
+        {/* WAR & MILITARY HOTSPOTS (Visible in 'war' mode - includes major wars, civil wars & small wars) */}
         {metricMode === 'war' && !isSpotterActive && (
           <g id="war-military-hotspots">
-            {MILITARY_HOTSPOTS.map((hotspot) => {
+            {filteredHotspots.map((hotspot) => {
               if (!isVisibleOnMap(hotspot.coordinates)) return null;
               const coords = projection(hotspot.coordinates);
               if (!coords) return null;
+
+              const isCritical = hotspot.threatLevel === 'Critical';
+              const dotColor =
+                hotspot.conflictType === 'Major Interstate War'
+                  ? '#ef4444' // red
+                  : hotspot.conflictType === 'Civil War'
+                  ? '#f97316' // orange
+                  : hotspot.conflictType === 'Insurgency & Guerrilla War'
+                  ? '#f59e0b' // amber
+                  : '#a855f7'; // purple for border/chokepoints
 
               return (
                 <g
@@ -1287,10 +1315,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                   className="cursor-pointer group"
                   onPointerEnter={() => {
                     setHoveredFeature({
-                      type: 'Military Hotspot',
+                      type: `${hotspot.conflictType} • ${hotspot.threatLevel} Threat`,
                       name: hotspot.name,
-                      detail: `${hotspot.region} • ${hotspot.threatLevel} Threat • Forces: ${hotspot.primaryForces.slice(0, 2).join(', ')}`,
-                      icon: '⚠️',
+                      detail: `${hotspot.region} • ${hotspot.totalTroopCommitment?.split('(')[0]?.trim() || 'Active Combat Forces'} • Click dot for full troops & context briefing`,
+                      icon: '⚔️',
                     });
                   }}
                   onPointerLeave={() => setHoveredFeature(null)}
@@ -1299,24 +1327,35 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                     setSelectedFeature({ type: 'hotspot', data: hotspot });
                   }}
                 >
+                  {/* Invisible wide hit target for responsive clicks on all screens */}
+                  <circle r="18" fill="transparent" />
+
                   {/* Tactical radar rings */}
                   <circle
-                    r="14"
+                    r="12"
                     fill="none"
-                    stroke="#ef4444"
+                    stroke={dotColor}
                     strokeWidth="1.2"
-                    strokeDasharray="3 3"
-                    className="animate-spin opacity-80"
-                    style={{ animationDuration: '4s' }}
+                    strokeDasharray="2 2"
+                    className={`opacity-70 group-hover:opacity-100 group-hover:stroke-white ${
+                      isCritical ? 'animate-spin' : ''
+                    }`}
+                    style={{ animationDuration: '5s' }}
                   />
                   <circle
-                    r="8"
+                    r={isCritical ? '7.5' : '5.5'}
                     fill="none"
-                    stroke="#f59e0b"
+                    stroke={dotColor}
                     strokeWidth="1.5"
                     className="animate-ping opacity-60"
                   />
-                  <circle r="3.5" fill="#dc2626" className="group-hover:scale-150 transition-transform" />
+                  <circle
+                    r={isCritical ? '4' : '3.5'}
+                    fill={dotColor}
+                    stroke="#020617"
+                    strokeWidth="1"
+                    className="group-hover:scale-150 transition-transform shadow-md"
+                  />
                 </g>
               );
             })}
@@ -1651,7 +1690,89 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         </div>
       )}
 
-      {/* Cursor Floating Tooltip (Concealed during Spotter Challenge so no flags or names are spoiled) */}
+      {/* WAR & TROOPS MODE INTERACTIVE CONTROLLER HUD */}
+      {metricMode === 'war' && !isSpotterActive && (
+        <div
+          id="war-control-hud"
+          className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto z-30 flex flex-col gap-2 bg-slate-950/92 backdrop-blur-md p-3 rounded-2xl border border-slate-700/80 shadow-2xl text-xs max-w-xl animate-in fade-in slide-in-from-top-2 duration-200"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
+            <div className="flex items-center gap-1.5 font-bold text-slate-100 text-sm">
+              <Swords className="w-4 h-4 text-red-400" />
+              <span>War &amp; Troop Conflicts ({filteredHotspots.length})</span>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px] overflow-x-auto">
+              <button
+                onClick={() => setWarFilter('all')}
+                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold ${
+                  warFilter === 'all'
+                    ? 'bg-red-500/25 text-red-300 border border-red-400/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                All (32)
+              </button>
+              <button
+                onClick={() => setWarFilter('major')}
+                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
+                  warFilter === 'major'
+                    ? 'bg-red-500/25 text-red-300 border border-red-400/40'
+                    : 'text-slate-400 hover:text-red-300'
+                }`}
+                title="Major Conventional Interstate Wars"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                Major Wars
+              </button>
+              <button
+                onClick={() => setWarFilter('civil')}
+                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
+                  warFilter === 'civil'
+                    ? 'bg-orange-500/25 text-orange-300 border border-orange-400/40'
+                    : 'text-slate-400 hover:text-orange-300'
+                }`}
+                title="Internal Civil Wars & Multi-Faction Conflicts"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                Civil Wars
+              </button>
+              <button
+                onClick={() => setWarFilter('small')}
+                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
+                  warFilter === 'small'
+                    ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40'
+                    : 'text-slate-400 hover:text-amber-300'
+                }`}
+                title="Small Wars, Regional Insurgencies & Asymmetric Conflicts"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Small Wars &amp; Insurgencies
+              </button>
+              <button
+                onClick={() => setWarFilter('border')}
+                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
+                  warFilter === 'border'
+                    ? 'bg-purple-500/25 text-purple-300 border border-purple-400/40'
+                    : 'text-slate-400 hover:text-purple-300'
+                }`}
+                title="Border Standoffs, Armistice Lines & Chokepoints"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                Border Standoffs
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-ping" />
+              <span>Click any dot on the map to open full troop breakdown, tactical doctrine &amp; historical context</span>
+            </span>
+          </div>
+        </div>
+      )}
       {tooltipPos && !isSpotterActive && (hoveredFeature || hoveredCountry || hoveredName) && (
         <div
           id="map-hover-tooltip"

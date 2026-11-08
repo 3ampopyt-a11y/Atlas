@@ -5,6 +5,7 @@ import { formatPersonnel, formatBudget, getUnStatus } from '../../utils/formatte
 import { getDetailedMilitary } from '../../utils/militaryData.ts';
 import { getAlliancesFor } from '../../utils/allianceData.ts';
 import { AllianceCard } from '../AllianceCard.tsx';
+import { MILITARY_HOTSPOTS, MilitaryHotspot } from '../../data/warData.ts';
 import {
   Shield,
   Crosshair,
@@ -21,6 +22,11 @@ import {
   HelpCircle,
   Truck,
   Zap,
+  Flame,
+  Swords,
+  Skull,
+  History,
+  ChevronDown,
 } from 'lucide-react';
 
 interface DossierMilitaryTabProps {
@@ -29,7 +35,7 @@ interface DossierMilitaryTabProps {
   nuclearBadge: { label: string; color: string; icon: string };
 }
 
-type MilitarySubCategory = 'all' | 'personnel' | 'vehicles' | 'aircraft' | 'naval' | 'defense' | 'alliances';
+type MilitarySubCategory = 'all' | 'conflicts' | 'personnel' | 'vehicles' | 'aircraft' | 'naval' | 'defense' | 'alliances';
 
 export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
   country,
@@ -55,6 +61,50 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
   const paramilitaryPct = mil.totalMilitaryPersonnel > 0
     ? Math.max(0, 100 - activePct - reservePct)
     : 0;
+
+  const [expandedConflictId, setExpandedConflictId] = useState<string | null>(null);
+
+  const countryConflicts = useMemo(() => {
+    const qName = country.name.toLowerCase();
+    return MILITARY_HOTSPOTS.filter((h) => {
+      const matchText = `${h.name} ${h.description} ${h.primaryForces.join(' ')} ${h.historicalContext} ${h.geopoliticalSignificance}`.toLowerCase();
+      if (matchText.includes(qName)) return true;
+      if (country.code === 'UA' && h.id === 'eastern-europe') return true;
+      if (country.code === 'RU' && (h.id === 'eastern-europe' || h.id === 'transnistria-cobasna')) return true;
+      if (country.code === 'IL' && (h.id === 'gaza-israel' || h.id === 'lebanon-border')) return true;
+      if (country.code === 'LB' && h.id === 'lebanon-border') return true;
+      if (country.code === 'PS' && h.id === 'gaza-israel') return true;
+      if (country.code === 'SD' && h.id === 'sudan-civil-war') return true;
+      if (country.code === 'MM' && h.id === 'myanmar-civil-war') return true;
+      if (country.code === 'CD' && h.id === 'drc-kivu') return true;
+      if (country.code === 'RW' && h.id === 'drc-kivu') return true;
+      if (country.code === 'SY' && h.id === 'syria-war') return true;
+      if (country.code === 'YE' && h.id === 'middle-east-gulf') return true;
+      if (country.code === 'SO' && h.id === 'somalia-shabaab') return true;
+      if ((country.code === 'ML' || country.code === 'BF' || country.code === 'NE') && h.id === 'sahel-insurgency') return true;
+      if (country.code === 'ET' && h.id === 'ethiopia-internal') return true;
+      if (country.code === 'MZ' && h.id === 'cabo-delgado') return true;
+      if (country.code === 'CF' && h.id === 'car-civil-war') return true;
+      if ((country.code === 'NG' || country.code === 'TD' || country.code === 'CM') && h.id === 'lake-chad') return true;
+      if (country.code === 'CO' && h.id === 'colombia-internal') return true;
+      if (country.code === 'MX' && h.id === 'mexico-cartel-war') return true;
+      if (country.code === 'HT' && h.id === 'haiti-gang-crisis') return true;
+      if ((country.code === 'AM' || country.code === 'AZ') && h.id === 'nagorno-karabakh') return true;
+      if ((country.code === 'IN' || country.code === 'PK') && (h.id === 'kashmir-loc' || h.id === 'balochistan')) return true;
+      if ((country.code === 'KR' || country.code === 'KP') && h.id === 'korean-dmz') return true;
+      if ((country.code === 'TW' || country.code === 'CN') && (h.id === 'taiwan-strait' || h.id === 'south-china-sea')) return true;
+      if (country.code === 'PH' && (h.id === 'south-china-sea' || h.id === 'mindanao-conflict')) return true;
+      if (country.code === 'TR' && (h.id === 'kurdistan-conflict' || h.id === 'cyprus-green-line')) return true;
+      if ((country.code === 'MA' || country.code === 'EH') && h.id === 'western-sahara') return true;
+      if (country.code === 'CY' && h.id === 'cyprus-green-line') return true;
+      if (country.code === 'ID' && h.id === 'papua-conflict') return true;
+      if (country.code === 'TH' && h.id === 'deep-south-thailand') return true;
+      if ((country.code === 'RS' || country.code === 'XK') && h.id === 'kosovo-serbia') return true;
+      if (country.code === 'MD' && h.id === 'transnistria-cobasna') return true;
+      if (country.code === 'LY' && h.id === 'libya-standoff') return true;
+      return false;
+    });
+  }, [country]);
 
   return (
     <div id="section-military" className="space-y-4 animate-in fade-in duration-150">
@@ -181,6 +231,19 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           ⚓ Ships & Fleet ({mil.navalFleetTotal} Ships)
         </button>
         )}
+        {countryConflicts.length > 0 && (
+          <button
+            onClick={() => setSubTab('conflicts')}
+            className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border flex items-center gap-1 ${
+              subTab === 'conflicts'
+                ? 'bg-red-500 text-white border-red-400 shadow-md'
+                : 'bg-red-950/40 border-red-800/60 text-red-300 hover:text-white'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-red-400" />
+            <span>Active Conflicts ({countryConflicts.length})</span>
+          </button>
+        )}
         <button
           onClick={() => setSubTab('defense')}
           className={`px-3 py-1.5 rounded-xl font-bold transition-all whitespace-nowrap border ${
@@ -192,6 +255,147 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
           🎯 Air Defense & Doctrine
         </button>
       </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SECTION 0: ACTIVE WARS, CONFLICTS & TROOP COMMITMENTS                     */}
+      {/* ========================================================================= */}
+      {countryConflicts.length > 0 && (subTab === 'all' || subTab === 'conflicts') && (
+        <div className="p-4 rounded-3xl bg-gradient-to-br from-red-950/40 via-slate-900 to-amber-950/30 border border-red-500/40 shadow-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-red-900/30 pb-2">
+            <div className="text-slate-100 font-bold text-xs sm:text-sm flex items-center gap-2">
+              <span className="p-1.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/30">
+                <Swords className="w-4 h-4 animate-pulse" />
+              </span>
+              <span>Active Wars &amp; Military Conflict Deployments ({countryConflicts.length})</span>
+            </div>
+            <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 font-bold">
+              Combat Flashpoints
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            {countryConflicts.map((conflict) => {
+              const isExpanded = expandedConflictId === conflict.id;
+              return (
+                <div
+                  key={conflict.id}
+                  className="rounded-2xl bg-slate-950/80 border border-slate-800/90 overflow-hidden transition-all"
+                >
+                  <div
+                    onClick={() => setExpandedConflictId((prev) => (prev === conflict.id ? null : conflict.id))}
+                    className="p-3.5 flex items-start justify-between gap-3 cursor-pointer hover:bg-slate-900/60 transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="px-2 py-0.2 rounded text-[9.5px] font-mono font-bold bg-red-500/20 text-red-300 border border-red-500/30 uppercase">
+                          {conflict.conflictType}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {conflict.region} • {conflict.status}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
+                        <span>{conflict.name}</span>
+                      </h4>
+                      <p className="text-xs text-slate-300 line-clamp-2">
+                        {conflict.description}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 whitespace-nowrap">
+                        {conflict.totalTroopCommitment?.split('(')[0]?.trim()}
+                      </span>
+                      <span className="text-slate-400 hover:text-white p-1 rounded-lg">
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Expanded in-depth troop & tactical details */}
+                  {isExpanded && (
+                    <div className="p-3.5 pt-0 border-t border-slate-800/80 space-y-3 text-xs bg-slate-950/40">
+                      {/* Battlefield Tactics */}
+                      {conflict.tacticalDoctrine && (
+                        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1 mt-2.5">
+                          <div className="text-[10px] font-mono uppercase text-amber-400 font-bold flex items-center gap-1.5">
+                            <Crosshair className="w-3.5 h-3.5" />
+                            <span>Battlefield Tactics &amp; Operational Reality:</span>
+                          </div>
+                          <p className="text-slate-300 leading-relaxed text-[11.5px]">
+                            {conflict.tacticalDoctrine}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Historical Context */}
+                      {conflict.historicalContext && (
+                        <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-1">
+                          <div className="text-[10px] font-mono uppercase text-cyan-400 font-bold flex items-center gap-1.5">
+                            <History className="w-3.5 h-3.5" />
+                            <span>Historical Context &amp; Causes:</span>
+                          </div>
+                          <p className="text-slate-300 leading-relaxed text-[11.5px]">
+                            {conflict.historicalContext}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Troop Breakdown */}
+                      {conflict.troopBreakdown && conflict.troopBreakdown.length > 0 && (
+                        <div className="space-y-1.5">
+                          <div className="text-[10.5px] font-mono uppercase text-slate-400 font-bold flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5 text-red-400" />
+                            <span>Belligerent Troops &amp; Forces:</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {conflict.troopBreakdown.map((combatant, cIdx) => (
+                              <div
+                                key={cIdx}
+                                className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1 text-[11px]"
+                              >
+                                <div className="font-bold text-slate-200 flex items-center justify-between">
+                                  <span>{combatant.name}</span>
+                                </div>
+                                <div className="text-amber-300 font-mono text-[10px] font-semibold">
+                                  {combatant.estimatedTroops}
+                                </div>
+                                <div className="text-slate-400 text-[10px] leading-tight">
+                                  {combatant.role}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Key Assets & Frontlines */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        <div className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/70">
+                          <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block mb-0.5">
+                            Combat Assets:
+                          </span>
+                          <span className="text-slate-300 font-mono text-[10.5px]">{conflict.keyAssets}</span>
+                        </div>
+                        {conflict.notableFrontlines && (
+                          <div className="p-2.5 rounded-xl bg-slate-900/50 border border-slate-800/70">
+                            <span className="text-[10px] uppercase font-mono text-slate-400 font-semibold block mb-0.5">
+                              Active Frontline Sectors:
+                            </span>
+                            <span className="text-rose-300 font-mono text-[10.5px]">
+                              {conflict.notableFrontlines.join(' • ')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* ========================================================================= */}

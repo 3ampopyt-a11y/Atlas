@@ -243,9 +243,21 @@ export const MetricLegend: React.FC<MetricLegendProps> = ({ metricMode, onChange
               <span className="text-purple-400">☢️ Nuclear States</span>
               <span className="text-slate-400">&lt;50k Neutral</span>
             </div>
-            <div className="text-[10px] text-slate-400 flex items-center gap-3 pt-0.5">
-              <span>🎯 Radar rings = Active hotspots (Ukraine, Taiwan Strait, Red Sea)</span>
-              <span>• Click hotspot for tactical briefing</span>
+            <div className="flex flex-wrap items-center justify-between text-[10px] text-slate-400 gap-2 pt-0.5">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="flex items-center gap-1 text-slate-200 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-ping" />
+                  <span>32 Active Wars, Civil Conflicts &amp; Small Insurgencies</span>
+                </span>
+                <span className="text-slate-500">•</span>
+                <span className="text-amber-300 font-semibold">Click any dot on the map for full troop numbers, tactics &amp; context</span>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-[9.5px]">
+                <span className="text-red-400 font-bold">🔴 Major</span>
+                <span className="text-orange-400 font-bold">🟠 Civil</span>
+                <span className="text-amber-400 font-bold">🟡 Small War</span>
+                <span className="text-purple-400 font-bold">🟣 Border/Standoff</span>
+              </div>
             </div>
           </div>
         )}
