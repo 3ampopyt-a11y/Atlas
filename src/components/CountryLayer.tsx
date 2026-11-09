@@ -20,6 +20,7 @@ interface CountryLayerProps {
   borderMode: 'sharp' | 'contrast' | 'subtle';
   flagFillEnabled: boolean;
   flagCodes: Set<string>;
+  climateFilter?: string;
   isSpotterActive: boolean;
   spotterFeedback: {
     status: 'correct' | 'wrong' | 'revealed';
@@ -43,6 +44,7 @@ export const CountryLayer = React.memo(function CountryLayer({
   borderMode,
   flagFillEnabled,
   flagCodes,
+  climateFilter,
   isSpotterActive,
   spotterFeedback,
   isMoving,
@@ -85,7 +87,7 @@ export const CountryLayer = React.memo(function CountryLayer({
         const hasFlagPattern = Boolean(code && code.length === 2 && flagCodes.has(code));
 
         // Default color calculation
-        let fillColor = getCountryFillColor(country, metricMode, isSelected, isHovered);
+        let fillColor = getCountryFillColor(country, metricMode, isSelected, isHovered, climateFilter);
         if (metricMode === 'flags' && !isSpotterActive) {
           if (flagFillEnabled && country && getOwnFlagUrl(country.name)) {
             fillColor = `url(#${ownFlagPatternId(country.name)})`;

@@ -407,7 +407,7 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
                 <span className="text-[10px] uppercase font-mono tracking-wider text-indigo-400 font-bold">
                   GLOBAL SUMMIT SURVEY • {feature.data.range}
                 </span>
-                <h3 className="text-lg font-bold text-slate-100">{feature.data.name}</h3>
+                <h3 className="text-xl font-bold text-slate-100">{feature.data.name}</h3>
               </div>
             </div>
 
@@ -426,20 +426,51 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-slate-300">
-              <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 font-medium">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-300">
+              <span className="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 font-medium">
                 Country: {feature.data.country}
               </span>
               {feature.data.isSevenSummit && (
-                <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                <span className="px-2.5 py-1 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
                   ⭐ Seven Summit
+                </span>
+              )}
+              {feature.data.deathZoneWarning && (
+                <span className="px-2.5 py-1 rounded-xl bg-red-500/25 text-red-300 border border-red-500/40 font-bold flex items-center gap-1">
+                  ☠️ Above 8,000m Death Zone
+                </span>
+              )}
+              {feature.data.firstAscentYear && (
+                <span className="px-2.5 py-1 rounded-xl bg-cyan-950/40 text-cyan-300 border border-cyan-800/40 font-mono">
+                  First Ascent: {feature.data.firstAscentYear}
                 </span>
               )}
             </div>
 
+            {feature.data.climbingDifficulty && (
+              <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs">
+                <span className="font-bold text-slate-400 uppercase text-[10px] block font-mono mb-0.5">Climbing Grade &amp; Hazard:</span>
+                <span className="text-slate-200">{feature.data.climbingDifficulty}</span>
+              </div>
+            )}
+
+            {feature.data.geologicalOrigin && (
+              <div className="p-3 rounded-2xl bg-indigo-950/25 border border-indigo-900/40 text-xs text-indigo-200 space-y-1">
+                <span className="font-bold uppercase tracking-wider text-[10px] text-indigo-400 block font-mono">Geological Orogeny &amp; Formation:</span>
+                <div>{feature.data.geologicalOrigin}</div>
+              </div>
+            )}
+
             <p className="text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3.5 rounded-2xl border border-slate-800">
               {feature.data.notes}
             </p>
+
+            {feature.data.context && (
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 leading-relaxed space-y-1.5">
+                <span className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] block font-mono">In-Depth Geographical Context:</span>
+                <div>{feature.data.context}</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -454,9 +485,9 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
               </span>
               <div>
                 <span className="text-[10px] uppercase font-mono tracking-wider text-cyan-400 font-bold">
-                  DEEP OCEAN &amp; LAND DEPRESSION
+                  DEEP OCEAN &amp; LAND DEPRESSION • {feature.data.type}
                 </span>
-                <h3 className="text-lg font-bold text-slate-100">{feature.data.name}</h3>
+                <h3 className="text-xl font-bold text-slate-100">{feature.data.name}</h3>
               </div>
             </div>
 
@@ -475,9 +506,30 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
               </div>
             </div>
 
+            {feature.data.pressureAtm && (
+              <div className="p-3 rounded-2xl bg-cyan-950/30 border border-cyan-900/40 text-xs text-cyan-200">
+                <span className="font-bold text-cyan-400 uppercase font-mono text-[10px] block mb-0.5">Atmospheric / Hydrostatic Pressure:</span>
+                <div>{feature.data.pressureAtm}</div>
+              </div>
+            )}
+
+            {feature.data.geologicalOrigin && (
+              <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-300">
+                <span className="font-bold text-slate-400 uppercase font-mono text-[10px] block mb-0.5">Tectonic Origin &amp; Mechanism:</span>
+                <div>{feature.data.geologicalOrigin}</div>
+              </div>
+            )}
+
             <p className="text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3.5 rounded-2xl border border-slate-800">
               {feature.data.notes}
             </p>
+
+            {feature.data.context && (
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 leading-relaxed space-y-1.5">
+                <span className="font-bold text-cyan-400 uppercase tracking-wider text-[10px] block font-mono">Extreme Habitat &amp; Geological Dynamics:</span>
+                <div>{feature.data.context}</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -653,7 +705,7 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
         )}
 
         {/* ===================================================================== */}
-        {/* 6. BIOME (DESERT, OCEAN, RAINFOREST)                                 */}
+        {/* 6. BIOME (DESERT, OCEAN, RAINFOREST, TAIGA)                          */}
         {/* ===================================================================== */}
         {feature.type === 'biome' && (
           <div className="space-y-4">
@@ -665,7 +717,7 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
                 <span className="text-[10px] uppercase font-mono tracking-wider text-yellow-400 font-bold">
                   PLANETARY BIOME • {feature.data.category}
                 </span>
-                <h3 className="text-lg font-bold text-slate-100">{feature.data.name}</h3>
+                <h3 className="text-xl font-bold text-slate-100">{feature.data.name}</h3>
               </div>
             </div>
 
@@ -688,25 +740,53 @@ export const FeatureDetailModal: React.FC<FeatureDetailModalProps> = ({ feature,
               )}
             </div>
 
-            <div className="text-xs text-slate-300">
-              <span className="font-semibold text-slate-400">Climate Zone: </span>
-              <span className="text-emerald-300 font-medium">{feature.data.climateZone}</span>
+            {feature.data.biomeRole && (
+              <div className="p-3.5 rounded-2xl bg-emerald-950/25 border border-emerald-900/40 text-xs text-emerald-200 space-y-1">
+                <span className="font-bold text-emerald-400 uppercase tracking-wider text-[10px] block font-mono">Global Ecological Role &amp; Planetary Function:</span>
+                <div className="leading-relaxed">{feature.data.biomeRole}</div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                <span className="text-[10px] uppercase font-mono text-slate-400 block">Climate Classification</span>
+                <span className="text-slate-200 font-medium">{feature.data.climateZone}</span>
+              </div>
+              {feature.data.rainfallAnnual && (
+                <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <span className="text-[10px] uppercase font-mono text-slate-400 block">Annual Precipitation</span>
+                  <span className="text-cyan-300 font-medium font-mono">{feature.data.rainfallAnnual}</span>
+                </div>
+              )}
+              {feature.data.temperatureRange && (
+                <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 sm:col-span-2">
+                  <span className="text-[10px] uppercase font-mono text-slate-400 block">Thermal / Temperature Range</span>
+                  <span className="text-amber-300 font-medium font-mono">{feature.data.temperatureRange}</span>
+                </div>
+              )}
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed bg-slate-950/50 p-3.5 rounded-2xl border border-slate-800">
               {feature.data.description}
             </p>
 
+            {feature.data.threats && (
+              <div className="p-3 rounded-2xl bg-amber-950/20 border border-amber-900/40 text-xs text-amber-200 space-y-1">
+                <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px] block font-mono">Environmental Threats &amp; Vulnerabilities:</span>
+                <div className="leading-relaxed">{feature.data.threats}</div>
+              </div>
+            )}
+
             {feature.data.keySpecies && feature.data.keySpecies.length > 0 && (
               <div className="space-y-1.5">
-                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono">
                   Key Endemic &amp; Characteristic Wildlife Species:
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {feature.data.keySpecies.map((species, i) => (
                     <span
                       key={i}
-                      className="px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200"
+                      className="px-2.5 py-1 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200 font-medium"
                     >
                       🌿 {species}
                     </span>

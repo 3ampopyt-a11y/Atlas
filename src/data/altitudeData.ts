@@ -10,6 +10,11 @@ export interface MountainPeak {
   prominenceRank?: number;
   isSevenSummit?: boolean;
   notes: string;
+  geologicalOrigin?: string;
+  deathZoneWarning?: boolean;
+  firstAscentYear?: number;
+  climbingDifficulty?: string;
+  context?: string;
 }
 
 export interface DepressionPoint {
@@ -20,25 +25,33 @@ export interface DepressionPoint {
   type: 'Ocean Trench' | 'Land Depression';
   coordinates: [number, number];
   notes: string;
+  geologicalOrigin?: string;
+  pressureAtm?: string;
+  context?: string;
 }
 
 export const WORLD_PEAKS: MountainPeak[] = [
   {
     id: 'everest',
-    name: 'Mount Everest (Sagarmatha)',
+    name: 'Mount Everest (Sagarmatha / Qomolangma)',
     elevationM: 8848,
     elevationFt: 29031,
     range: 'Himalayas',
-    country: 'Nepal / China',
+    country: 'Nepal / China (Tibet)',
     countryCode: 'NP',
     coordinates: [86.925, 27.988],
     prominenceRank: 1,
     isSevenSummit: true,
-    notes: 'Earth’s highest mountain above sea level, rising on the collision zone between India and Eurasia.',
+    deathZoneWarning: true,
+    firstAscentYear: 1953,
+    climbingDifficulty: 'Extreme High-Altitude Expedition • Supplemental Oxygen Required',
+    geologicalOrigin: 'Continental Collision Orogeny: Indian Plate colliding with the Eurasian Plate at ~50 mm/yr, lifting ancient Tethys Sea marine limestone sediments into the sky.',
+    notes: 'Earth’s highest mountain above sea level, rising on the collision boundary between the Indian and Eurasian plates.',
+    context: 'The summit of Everest is actually composed of Ordovician marine limestone deposited on an ancient ocean floor over 450 million years ago, containing fossilized trilobites and crinoids lifted 8.8 km above sea level. Above 8,000 meters (26,247 ft), climbers enter the physiological "Death Zone", where atmospheric pressure drops to 33% of sea level and the human body consumes its own cellular reserves faster than oxygen can replenish them.',
   },
   {
     id: 'k2',
-    name: 'K2 (Godwin-Austen)',
+    name: 'K2 (Chhogori / Godwin-Austen)',
     elevationM: 8611,
     elevationFt: 28251,
     range: 'Karakoram',
@@ -46,7 +59,12 @@ export const WORLD_PEAKS: MountainPeak[] = [
     countryCode: 'PK',
     coordinates: [76.513, 35.882],
     prominenceRank: 2,
-    notes: 'The "Savage Mountain", world’s second-highest summit and considered the most difficult climb.',
+    deathZoneWarning: true,
+    firstAscentYear: 1954,
+    climbingDifficulty: 'World’s Most Dangerous & Technical 8,000m Peak (Grade V Ice/Rock)',
+    geologicalOrigin: 'Tectonic thrusting and transpressional shearing along the collision boundary between the Kohistan-Ladakh island arc and the Asian continental margin.',
+    notes: 'The "Savage Mountain", world’s second-highest summit and universally considered the most lethal high-altitude climb.',
+    context: 'Unlike Everest, K2 features nearly sheer pyramid faces of rock and blue glacial ice with virtually no flat terrain from base camp to the summit. For every 4 climbers who successfully reach the summit, one has perished on the mountain, primarily due to catastrophic serac ice collapses in the "Bottleneck" couloir at 8,200m. Its first winter ascent was completed in January 2021 by a historic 10-man team of Nepali mountaineers.',
   },
   {
     id: 'aconcagua',
@@ -59,7 +77,12 @@ export const WORLD_PEAKS: MountainPeak[] = [
     coordinates: [-70.01, -32.65],
     prominenceRank: 1,
     isSevenSummit: true,
+    deathZoneWarning: false,
+    firstAscentYear: 1897,
+    climbingDifficulty: 'High-Altitude Non-Technical Trek • Severe Windstorms ("Viento Blanco")',
+    geologicalOrigin: 'Fold-and-thrust belt formed by subduction of the oceanic Nazca Plate beneath the South American Continental Plate.',
     notes: 'Highest peak in the Americas, Western Hemisphere, and Southern Hemisphere.',
+    context: 'Aconcagua is a massive volcanic complex that formed during the Miocene epoch before the angle of subduction flattened, stopping active volcanic eruptions. Its colossal bulk forces prevailing Pacific storm winds upward, causing severe "Viento Blanco" (white winds) with hurricane-force gusts exceeding 160 km/h and rapid temperature drops down to -30°C. It causes extreme rainshadow aridification across western Argentina.',
   },
   {
     id: 'denali',
@@ -72,7 +95,12 @@ export const WORLD_PEAKS: MountainPeak[] = [
     coordinates: [-151.0, 63.07],
     prominenceRank: 1,
     isSevenSummit: true,
-    notes: 'Highest mountain peak in North America, with the greatest base-to-peak vertical rise on land (~5,500m).',
+    deathZoneWarning: false,
+    firstAscentYear: 1913,
+    climbingDifficulty: 'Severe Sub-Arctic Glacial Expedition • Extreme Frostbite Risk',
+    geologicalOrigin: 'Granitic pluton formed by magma intrusion deep within the crust during the collision of the Pacific and North American plates.',
+    notes: 'Highest mountain peak in North America, boasting the world’s greatest base-to-peak vertical rise on land (~5,500m).',
+    context: 'Because Denali sits at 63° North latitude near the Arctic Circle, atmospheric pressure at its summit is substantially lower than on an equatorial mountain of the same elevation (feeling equivalent to ~6,900m in the Himalayas). Furthermore, while Everest rises ~3,700m from the Tibetan Plateau, Denali rises 5,500m (18,000 ft) directly from its 600m lowland base, creating the greatest uninterrupted vertical landwall on Earth.',
   },
   {
     id: 'kilimanjaro',
@@ -85,7 +113,12 @@ export const WORLD_PEAKS: MountainPeak[] = [
     coordinates: [37.35, -3.07],
     prominenceRank: 1,
     isSevenSummit: true,
+    deathZoneWarning: false,
+    firstAscentYear: 1889,
+    climbingDifficulty: 'Multi-Day Non-Technical Trek Through 5 Distinct Climate Zones',
+    geologicalOrigin: 'Intraplate stratovolcano complex formed by continental rifting along the East African Rift System.',
     notes: 'Highest peak in Africa and the world’s largest free-standing volcanic mountain massif.',
+    context: 'Kilimanjaro is a dormant triple-crater volcano composed of three distinct volcanic cones: Kibo (summit at Uhuru Peak), Mawenzi (rugged eroded crag), and Shira (collapsed caldera). A hiker ascending Kilimanjaro journeys through five distinct ecological biomes in less than a week: tropical rainforest, heath and moorland, alpine desert, and the glaciated arctic summit plateau, whose ancient ice fields are rapidly melting.',
   },
   {
     id: 'elbrus',
@@ -98,11 +131,16 @@ export const WORLD_PEAKS: MountainPeak[] = [
     coordinates: [42.44, 43.35],
     prominenceRank: 1,
     isSevenSummit: true,
-    notes: 'Highest peak in Europe and Russia, a dormant double-cone stratovolcano.',
+    deathZoneWarning: false,
+    firstAscentYear: 1874,
+    climbingDifficulty: 'Glaciated Stratovolcano • Unpredictable Black-Sea Storms',
+    geologicalOrigin: 'Double-cone stratovolcano formed on the collision boundary between the Arabian Plate and Eurasian Plate.',
+    notes: 'Highest peak in Europe and Russia, an imposing dormant double-cone volcanic mass.',
+    context: 'Formed over 2.5 million years ago along the tectonic collision zone between the northward-pushing Arabian Plate and the Eurasian Plate, Elbrus retains magma reservoirs deep underground, giving off active sulfur gases and heating natural mineral springs across the North Caucasus. Its twin summits are permanently blanketed by 22 major glaciers feeding the Kuban and Baksan rivers.',
   },
   {
     id: 'vinson',
-    name: 'Mount Vinson',
+    name: 'Mount Vinson (Vinson Massif)',
     elevationM: 4892,
     elevationFt: 16050,
     range: 'Sentinel Range',
@@ -111,7 +149,12 @@ export const WORLD_PEAKS: MountainPeak[] = [
     coordinates: [-85.62, -78.53],
     prominenceRank: 1,
     isSevenSummit: true,
-    notes: 'Highest peak of Antarctica, towering over the Ronne Ice Shelf ~1,200 km from the South Pole.',
+    deathZoneWarning: false,
+    firstAscentYear: 1966,
+    climbingDifficulty: 'Polar Desert Mountaineering • 24-Hour Sun & Temperatures to -40°C',
+    geologicalOrigin: 'Ancient Paleozoic quartzite and sandstone sequence uplifted during Gondwana tectonic rifting.',
+    notes: 'Highest peak of Antarctica, towering over the vast Ronne Ice Shelf ~1,200 km from the South Pole.',
+    context: 'Located in the remote Ellsworth Mountains overlooking the Ronne Ice Shelf, Vinson receives virtually zero precipitation (averaging under 2 inches of snow per year), making it an extreme high-altitude polar desert. Climbers experience 24 hours of continuous daylight during the austral summer climbing window, but face constant gale-force katabatic winds spilling off the Antarctic interior ice plateau.',
   },
   {
     id: 'puncak-jaya',
@@ -119,12 +162,17 @@ export const WORLD_PEAKS: MountainPeak[] = [
     elevationM: 4884,
     elevationFt: 16024,
     range: 'Sudirman Range',
-    country: 'Indonesia',
+    country: 'Indonesia (Papua)',
     countryCode: 'ID',
     coordinates: [137.18, -4.08],
     prominenceRank: 1,
     isSevenSummit: true,
-    notes: 'Highest island peak on Earth and highest summit in Oceania / Australasia.',
+    deathZoneWarning: false,
+    firstAscentYear: 1962,
+    climbingDifficulty: 'Technical Grade IV Limestone Rock Climbing Through Dense Equatorial Jungle',
+    geologicalOrigin: 'Tectonic collision between the northward-drifting Australian Plate and the Pacific Plate uplifting marine limestone.',
+    notes: 'Highest island peak on Earth and the highest summit in Oceania and Australasia.',
+    context: 'Puncak Jaya is the highest summit situated between the Himalayas and the Andes, and the highest point on any island on Earth. Remarkably situated just 4 degrees south of the equator, it was historically topped by equatorial glaciers. These glaciers are now among the fastest disappearing on Earth due to global warming, projected to vanish completely in the coming years.',
   },
   {
     id: 'mont-blanc',
@@ -136,10 +184,14 @@ export const WORLD_PEAKS: MountainPeak[] = [
     countryCode: 'FR',
     coordinates: [6.86, 45.83],
     notes: 'Monarch of the European Alps, renowned birthplace of modern mountaineering.',
+    geologicalOrigin: 'Granite intrusion uplifted during the Alpine Orogeny as the African tectonic plate compressed into Europe.',
+    firstAscentYear: 1786,
+    climbingDifficulty: 'Classic Alpine Glacial Route • Crevasse & Serac Hazards',
+    context: 'Mont Blanc represents the birthplace of modern mountaineering following the first successful ascent by Jacques Balmat and Michel Paccard in 1786. Its glaciated mass feeds critical European river systems including the Rhône and Po. The peak sits directly above the 11.6 km Mont Blanc Tunnel connecting France and Italy.',
   },
   {
     id: 'fuji',
-    name: 'Mount Fuji',
+    name: 'Mount Fuji (Fuji-san)',
     elevationM: 3776,
     elevationFt: 12389,
     range: 'Honshu Volcanic Arc',
@@ -147,6 +199,10 @@ export const WORLD_PEAKS: MountainPeak[] = [
     countryCode: 'JP',
     coordinates: [138.73, 35.36],
     notes: 'Sacred icon of Japan, towering symmetrical stratovolcano visible across the Tokyo metropolitan area.',
+    geologicalOrigin: 'Active triple-junction stratovolcano sitting at the intersection of the Amur, Okhotsk, and Philippine Sea plates.',
+    firstAscentYear: 663,
+    climbingDifficulty: 'Moderate Non-Technical Trail • Volcanic Cinder Slopes',
+    context: 'Fuji is an extraordinarily symmetrical composite stratovolcano built up over three distinct eruptive phases: Komitake, Ko-Fuji, and Shin-Fuji. Because it sits at the complex junction where three tectonic plates converge, magma is continually generated by subducting Pacific and Philippine Sea slabs. Its last major explosive eruption was the 1707 Hōei eruption, which coated Tokyo in ash.',
   },
   {
     id: 'matterhorn',
@@ -158,10 +214,14 @@ export const WORLD_PEAKS: MountainPeak[] = [
     countryCode: 'CH',
     coordinates: [7.66, 45.98],
     notes: 'Famous pyramid-shaped horn carved by glaciers, symbolizing the high alpine peaks of Europe.',
+    geologicalOrigin: 'Glacial cirque erosion carving a crystalline basement nappe thrust northward from the African continent onto Europe.',
+    firstAscentYear: 1865,
+    climbingDifficulty: 'Exposed Technical Rock Ridge Climbing (Hörnli Ridge)',
+    context: 'The Matterhorn is a textbook "glacial horn": four steep triangular faces carved by opposing cirque glaciers eroding into a single mountain core. Geologically, the top section of the mountain is a "klippe" — rock that originally belonged to the African continental plate that was pushed over 100 km north during the Alpine collision and now rests on European oceanic basement rocks.',
   },
   {
     id: 'orizaba',
-    name: 'Pico de Orizaba',
+    name: 'Pico de Orizaba (Citlaltépetl)',
     elevationM: 5636,
     elevationFt: 18491,
     range: 'Trans-Mexican Volcanic Belt',
@@ -169,6 +229,10 @@ export const WORLD_PEAKS: MountainPeak[] = [
     countryCode: 'MX',
     coordinates: [-97.27, 19.03],
     notes: 'Highest peak in Mexico and the third highest summit in North America.',
+    geologicalOrigin: 'Subduction of the Cocos and Rivera oceanic plates beneath the North American Plate along the Middle America Trench.',
+    firstAscentYear: 1848,
+    climbingDifficulty: 'Glaciated Volcano Climbing • High Altitude Jamapa Glacier',
+    context: 'Known in Nahuatl as Citlaltépetl ("Star Mountain"), this dormant stratovolcano anchors the eastern anchor of the Trans-Mexican Volcanic Belt. It supports Mexico\'s largest remaining glacier, the Gran Glaciar Norte, which feeds critical drinking water to the Veracruz coastal plain before emptying into the Gulf of Mexico.',
   },
 ];
 
@@ -180,7 +244,10 @@ export const DEPRESSION_POINTS: DepressionPoint[] = [
     elevationFt: -36070,
     type: 'Ocean Trench',
     coordinates: [142.2, 11.35],
-    notes: 'Deepest surveyed point in the world’s ocean, situated in the Mariana Trench.',
+    geologicalOrigin: 'Oceanic Subduction: The ancient, cold, and exceptionally dense Pacific Plate dives beneath the Mariana Microplate into the mantle.',
+    pressureAtm: '1,086 bar (over 1,071 atmospheres — equivalent to 8 tons per square inch)',
+    notes: 'Deepest surveyed point in the world’s oceans, plunging nearly 11 km beneath the Pacific surface.',
+    context: 'At the bottom of the Challenger Deep, hydrostatic water pressure exceeds 1,086 times that at sea level — enough to crush a steel submarine hull like a tin can. The water temperature sits near freezing (1°C to 4°C), and perpetual pitch darkness reigns. Despite these conditions, specialized organisms thrive here, including giant xenophyophores (single-celled amoebas up to 20 cm wide), endemic amphipods, and hadal snailfish.',
   },
   {
     id: 'puerto-rico-trench',
@@ -189,7 +256,10 @@ export const DEPRESSION_POINTS: DepressionPoint[] = [
     elevationFt: -27480,
     type: 'Ocean Trench',
     coordinates: [-66.5, 19.8],
-    notes: 'Deepest point in the Atlantic Ocean, on the boundary between Caribbean and North American plates.',
+    geologicalOrigin: 'Oblique Subduction & Strike-Slip boundary where the North American Plate slides under the Caribbean Plate.',
+    pressureAtm: '840 bar (over 820 atmospheres)',
+    notes: 'Deepest point in the Atlantic Ocean, on the tectonic boundary between the Caribbean and North American plates.',
+    context: 'Plunging over 8.3 kilometers down, the Milwaukee Deep marks a complex tectonic transition zone where the North American Plate slides diagonally beneath the Caribbean Plate. Because subduction here is locked and accumulating immense stress, seismologists identify this trench as the greatest source of catastrophic megathrust earthquake and oceanwide tsunami hazard for Puerto Rico, the Virgin Islands, and the US East Coast.',
   },
   {
     id: 'dead-sea',
@@ -198,7 +268,10 @@ export const DEPRESSION_POINTS: DepressionPoint[] = [
     elevationFt: -1411,
     type: 'Land Depression',
     coordinates: [35.5, 31.5],
-    notes: 'Lowest dry land point on Earth, nestled in the Jordan Rift Valley.',
+    geologicalOrigin: 'Pull-Apart Basin along the Dead Sea Transform fault separating the African and Arabian plates.',
+    pressureAtm: '1.05 bar (Highest barometric pressure on dry land due to extra atmospheric column)',
+    notes: 'Lowest dry land point on Earth, nestled in the Jordan Rift Valley with 34% hypersaline water.',
+    context: 'The Dead Sea surface sits 430 meters below sea level and continues to drop roughly 1 meter per year due to upstream water diversions. Because the air column above the Dead Sea is the thickest on dry land, barometric pressure is significantly higher than sea level, resulting in 3.3% to 4.8% higher oxygen concentration. The lake water is nearly 10 times saltier than the ocean (34.2% salinity), creating extreme buoyancy.',
   },
   {
     id: 'lake-assal',
@@ -207,7 +280,10 @@ export const DEPRESSION_POINTS: DepressionPoint[] = [
     elevationFt: -509,
     type: 'Land Depression',
     coordinates: [42.4, 11.65],
-    notes: 'Lowest point in Africa, hypersaline lake in the Afar Triple Junction.',
+    geologicalOrigin: 'Continental Rifting at the Afar Triple Junction where the Nubian, Somali, and Arabian plates are ripping Africa apart.',
+    pressureAtm: '1.02 bar',
+    notes: 'Lowest point in Africa, hypersaline lake in the geothermal Afar Triple Junction.',
+    context: 'Sitting in a crater lake inside the Danakil desert depression in Djibouti, Lake Assal is the lowest point on the African continent. It is fed by subterranean seawater seeping through basalt fissures from the nearby Gulf of Tadjoura, but with zero outflow and searing desert evaporation (temperatures often reach 52°C), its salinity reaches 35% to 40%, creating massive salt pans harvested by Afar salt caravans for centuries.',
   },
   {
     id: 'death-valley',
@@ -216,6 +292,9 @@ export const DEPRESSION_POINTS: DepressionPoint[] = [
     elevationFt: -282,
     type: 'Land Depression',
     coordinates: [-116.8, 36.25],
+    geologicalOrigin: 'Basin and Range crustal extension: tectonic stretching pulling western North America apart and dropping down graben fault blocks.',
+    pressureAtm: '1.01 bar',
     notes: 'Lowest elevation point in North America, formed by crustal extension in the Great Basin.',
+    context: 'Badwater Basin is a geometric salt flat covering 200 square miles, formed as ancient Pleistocene lakes dried up and left behind sodium chloride, borax, and calcite deposits up to 5 feet thick. Trapped between the towering Panamint Range (which rises to 3,368m at Telescope Peak) and Black Mountains, descending air heats adiabatically, creating the world\'s hottest recorded surface air temperatures (+56.7°C / 134°F in 1913).',
   },
 ];

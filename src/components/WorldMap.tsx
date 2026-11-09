@@ -39,6 +39,7 @@ import {
   Radio,
   Flag,
   Compass,
+  X,
 } from 'lucide-react';
 import { MILITARY_HOTSPOTS, MilitaryHotspot, NUCLEAR_STATES } from '../data/warData.ts';
 import { WORLD_PEAKS, DEPRESSION_POINTS, MountainPeak, DepressionPoint } from '../data/altitudeData.ts';
@@ -212,6 +213,23 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
   // War & Troops mode interactive state & filters (including small wars & insurgencies)
   const [warFilter, setWarFilter] = useState<'all' | 'major' | 'civil' | 'small' | 'border'>('all');
+  // Collapsible / Removable plate positioned lower down with minimal footprint and single-click dismiss
+  const [isWarHudExpanded, setIsWarHudExpanded] = useState<boolean>(true);
+
+  // Climate Zones mode interactive state & filters
+  const [climateFilter, setClimateFilter] = useState<string>('all');
+  const [isClimateHudExpanded, setIsClimateHudExpanded] = useState<boolean>(true);
+
+  // Tectonic mode collapsible HUD state
+  const [isTectonicHudExpanded, setIsTectonicHudExpanded] = useState<boolean>(true);
+
+  // Biomes mode interactive state & filters
+  const [biomeFilter, setBiomeFilter] = useState<string>('all');
+  const [isBiomesHudExpanded, setIsBiomesHudExpanded] = useState<boolean>(true);
+
+  // Altitude & Peaks mode interactive state & filters
+  const [altitudeFilter, setAltitudeFilter] = useState<'all' | 'seven-summits' | 'peaks' | 'depressions'>('all');
+  const [isAltitudeHudExpanded, setIsAltitudeHudExpanded] = useState<boolean>(true);
 
   const filteredHotspots = useMemo(() => {
     if (warFilter === 'all') return MILITARY_HOTSPOTS;
@@ -901,6 +919,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           borderMode={borderMode}
           flagFillEnabled={flagFillEnabled}
           flagCodes={flagCodeSet}
+          climateFilter={climateFilter}
           isSpotterActive={isSpotterActive}
           spotterFeedback={spotterFeedback}
           isMoving={isMoving}
@@ -1192,7 +1211,11 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         {metricMode === 'altitude' && !isSpotterActive && (
           <g id="altitude-peaks-and-trenches">
             {/* World Peaks */}
-            {WORLD_PEAKS.map((peak) => {
+            {WORLD_PEAKS.filter((peak) => {
+              if (altitudeFilter === 'depressions') return false;
+              if (altitudeFilter === 'seven-summits') return peak.isSevenSummit;
+              return true;
+            }).map((peak) => {
               if (!isVisibleOnMap(peak.coordinates)) return null;
               const coords = projection(peak.coordinates);
               if (!coords) return null;
@@ -1223,7 +1246,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({
             })}
 
             {/* Deep Trenches & Depressions */}
-            {DEPRESSION_POINTS.map((dep) => {
+            {DEPRESSION_POINTS.filter(() => {
+              if (altitudeFilter === 'seven-summits' || altitudeFilter === 'peaks') return false;
+              return true;
+            }).map((dep) => {
               if (!isVisibleOnMap(dep.coordinates)) return null;
               const coords = projection(dep.coordinates);
               if (!coords) return null;
@@ -1258,7 +1284,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         {/* BIOMES: DESERTS, OCEANS, RAINFORESTS (Visible in 'biomes' mode) */}
         {metricMode === 'biomes' && !isSpotterActive && (
           <g id="biomes-features">
-            {BIOMES_FEATURES.map((biome) => {
+            {BIOMES_FEATURES.filter((biome) => {
+              if (biomeFilter === 'all') return true;
+              return biome.category === biomeFilter;
+            }).map((biome) => {
               if (!isVisibleOnMap(biome.coordinates)) return null;
               const coords = projection(biome.coordinates);
               if (!coords) return null;
@@ -1492,7 +1521,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
       </div>
 
       {/* Quick Continent Focus Bar */}
-      {metricMode !== 'tectonic' && !isSpotterActive && (
+      {metricMode !== 'tectonic' && metricMode !== 'war' && metricMode !== 'climate' && metricMode !== 'biomes' && metricMode !== 'altitude' && !isSpotterActive && (
         <div
           id="continent-jump-bar"
           className="absolute bottom-6 left-24 hidden lg:flex [@media(max-height:520px)]:hidden items-center gap-1.5 z-20 bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-slate-700/80 shadow-xl text-xs text-slate-300"
@@ -1514,263 +1543,532 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         </div>
       )}
 
-      {/* TECTONIC MODE INTERACTIVE CONTROLLER HUD */}
-      {metricMode === 'tectonic' && !isSpotterActive && (
-        <div
-          id="tectonic-control-hud"
-          className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto z-30 flex flex-col gap-2 bg-slate-950/90 backdrop-blur-md p-3 rounded-2xl border border-slate-700/80 shadow-2xl text-xs max-w-xl animate-in fade-in slide-in-from-top-2 duration-200"
-        >
-          {/* Header & Filter Row */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
-            <div className="flex items-center gap-1.5 font-bold text-slate-100 text-sm">
-              <span className="text-base">🌋</span>
-              <span>Tectonic Plates & Boundaries</span>
-            </div>
+      {/* TECTONIC MODE INTERACTIVE CONTROLLER HUD (Centered in the middle, compact, with single X to close) */}
+      {metricMode === 'tectonic' && !isSpotterActive && !selectedCountry && (
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 animate-in fade-in duration-150">
+          {!isTectonicHudExpanded ? (
+            <button
+              id="btn-toggle-tectonic-hud"
+              onClick={() => setIsTectonicHudExpanded(true)}
+              className="flex items-center gap-1.5 bg-slate-950/90 hover:bg-slate-900 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs text-slate-200 transition-all hover:border-amber-500/50 cursor-pointer whitespace-nowrap"
+              title="Show Tectonic Plates & Boundaries Filter"
+            >
+              <Activity className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-semibold text-xs">
+                Tectonic ({tectonicFilter === 'all' ? 'All' : tectonicFilter === 'convergent' ? 'Subduction' : tectonicFilter === 'divergent' ? 'Ridges' : tectonicFilter === 'transform' ? 'Transform' : 'Ring of Fire'})
+              </span>
+              {activePlateId && (
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                  {TECTONIC_PLATES.find((p) => p.id === activePlateId)?.shortName || ''}
+                </span>
+              )}
+            </button>
+          ) : (
+            <div
+              id="tectonic-control-hud"
+              className="flex flex-col gap-1.5 bg-slate-950/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl border border-slate-700/80 shadow-2xl text-xs w-[94vw] max-w-sm sm:max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200 text-xs">
+                  <Activity className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Tectonic Plates &amp; Fault Boundaries</span>
+                  <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Subduction, Ridges, Transform &amp; Hotspots)</span>
+                </div>
+                {/* Close Button: just an X */}
+                <button
+                  onClick={() => setIsTectonicHudExpanded(false)}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-            {/* Boundary Filters */}
-            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px]">
-              <button
-                onClick={() => setTectonicFilter('all')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold ${
-                  tectonicFilter === 'all'
-                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setTectonicFilter('convergent')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  tectonicFilter === 'convergent'
-                    ? 'bg-red-500/25 text-red-300 border border-red-400/40'
-                    : 'text-slate-400 hover:text-red-300'
-                }`}
-                title="Convergent: Subduction Trenches & Mountain Collisions"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                Subduction
-              </button>
-              <button
-                onClick={() => setTectonicFilter('divergent')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  tectonicFilter === 'divergent'
-                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/40'
-                    : 'text-slate-400 hover:text-cyan-300'
-                }`}
-                title="Divergent: Ocean Spreading Ridges & Continental Rifts"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                Ridges
-              </button>
-              <button
-                onClick={() => setTectonicFilter('transform')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  tectonicFilter === 'transform'
-                    ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40'
-                    : 'text-slate-400 hover:text-amber-300'
-                }`}
-                title="Transform: Lateral Strike-Slip Faults"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                Transform
-              </button>
-              <button
-                onClick={() => setTectonicFilter((prev) => (prev === 'ring-of-fire' ? 'all' : 'ring-of-fire'))}
-                className={`px-2 py-0.5 rounded-lg transition-all font-bold flex items-center gap-1 ${
-                  tectonicFilter === 'ring-of-fire'
-                    ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-lg'
-                    : 'text-orange-400 hover:bg-orange-500/10'
-                }`}
-                title="Highlight the Pacific Ring of Fire"
-              >
-                <span>🔥</span>
-                Ring of Fire
-              </button>
-            </div>
-          </div>
+              {/* Boundary Filters */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-[10.5px]">
+                <button
+                  onClick={() => setTectonicFilter('all')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors cursor-pointer ${
+                    tectonicFilter === 'all'
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setTectonicFilter('convergent')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    tectonicFilter === 'convergent'
+                      ? 'bg-red-500/25 text-red-300 border border-red-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-red-300 border border-slate-800'
+                  }`}
+                  title="Convergent: Ocean trenches & collision mountain ranges"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  Subduction
+                </button>
+                <button
+                  onClick={() => setTectonicFilter('divergent')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    tectonicFilter === 'divergent'
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-cyan-300 border border-slate-800'
+                  }`}
+                  title="Divergent: Mid-ocean spreading ridges & continental rifts"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  Ridges
+                </button>
+                <button
+                  onClick={() => setTectonicFilter('transform')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    tectonicFilter === 'transform'
+                      ? 'bg-amber-500/25 text-amber-300 border border-amber-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-amber-300 border border-slate-800'
+                  }`}
+                  title="Transform: Strike-slip faults & shallow earthquakes"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  Transform
+                </button>
+                <button
+                  onClick={() => setTectonicFilter((prev) => (prev === 'ring-of-fire' ? 'all' : 'ring-of-fire'))}
+                  className={`px-2 py-0.5 rounded-md font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                    tectonicFilter === 'ring-of-fire'
+                      ? 'bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md'
+                      : 'bg-slate-900/90 text-orange-400 hover:bg-orange-500/10 border border-slate-800'
+                  }`}
+                  title="Highlight Pacific Ring of Fire subduction rim"
+                >
+                  <span>🔥</span>
+                  Ring of Fire
+                </button>
+              </div>
 
-          {/* Sub-toggles & Opacity & Quick Jump Strip */}
-          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px]">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {/* Plate Surfaces Fill Toggle */}
-              <button
-                onClick={() => setShowPlateSurfaces((prev) => !prev)}
-                className={`px-2.5 py-1 rounded-lg transition-colors font-medium flex items-center gap-1.5 border ${
-                  showPlateSurfaces
-                    ? 'bg-cyan-500/25 text-cyan-200 border-cyan-400/50 shadow-sm'
-                    : 'text-slate-500 border-slate-800 hover:text-slate-300'
-                }`}
-                title="Toggle Shaded Tectonic Plate Surfaces across the Earth"
-              >
-                <span>🗺️</span>
-                <span className="font-semibold">Plate Surfaces</span>
-              </button>
+              {/* Toggles & Plate Jump Strip */}
+              <div className="flex flex-wrap items-center justify-between gap-1.5 pt-0.5 text-[10px]">
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowPlateSurfaces((prev) => !prev)}
+                    className={`px-2 py-0.5 rounded-md border font-medium cursor-pointer ${
+                      showPlateSurfaces
+                        ? 'bg-cyan-500/25 text-cyan-200 border-cyan-400/50'
+                        : 'text-slate-500 border-slate-800 hover:text-slate-300'
+                    }`}
+                  >
+                    🗺️ Surfaces
+                  </button>
+                  <button
+                    onClick={() => setShowFaultLines((prev) => !prev)}
+                    className={`px-2 py-0.5 rounded-md border font-medium cursor-pointer ${
+                      showFaultLines
+                        ? 'bg-slate-800 text-slate-200 border-slate-700'
+                        : 'text-slate-500 border-slate-800 hover:text-slate-300'
+                    }`}
+                  >
+                    ⚡ Faults
+                  </button>
+                  <button
+                    onClick={() => setShowTectonicHotspots((prev) => !prev)}
+                    className={`px-2 py-0.5 rounded-md border font-medium cursor-pointer ${
+                      showTectonicHotspots
+                        ? 'bg-slate-800 text-slate-200 border-slate-700'
+                        : 'text-slate-500 border-slate-800 hover:text-slate-300'
+                    }`}
+                  >
+                    🌋 Hotspots
+                  </button>
+                </div>
 
-              {/* Opacity selector when surfaces are on */}
-              {showPlateSurfaces && (
-                <div className="flex items-center gap-0.5 bg-slate-900 px-1 py-0.5 rounded-lg border border-slate-800 text-[10px] font-mono">
-                  {[
-                    { label: '25%', val: 0.25 },
-                    { label: '45%', val: 0.45 },
-                    { label: '65%', val: 0.65 },
-                  ].map((lvl) => (
+                {/* Quick-Jump to Plates strip */}
+                <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-0.5 scrollbar-thin">
+                  <span className="text-slate-500 font-mono text-[9px] uppercase shrink-0">Plates:</span>
+                  {TECTONIC_PLATES.map((plate) => (
                     <button
-                      key={lvl.label}
-                      onClick={() => setPlateOpacity(lvl.val)}
-                      className={`px-1.5 py-0.5 rounded transition-colors ${
-                        Math.abs(plateOpacity - lvl.val) < 0.05
-                          ? 'bg-cyan-500 text-slate-950 font-bold'
-                          : 'text-slate-400 hover:text-white'
+                      key={plate.id}
+                      onClick={() => focusPlate(plate)}
+                      className={`px-1.5 py-0.5 rounded text-[9.5px] font-semibold whitespace-nowrap transition-all border cursor-pointer ${
+                        activePlateId === plate.id
+                          ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400 shadow-sm'
+                          : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800'
                       }`}
+                      style={{ borderLeftColor: plate.color, borderLeftWidth: '2.5px' }}
                     >
-                      {lvl.label}
+                      {plate.shortName}
                     </button>
                   ))}
                 </div>
-              )}
-
-              {/* Fault Lines Toggle */}
-              <button
-                onClick={() => setShowFaultLines((prev) => !prev)}
-                className={`px-2 py-1 rounded-lg transition-colors font-medium flex items-center gap-1 border ${
-                  showFaultLines ? 'bg-slate-800 text-slate-100 border-slate-700' : 'text-slate-500 border-slate-800 hover:text-slate-300'
-                }`}
-                title="Toggle Plate Boundary & Fault Lines"
-              >
-                <span>⚡</span>
-                <span>Fault Lines</span>
-              </button>
-
-              {/* Plate Badges Toggle */}
-              <button
-                onClick={() => setShowPlateBadges((prev) => !prev)}
-                className={`px-2 py-1 rounded-lg transition-colors font-medium flex items-center gap-1 border ${
-                  showPlateBadges ? 'bg-slate-800 text-slate-100 border-slate-700' : 'text-slate-500 border-slate-800 hover:text-slate-300'
-                }`}
-              >
-                <span>🏷️</span>
-                <span>Badges</span>
-              </button>
-
-              {/* Hotspots Toggle */}
-              <button
-                onClick={() => setShowTectonicHotspots((prev) => !prev)}
-                className={`px-2 py-1 rounded-lg transition-colors font-medium flex items-center gap-1 border ${
-                  showTectonicHotspots ? 'bg-slate-800 text-slate-100 border-slate-700' : 'text-slate-500 border-slate-800 hover:text-slate-300'
-                }`}
-              >
-                <span>🌋</span>
-                <span>Hotspots</span>
-              </button>
+              </div>
             </div>
-
-            {/* Quick-Jump to Plates strip */}
-            <div className="flex items-center gap-1 overflow-x-auto max-w-full pb-0.5 scrollbar-thin">
-              <span className="text-slate-400 font-mono text-[10px] uppercase shrink-0">Jump To:</span>
-              {TECTONIC_PLATES.map((plate) => (
-                <button
-                  key={plate.id}
-                  onClick={() => focusPlate(plate)}
-                  className={`px-2 py-0.5 rounded-lg text-[10.5px] font-semibold whitespace-nowrap transition-all border ${
-                    activePlateId === plate.id
-                      ? 'bg-cyan-500 text-slate-950 font-bold border-cyan-400 shadow-sm'
-                      : 'bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border-slate-800'
-                  }`}
-                  style={{
-                    borderLeftColor: plate.color,
-                    borderLeftWidth: '3px',
-                  }}
-                >
-                  {plate.shortName}
-                </button>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       )}
 
-      {/* WAR & TROOPS MODE INTERACTIVE CONTROLLER HUD */}
-      {metricMode === 'war' && !isSpotterActive && (
-        <div
-          id="war-control-hud"
-          className="absolute top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto z-30 flex flex-col gap-2 bg-slate-950/92 backdrop-blur-md p-3 rounded-2xl border border-slate-700/80 shadow-2xl text-xs max-w-xl animate-in fade-in slide-in-from-top-2 duration-200"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2">
-            <div className="flex items-center gap-1.5 font-bold text-slate-100 text-sm">
-              <Swords className="w-4 h-4 text-red-400" />
-              <span>War &amp; Troop Conflicts ({filteredHotspots.length})</span>
-            </div>
+      {/* BIOMES MODE INTERACTIVE CONTROLLER HUD (Centered in the middle, compact, with single X to close) */}
+      {metricMode === 'biomes' && !isSpotterActive && !selectedCountry && (
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 animate-in fade-in duration-150">
+          {!isBiomesHudExpanded ? (
+            <button
+              id="btn-toggle-biomes-hud"
+              onClick={() => setIsBiomesHudExpanded(true)}
+              className="flex items-center gap-1.5 bg-slate-950/90 hover:bg-slate-900 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs text-slate-200 transition-all hover:border-yellow-500/50 cursor-pointer whitespace-nowrap"
+              title="Show Planetary Biomes Filter"
+            >
+              <Palmtree className="w-3.5 h-3.5 text-yellow-400" />
+              <span className="font-semibold text-xs">
+                Biomes ({biomeFilter === 'all' ? 'All (13)' : biomeFilter})
+              </span>
+            </button>
+          ) : (
+            <div
+              id="biomes-control-hud"
+              className="flex flex-col gap-1.5 bg-slate-950/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl border border-slate-700/80 shadow-2xl text-xs w-[92vw] max-w-sm sm:max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200 text-xs">
+                  <Palmtree className="w-3.5 h-3.5 text-yellow-400" />
+                  <span>Planetary Biomes</span>
+                  <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Deserts, Oceans, Rainforests &amp; Taiga)</span>
+                </div>
+                {/* Close Button: just an X */}
+                <button
+                  onClick={() => setIsBiomesHudExpanded(false)}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
-            {/* Filter buttons */}
-            <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-[11px] overflow-x-auto">
-              <button
-                onClick={() => setWarFilter('all')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold ${
-                  warFilter === 'all'
-                    ? 'bg-red-500/25 text-red-300 border border-red-400/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                All (32)
-              </button>
-              <button
-                onClick={() => setWarFilter('major')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  warFilter === 'major'
-                    ? 'bg-red-500/25 text-red-300 border border-red-400/40'
-                    : 'text-slate-400 hover:text-red-300'
-                }`}
-                title="Major Conventional Interstate Wars"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                Major Wars
-              </button>
-              <button
-                onClick={() => setWarFilter('civil')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  warFilter === 'civil'
-                    ? 'bg-orange-500/25 text-orange-300 border border-orange-400/40'
-                    : 'text-slate-400 hover:text-orange-300'
-                }`}
-                title="Internal Civil Wars & Multi-Faction Conflicts"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
-                Civil Wars
-              </button>
-              <button
-                onClick={() => setWarFilter('small')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  warFilter === 'small'
-                    ? 'bg-amber-500/25 text-amber-300 border border-amber-400/40'
-                    : 'text-slate-400 hover:text-amber-300'
-                }`}
-                title="Small Wars, Regional Insurgencies & Asymmetric Conflicts"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                Small Wars &amp; Insurgencies
-              </button>
-              <button
-                onClick={() => setWarFilter('border')}
-                className={`px-2 py-0.5 rounded-lg transition-colors font-semibold flex items-center gap-1 ${
-                  warFilter === 'border'
-                    ? 'bg-purple-500/25 text-purple-300 border border-purple-400/40'
-                    : 'text-slate-400 hover:text-purple-300'
-                }`}
-                title="Border Standoffs, Armistice Lines & Chokepoints"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                Border Standoffs
-              </button>
+              {/* Filter buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-[10.5px]">
+                <button
+                  onClick={() => setBiomeFilter('all')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors cursor-pointer ${
+                    biomeFilter === 'all'
+                      ? 'bg-yellow-500/25 text-yellow-300 border border-yellow-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  All Biomes (13)
+                </button>
+                {[
+                  { id: 'Desert', label: 'Deserts (6)', icon: '🏜️' },
+                  { id: 'Ocean', label: 'Oceans (5)', icon: '🌊' },
+                  { id: 'Rainforest', label: 'Rainforests (3)', icon: '🌴' },
+                  { id: 'Taiga / Boreal', label: 'Taiga (2)', icon: '🌲' },
+                  { id: 'Coral Reef', label: 'Coral Reefs', icon: '🪸' },
+                ].map((b) => (
+                  <button
+                    key={b.id}
+                    onClick={() => setBiomeFilter(b.id)}
+                    className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                      biomeFilter === b.id
+                        ? 'bg-yellow-500/25 text-yellow-300 border border-yellow-400/50 shadow-sm'
+                        : 'bg-slate-900/90 text-slate-400 hover:text-yellow-300 border border-slate-800'
+                    }`}
+                  >
+                    <span>{b.icon}</span>
+                    <span>{b.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+      )}
 
-          <div className="flex items-center justify-between text-[11px] text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-ping" />
-              <span>Click any dot on the map to open full troop breakdown, tactical doctrine &amp; historical context</span>
-            </span>
-          </div>
+      {/* ALTITUDE & PEAKS MODE INTERACTIVE CONTROLLER HUD (Centered in the middle, compact, with single X to close) */}
+      {metricMode === 'altitude' && !isSpotterActive && !selectedCountry && (
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 animate-in fade-in duration-150">
+          {!isAltitudeHudExpanded ? (
+            <button
+              id="btn-toggle-altitude-hud"
+              onClick={() => setIsAltitudeHudExpanded(true)}
+              className="flex items-center gap-1.5 bg-slate-950/90 hover:bg-slate-900 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs text-slate-200 transition-all hover:border-indigo-500/50 cursor-pointer whitespace-nowrap"
+              title="Show Altitudes & Peaks Filter"
+            >
+              <Mountain className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="font-semibold text-xs">
+                Altitudes ({altitudeFilter === 'all' ? 'All (17)' : altitudeFilter === 'seven-summits' ? '7 Summits' : altitudeFilter === 'peaks' ? 'Peaks' : 'Depressions'})
+              </span>
+            </button>
+          ) : (
+            <div
+              id="altitude-control-hud"
+              className="flex flex-col gap-1.5 bg-slate-950/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl border border-slate-700/80 shadow-2xl text-xs w-[92vw] max-w-sm sm:max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200 text-xs">
+                  <Mountain className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Altitudes, Peaks &amp; Depressions</span>
+                  <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Everest +8,848m to Challenger Deep -10,994m)</span>
+                </div>
+                {/* Close Button: just an X */}
+                <button
+                  onClick={() => setIsAltitudeHudExpanded(false)}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Filter buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-[10.5px]">
+                <button
+                  onClick={() => setAltitudeFilter('all')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors cursor-pointer ${
+                    altitudeFilter === 'all'
+                      ? 'bg-indigo-500/25 text-indigo-300 border border-indigo-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  All Extremes (17)
+                </button>
+                <button
+                  onClick={() => setAltitudeFilter('seven-summits')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    altitudeFilter === 'seven-summits'
+                      ? 'bg-amber-500/25 text-amber-300 border border-amber-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-amber-300 border border-slate-800'
+                  }`}
+                  title="Seven Summits: The highest mountain on each continent"
+                >
+                  <span>⭐</span>
+                  Seven Summits (7)
+                </button>
+                <button
+                  onClick={() => setAltitudeFilter('peaks')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    altitudeFilter === 'peaks'
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-cyan-300 border border-slate-800'
+                  }`}
+                  title="All continental and regional mountain summits"
+                >
+                  <span>🏔️</span>
+                  Major Peaks (12)
+                </button>
+                <button
+                  onClick={() => setAltitudeFilter('depressions')}
+                  className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    altitudeFilter === 'depressions'
+                      ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-cyan-300 border border-slate-800'
+                  }`}
+                  title="Deep ocean trenches and below-sea-level land basins"
+                >
+                  <span>🌊</span>
+                  Deep Depressions (5)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* WAR & TROOPS MODE INTERACTIVE CONTROLLER HUD (Centered in the middle, compact, with single X to close) */}
+      {metricMode === 'war' && !isSpotterActive && !selectedCountry && (
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 animate-in fade-in duration-150">
+          {!isWarHudExpanded ? (
+            <button
+              id="btn-toggle-war-hud"
+              onClick={() => setIsWarHudExpanded(true)}
+              className="flex items-center gap-1.5 bg-slate-950/90 hover:bg-slate-900 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs text-slate-200 transition-all hover:border-red-500/50 cursor-pointer whitespace-nowrap"
+              title="Show War & Conflict Filters"
+            >
+              <Swords className="w-3.5 h-3.5 text-red-400" />
+              <span className="font-semibold text-xs">Wars ({filteredHotspots.length})</span>
+              {warFilter !== 'all' && (
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40 uppercase">
+                  {warFilter}
+                </span>
+              )}
+            </button>
+          ) : (
+            <div
+              id="war-control-hud"
+              className="flex flex-col gap-1.5 bg-slate-950/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl border border-slate-700/80 shadow-2xl text-xs w-[92vw] max-w-sm sm:max-w-md animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200 text-xs">
+                  <Swords className="w-3.5 h-3.5 text-red-400" />
+                  <span>Wars &amp; Troop Conflicts ({filteredHotspots.length})</span>
+                </div>
+                {/* Close Button: just an X */}
+                <button
+                  onClick={() => setIsWarHudExpanded(false)}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Filter buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-[10.5px]">
+                <button
+                  onClick={() => setWarFilter('all')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors cursor-pointer ${
+                    warFilter === 'all'
+                      ? 'bg-red-500/25 text-red-300 border border-red-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  All (32)
+                </button>
+                <button
+                  onClick={() => setWarFilter('major')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    warFilter === 'major'
+                      ? 'bg-red-500/25 text-red-300 border border-red-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-red-300 border border-slate-800'
+                  }`}
+                  title="Major Conventional Interstate Wars"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                  Major
+                </button>
+                <button
+                  onClick={() => setWarFilter('civil')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    warFilter === 'civil'
+                      ? 'bg-orange-500/25 text-orange-300 border border-orange-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-orange-300 border border-slate-800'
+                  }`}
+                  title="Internal Civil Wars & Multi-Faction Conflicts"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+                  Civil
+                </button>
+                <button
+                  onClick={() => setWarFilter('small')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    warFilter === 'small'
+                      ? 'bg-amber-500/25 text-amber-300 border border-amber-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-amber-300 border border-slate-800'
+                  }`}
+                  title="Small Wars, Regional Insurgencies & Asymmetric Conflicts"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  Small
+                </button>
+                <button
+                  onClick={() => setWarFilter('border')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    warFilter === 'border'
+                      ? 'bg-purple-500/25 text-purple-300 border border-purple-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-purple-300 border border-slate-800'
+                  }`}
+                  title="Border Standoffs, Armistice Lines & Chokepoints"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                  Standoffs
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* CLIMATE ZONES MODE INTERACTIVE CONTROLLER HUD (Centered in the middle, compact, with single X to close) */}
+      {metricMode === 'climate' && !isSpotterActive && !selectedCountry && (
+        <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 animate-in fade-in duration-150">
+          {!isClimateHudExpanded ? (
+            <button
+              id="btn-toggle-climate-hud"
+              onClick={() => setIsClimateHudExpanded(true)}
+              className="flex items-center gap-1.5 bg-slate-950/90 hover:bg-slate-900 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-700/80 shadow-xl text-xs text-slate-200 transition-all hover:border-emerald-500/50 cursor-pointer whitespace-nowrap"
+              title="Show Climate Zones Filter"
+            >
+              <CloudSun className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-semibold text-xs">
+                Climate ({climateFilter === 'all' ? 'All 9' : CLIMATE_ZONES.find((z) => z.id === climateFilter)?.name.split(' ')[0] || climateFilter})
+              </span>
+              {climateFilter !== 'all' && (
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  {CLIMATE_ZONES.find((z) => z.id === climateFilter)?.icon || ''}
+                </span>
+              )}
+            </button>
+          ) : (
+            <div
+              id="climate-control-hud"
+              className="flex flex-col gap-1.5 bg-slate-950/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl border border-slate-700/80 shadow-2xl text-xs w-[92vw] max-w-sm sm:max-w-2xl animate-in fade-in slide-in-from-bottom-2 duration-150"
+            >
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-1.5">
+                <div className="flex items-center gap-1.5 font-bold text-slate-200 text-xs">
+                  <CloudSun className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Köppen Climate Zones</span>
+                  <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Click to highlight zone)</span>
+                </div>
+                {/* Close Button: just an X */}
+                <button
+                  onClick={() => setIsClimateHudExpanded(false)}
+                  className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Filter buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-1 text-[10.5px]">
+                <button
+                  onClick={() => setClimateFilter('all')}
+                  className={`px-2.5 py-0.5 rounded-md font-semibold transition-colors cursor-pointer ${
+                    climateFilter === 'all'
+                      ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 shadow-sm'
+                      : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+                  }`}
+                >
+                  All Zones
+                </button>
+                {CLIMATE_ZONES.map((zone) => {
+                  const label =
+                    zone.id === 'polar'
+                      ? 'Polar'
+                      : zone.id === 'subarctic'
+                      ? 'Boreal'
+                      : zone.id === 'temperate'
+                      ? 'Temperate'
+                      : zone.id === 'mediterranean'
+                      ? 'Medit.'
+                      : zone.id === 'subtropical'
+                      ? 'Subtropical'
+                      : zone.id === 'tropical-rainforest'
+                      ? 'Rainforest'
+                      : zone.id === 'tropical-savanna'
+                      ? 'Savanna'
+                      : zone.id === 'arid-desert'
+                      ? 'Desert'
+                      : 'Steppe';
+
+                  return (
+                    <button
+                      key={zone.id}
+                      onClick={() => setClimateFilter(zone.id)}
+                      className={`px-2 py-0.5 rounded-md font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                        climateFilter === zone.id
+                          ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 shadow-sm'
+                          : 'bg-slate-900/90 text-slate-400 hover:text-emerald-300 border border-slate-800'
+                      }`}
+                      title={`${zone.name} • ${zone.tempRange} • ${zone.precipitation}`}
+                    >
+                      <span
+                        className="w-2 h-2 rounded-full border border-black/30 shrink-0"
+                        style={{ backgroundColor: zone.color }}
+                      />
+                      <span>{zone.icon}</span>
+                      <span>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
       {tooltipPos && !isSpotterActive && (hoveredFeature || hoveredCountry || hoveredName) && (

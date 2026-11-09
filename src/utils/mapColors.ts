@@ -28,7 +28,8 @@ export function getCountryFillColor(
   country: CountryData | undefined,
   mode: MapMetricMode,
   isSelected: boolean,
-  isHovered: boolean
+  isHovered: boolean,
+  climateFilter?: string
 ): string {
   if (!country) {
     return isHovered ? '#334155' : '#1e293b'; // Unmatched territory default
@@ -65,6 +66,9 @@ export function getCountryFillColor(
     case 'climate': {
       // Climate classification mode
       const zone = getCountryClimateZone(country.code, country.continent, country.geography.climate);
+      if (climateFilter && climateFilter !== 'all' && zone.id !== climateFilter) {
+        return isHovered ? '#334155' : '#1e293b';
+      }
       return isHovered ? lightenColor(zone.color, 15) : zone.color;
     }
 
