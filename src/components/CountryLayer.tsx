@@ -27,6 +27,7 @@ interface CountryLayerProps {
     countryName: string;
     message: string;
   } | null;
+  spotterGuessedIds?: string[];
   // Drop expensive glow filters while the globe is moving; they are repainted every frame otherwise
   isMoving: boolean;
   onHover: (country: CountryData | null, name: string) => void;
@@ -47,6 +48,7 @@ export const CountryLayer = React.memo(function CountryLayer({
   climateFilter,
   isSpotterActive,
   spotterFeedback,
+  spotterGuessedIds,
   isMoving,
   onHover,
   onLeave,
@@ -96,17 +98,30 @@ export const CountryLayer = React.memo(function CountryLayer({
           }
         }
 
+        // Check if country was successfully guessed in Map Spotter mode
+        const isGuessedInSpotter = Boolean(
+          isSpotterActive &&
+            spotterGuessedIds &&
+            ((country && spotterGuessedIds.includes(country.id)) ||
+              spotterGuessedIds.includes(item.id) ||
+              (code && spotterGuessedIds.includes(code)) ||
+              spotterGuessedIds.includes(item.name.toLowerCase()))
+        );
+
         // CRITICAL FOR GLOBE SPOTTER CHALLENGE:
-        // The world map MUST NEVER show flag textures or reveal country identities.
-        // Countries have a clean, blind geopolitical palette, only revealing feedback upon guess.
+        // Unguessed countries are neutral dark slate to avoid spoilers.
+        // Once clicked and correctly identified, the country lights up in radiant bright neon emerald!
         if (isSpotterActive) {
-          if (isSelected && spotterFeedback) {
+          if (isGuessedInSpotter) {
+            // Conquered country glows in vibrant bright emerald!
+            fillColor = isHovered ? '#34d399' : '#00e599';
+          } else if (isSelected && spotterFeedback) {
             if (spotterFeedback.status === 'correct') {
-              fillColor = isHovered ? '#34d399' : '#059669'; // Vibrant emerald correct
+              fillColor = isHovered ? '#34d399' : '#00e599'; // Bright radiant emerald
             } else if (spotterFeedback.status === 'wrong') {
-              fillColor = isHovered ? '#fb7185' : '#e11d48'; // Rose incorrect guess
+              fillColor = isHovered ? '#fb7185' : '#f43f5e'; // Bright rose
             } else if (spotterFeedback.status === 'revealed') {
-              fillColor = isHovered ? '#38bdf8' : '#0284c7'; // Cyan revealed
+              fillColor = isHovered ? '#38bdf8' : '#0284c7'; // Bright cyan
             }
           } else {
             fillColor = isHovered ? '#334155' : '#1e293b';
@@ -115,8 +130,14 @@ export const CountryLayer = React.memo(function CountryLayer({
 
         // High-clarity stroke class for spotter mode vs normal mode
         const strokeClass = isSpotterActive
-          ? isSelected && spotterFeedback?.status === 'correct'
-            ? 'stroke-emerald-400 stroke-2'
+          ? isGuessedInSpotter
+            ? isMoving
+              ? 'stroke-emerald-300 stroke-[1.6]'
+              : 'stroke-emerald-300 stroke-[1.6] filter drop-shadow-[0_0_8px_rgba(0,229,153,0.85)]'
+            : isSelected && spotterFeedback?.status === 'correct'
+            ? isMoving
+              ? 'stroke-emerald-300 stroke-2'
+              : 'stroke-emerald-300 stroke-2 filter drop-shadow-[0_0_10px_rgba(0,229,153,0.9)]'
             : isSelected && spotterFeedback?.status === 'wrong'
             ? 'stroke-rose-400 stroke-2'
             : isHovered

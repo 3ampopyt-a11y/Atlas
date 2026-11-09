@@ -30,6 +30,8 @@ export default function App() {
   const [spotterContinent, setSpotterContinent] = useState<ContinentFilter>('All');
   const [spotterDifficulty, setSpotterDifficulty] = useState<GameDifficulty>('medium');
   const [spotterTargets, setSpotterTargets] = useState<CountryData[]>([]);
+  const [spotterGuessedIds, setSpotterGuessedIds] = useState<string[]>([]);
+  const [spotterPlayWithLives, setSpotterPlayWithLives] = useState<boolean>(false);
   const [spotterCurrentIndex, setSpotterCurrentIndex] = useState<number>(0);
   const [spotterScore, setSpotterScore] = useState<number>(0);
   const [spotterStreak, setSpotterStreak] = useState<number>(0);
@@ -82,28 +84,36 @@ export default function App() {
     setIsCompareOpen(true);
   }, []);
 
-  // Start live interactive Map Spotting mode
-  const handleStartMapSpotter = useCallback((continent: ContinentFilter, difficulty: GameDifficulty = 'medium') => {
-    const pool = countryList.filter((c) => {
-      if (!c.name || !c.capital) return false;
-      if (continent === 'All') return true;
-      return c.continent.toLowerCase() === continent.toLowerCase();
-    });
+  // Start live interactive Map Spotting mode (Infinite / Full Conquest Mode)
+  const handleStartMapSpotter = useCallback(
+    (continent: ContinentFilter, difficulty: GameDifficulty = 'medium', withLives?: boolean) => {
+      const pool = countryList.filter((c) => {
+        if (!c.name || !c.capital) return false;
+        if (continent === 'All') return true;
+        return c.continent.toLowerCase() === continent.toLowerCase();
+      });
 
-    const filteredPool = filterCountriesByDifficulty(pool, difficulty);
-    const shuffled = [...filteredPool].sort(() => 0.5 - Math.random()).slice(0, 10);
-    setSpotterContinent(continent);
-    setSpotterDifficulty(difficulty);
-    setSpotterTargets(shuffled);
-    setSpotterCurrentIndex(0);
-    setSpotterScore(0);
-    setSpotterStreak(0);
-    setSpotterLives(3);
-    setSpotterFeedback(null);
-    setIsSpotterGameOver(false);
-    setIsSpotterActive(true);
-    setSelectedCountry(null); // Deselect any open country
-  }, []);
+      const filteredPool = filterCountriesByDifficulty(pool, difficulty);
+      // Infinite / Full Region Conquest: Include all countries in the pool (no 10-cap limit)
+      const shuffled = [...filteredPool].sort(() => 0.5 - Math.random());
+      setSpotterContinent(continent);
+      setSpotterDifficulty(difficulty);
+      setSpotterTargets(shuffled);
+      setSpotterGuessedIds([]);
+      setSpotterCurrentIndex(0);
+      setSpotterScore(0);
+      setSpotterStreak(0);
+      setSpotterLives(3);
+      if (withLives !== undefined) {
+        setSpotterPlayWithLives(withLives);
+      }
+      setSpotterFeedback(null);
+      setIsSpotterGameOver(false);
+      setIsSpotterActive(true);
+      setSelectedCountry(null); // Deselect any open country
+    },
+    []
+  );
 
   // Interactive country selection (intercepted during Map Spotting mode)
   const handleSelectCountry = useCallback(
@@ -112,7 +122,7 @@ export default function App() {
         const target = spotterTargets[spotterCurrentIndex];
         if (!target) return;
 
-        // If current round already concluded, wait for user to click Next
+        // If current round already concluded, wait for next
         if (spotterFeedback?.status === 'correct' || spotterFeedback?.status === 'revealed') {
           return;
         }
@@ -123,51 +133,71 @@ export default function App() {
           country.code.toLowerCase() === target.code.toLowerCase();
 
         if (isMatch) {
-          // Correct!
+          // Correct guess!
           const newStreak = spotterStreak + 1;
           const multiplier = newStreak >= 3 ? 2 : 1;
           const pts = 100 * multiplier;
 
           setSpotterStreak(newStreak);
           setSpotterScore((prev) => prev + pts);
+
+          // Add to guessed country IDs so it permanently illuminates in bright neon emerald!
+          setSpotterGuessedIds((prev) => {
+            const next = new Set(prev);
+            next.add(country.id);
+            if (country.code) next.add(country.code.toLowerCase());
+            next.add(country.name.toLowerCase());
+            return Array.from(next);
+          });
+
           setSpotterFeedback({
             status: 'correct',
             countryName: country.name,
-            message: `🎉 Spot on! You found ${country.name}! (+${pts} PTS)`,
+            message: `🎉 Spot on! Conquered ${country.name}! (+${pts} PTS)`,
           });
           gameAudio.playCorrect();
           setSelectedCountry(country);
 
-          // Auto-advance to next round without requiring user to press Next!
+          // Auto-advance to next round
           if (spotterAdvanceTimerRef.current) {
             clearTimeout(spotterAdvanceTimerRef.current);
           }
           spotterAdvanceTimerRef.current = setTimeout(() => {
             handleSpotterNext();
-          }, 850);
+          }, 750);
         } else {
-          // Incorrect!
-          const newLives = spotterLives - 1;
-          setSpotterLives(newLives);
+          // Incorrect guess!
           setSpotterStreak(0);
           gameAudio.playWrong();
 
-          if (newLives <= 0) {
-            setSpotterFeedback({
-              status: 'wrong',
-              countryName: country.name,
-              message: `❌ You clicked ${country.name}! Out of lives.`,
-            });
-            setTimeout(() => {
-              setIsSpotterGameOver(true);
-            }, 800);
+          if (spotterPlayWithLives) {
+            const newLives = spotterLives - 1;
+            setSpotterLives(newLives);
+
+            if (newLives <= 0) {
+              setSpotterFeedback({
+                status: 'wrong',
+                countryName: country.name,
+                message: `❌ You clicked ${country.name}! Out of lives.`,
+              });
+              setTimeout(() => {
+                setIsSpotterGameOver(true);
+              }, 750);
+            } else {
+              setSpotterFeedback({
+                status: 'wrong',
+                countryName: country.name,
+                message: `❌ That's ${country.name}! Look in ${target.continent}. (${newLives} ${
+                  newLives === 1 ? 'life' : 'lives'
+                } left)`,
+              });
+            }
           } else {
+            // Infinite mode: no life penalty, player can keep guessing until found!
             setSpotterFeedback({
               status: 'wrong',
               countryName: country.name,
-              message: `❌ That's ${country.name}! Look in ${target.continent}. (${newLives} ${
-                newLives === 1 ? 'life' : 'lives'
-              } left)`,
+              message: `❌ That's ${country.name}! Find ${target.name} (${target.continent})`,
             });
           }
         }
@@ -177,7 +207,16 @@ export default function App() {
       // Normal mode: select country to view dossier
       setSelectedCountry(country);
     },
-    [isSpotterActive, isSpotterGameOver, spotterTargets, spotterCurrentIndex, spotterStreak, spotterLives, spotterFeedback]
+    [
+      isSpotterActive,
+      isSpotterGameOver,
+      spotterTargets,
+      spotterCurrentIndex,
+      spotterStreak,
+      spotterLives,
+      spotterPlayWithLives,
+      spotterFeedback,
+    ]
   );
 
   // Next round in spotter challenge
@@ -194,27 +233,6 @@ export default function App() {
       setIsSpotterGameOver(true);
     }
   }, [spotterCurrentIndex, spotterTargets.length]);
-
-  // Reveal target in spotter challenge
-  const handleSpotterReveal = useCallback(() => {
-    const target = spotterTargets[spotterCurrentIndex];
-    if (!target) return;
-    setSelectedCountry(target);
-    setSpotterStreak(0);
-    setSpotterFeedback({
-      status: 'revealed',
-      countryName: target.name,
-      message: `Here is ${target.name} in ${target.continent} (Capital: ${target.capital}).`,
-    });
-
-    // Auto-advance after showing target
-    if (spotterAdvanceTimerRef.current) {
-      clearTimeout(spotterAdvanceTimerRef.current);
-    }
-    spotterAdvanceTimerRef.current = setTimeout(() => {
-      handleSpotterNext();
-    }, 1400);
-  }, [spotterTargets, spotterCurrentIndex, handleSpotterNext]);
 
   // Exit spotter challenge
   const handleExitSpotter = useCallback(() => {
@@ -238,6 +256,7 @@ export default function App() {
         metricMode={metricMode}
         isSpotterActive={isSpotterActive}
         spotterFeedback={spotterFeedback}
+        spotterGuessedIds={spotterGuessedIds}
       />
 
       {/* 2. Top Floating Navigation & Search Bar */}
@@ -259,24 +278,28 @@ export default function App() {
         onChangeMetric={setMetricMode}
       />
 
-      {/* 3. Live Globe Map Spotter HUD (When Spotter Challenge is active) */}
+      {/* 3. Live Globe Map Spotter HUD (Docked on the side, compact, infinite conquest & lives option) */}
       {isSpotterActive && spotterTarget && (
         <MapSpotterHud
           targetCountry={spotterTarget}
           score={spotterScore}
           streak={spotterStreak}
-          lives={spotterLives}
-          roundNumber={spotterCurrentIndex + 1}
+          guessedCount={spotterGuessedIds.length}
           totalRounds={spotterTargets.length}
+          continent={spotterContinent}
+          onChangeContinent={(cont) => handleStartMapSpotter(cont, spotterDifficulty, spotterPlayWithLives)}
+          playWithLives={spotterPlayWithLives}
+          onToggleLivesMode={(enabled) => {
+            setSpotterPlayWithLives(enabled);
+            if (enabled) setSpotterLives(3);
+          }}
+          lives={spotterLives}
           difficulty={spotterDifficulty}
           lastGuessFeedback={spotterFeedback}
           onNextQuestion={handleSpotterNext}
           onExit={handleExitSpotter}
-          onRestart={() => handleStartMapSpotter(spotterContinent, spotterDifficulty)}
-          onChangeDifficulty={(diff) => handleStartMapSpotter(spotterContinent, diff)}
+          onRestart={() => handleStartMapSpotter(spotterContinent, spotterDifficulty, spotterPlayWithLives)}
           isGameOver={isSpotterGameOver}
-          onReveal={handleSpotterReveal}
-          onFlyToTarget={() => setSelectedCountry(spotterTarget)}
         />
       )}
 

@@ -36,7 +36,7 @@ export type QuizCategory = 'flags' | 'capitals' | 'trivia' | 'spotter' | 'mixed'
 interface GameModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onStartMapSpotter: (continent: ContinentFilter, difficulty?: GameDifficulty) => void;
+  onStartMapSpotter: (continent: ContinentFilter, difficulty?: GameDifficulty, withLives?: boolean) => void;
   onFlyToCountry: (country: CountryData) => void;
 }
 
@@ -66,7 +66,7 @@ export const GameModal: React.FC<GameModalProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<QuizCategory>('flags');
   const [selectedContinent, setSelectedContinent] = useState<ContinentFilter>('All');
   const [difficulty, setDifficulty] = useState<GameDifficulty>('medium');
-  const [gameModeType, setGameModeType] = useState<'sprint10' | 'sprint20' | 'survival'>('sprint10');
+  const [gameModeType, setGameModeType] = useState<'sprint10' | 'sprint20' | 'survival' | 'infinite'>('infinite');
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   // Gameplay state
@@ -122,7 +122,14 @@ export const GameModal: React.FC<GameModalProps> = ({
 
     // Shuffle pool
     const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
-    const count = gameModeType === 'sprint10' ? 10 : gameModeType === 'sprint20' ? 20 : 50;
+    const count =
+      gameModeType === 'sprint10'
+        ? 10
+        : gameModeType === 'sprint20'
+        ? 20
+        : gameModeType === 'survival'
+        ? 50
+        : pool.length; // 'infinite': ALL countries in the eligible pool!
     const selectedTargets = shuffledPool.slice(0, Math.min(count, shuffledPool.length));
 
     return selectedTargets.map((target, idx) => {
@@ -288,8 +295,8 @@ export const GameModal: React.FC<GameModalProps> = ({
   // Start new game
   const handleStartGame = () => {
     if (selectedCategory === 'spotter') {
-      // Launch live interactive map spotting challenge with chosen difficulty!
-      onStartMapSpotter(selectedContinent, difficulty);
+      // Launch live interactive map spotting challenge with chosen difficulty and mode!
+      onStartMapSpotter(selectedContinent, difficulty, gameModeType === 'survival');
       onClose();
       return;
     }
@@ -741,53 +748,67 @@ export const GameModal: React.FC<GameModalProps> = ({
                 </div>
               </div>
 
-              {/* Game Length / Survival Mode (Only for multiple choice quiz modes) */}
-              {selectedCategory !== 'spotter' && (
-                <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Challenge Format</span>
-                  </label>
+              {/* Challenge Format (Available across all modes, including Spotter) */}
+              <div className="space-y-2">
+                <label className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Challenge Format</span>
+                </label>
 
-                  <div className="grid grid-cols-3 gap-2.5">
-                    <button
-                      onClick={() => setGameModeType('sprint10')}
-                      className={`p-3 rounded-2xl border text-center transition-all ${
-                        gameModeType === 'sprint10'
-                          ? 'bg-slate-800 border-cyan-400 text-cyan-300 font-bold shadow-md'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <div className="text-base font-black">10</div>
-                      <div className="text-[10px] uppercase font-mono">Quick Sprint</div>
-                    </button>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    onClick={() => setGameModeType('infinite')}
+                    className={`p-2.5 rounded-2xl border text-center transition-all ${
+                      gameModeType === 'infinite'
+                        ? 'bg-emerald-950/70 border-emerald-400 text-emerald-300 font-bold shadow-md shadow-emerald-500/20 ring-1 ring-emerald-400/40'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="text-base font-black text-emerald-400">♾️</div>
+                    <div className="text-[10px] uppercase font-mono font-bold text-emerald-300">Infinite</div>
+                    <div className="text-[8.5px] text-slate-400">All Countries</div>
+                  </button>
 
-                    <button
-                      onClick={() => setGameModeType('sprint20')}
-                      className={`p-3 rounded-2xl border text-center transition-all ${
-                        gameModeType === 'sprint20'
-                          ? 'bg-slate-800 border-cyan-400 text-cyan-300 font-bold shadow-md'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <div className="text-base font-black">20</div>
-                      <div className="text-[10px] uppercase font-mono">Standard Tour</div>
-                    </button>
+                  <button
+                    onClick={() => setGameModeType('sprint10')}
+                    className={`p-2.5 rounded-2xl border text-center transition-all ${
+                      gameModeType === 'sprint10'
+                        ? 'bg-slate-800 border-cyan-400 text-cyan-300 font-bold shadow-md'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="text-base font-black">10</div>
+                    <div className="text-[10px] uppercase font-mono font-bold">Quick Sprint</div>
+                    <div className="text-[8.5px] text-slate-400">10 Questions</div>
+                  </button>
 
-                    <button
-                      onClick={() => setGameModeType('survival')}
-                      className={`p-3 rounded-2xl border text-center transition-all ${
-                        gameModeType === 'survival'
-                          ? 'bg-slate-800 border-rose-500 text-rose-300 font-bold shadow-md'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
-                      }`}
-                    >
-                      <div className="text-base font-black">❤️❤️❤️</div>
-                      <div className="text-[10px] uppercase font-mono">Endless Survival</div>
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setGameModeType('sprint20')}
+                    className={`p-2.5 rounded-2xl border text-center transition-all ${
+                      gameModeType === 'sprint20'
+                        ? 'bg-slate-800 border-cyan-400 text-cyan-300 font-bold shadow-md'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="text-base font-black">20</div>
+                    <div className="text-[10px] uppercase font-mono font-bold">Standard Tour</div>
+                    <div className="text-[8.5px] text-slate-400">20 Questions</div>
+                  </button>
+
+                  <button
+                    onClick={() => setGameModeType('survival')}
+                    className={`p-2.5 rounded-2xl border text-center transition-all ${
+                      gameModeType === 'survival'
+                        ? 'bg-slate-800 border-rose-500 text-rose-300 font-bold shadow-md'
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <div className="text-base font-black">❤️❤️❤️</div>
+                    <div className="text-[10px] uppercase font-mono font-bold text-rose-400">3 Lives</div>
+                    <div className="text-[8.5px] text-slate-400">Survival Mode</div>
+                  </button>
                 </div>
-              )}
+              </div>
 
               {/* Start & Exit Buttons */}
               <div className="flex items-center gap-3 pt-2">
@@ -957,6 +978,13 @@ export const GameModal: React.FC<GameModalProps> = ({
                           ❤️
                         </span>
                       ))}
+                    </span>
+                  )}
+
+                  {gameModeType === 'infinite' && (
+                    <span className="px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-mono font-bold flex items-center gap-1">
+                      <span>♾️</span>
+                      <span>All Countries</span>
                     </span>
                   )}
                 </div>

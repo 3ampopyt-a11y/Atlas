@@ -59,6 +59,7 @@ interface WorldMapProps {
     countryName: string;
     message: string;
   } | null;
+  spotterGuessedIds?: string[];
 }
 
 const BASE_WIDTH = 960;
@@ -97,6 +98,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   metricMode,
   isSpotterActive = false,
   spotterFeedback = null,
+  spotterGuessedIds,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -922,6 +924,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           climateFilter={climateFilter}
           isSpotterActive={isSpotterActive}
           spotterFeedback={spotterFeedback}
+          spotterGuessedIds={spotterGuessedIds}
           isMoving={isMoving}
           onHover={handleCountryHover}
           onLeave={handleCountryLeave}
@@ -2262,20 +2265,44 @@ export const WorldMap: React.FC<WorldMapProps> = ({
         </div>
       )}
 
-      {/* Spotter Challenge Blind Crosshair Hint (Zero spoilers: no country name, flag, or capital) */}
-      {tooltipPos && isSpotterActive && (hoveredCountry || hoveredName) && (
-        <div
-          id="spotter-cursor-indicator"
-          className="pointer-events-none absolute z-40 bg-slate-950/95 backdrop-blur-md border border-cyan-500/50 rounded-xl px-2.5 py-1.5 shadow-2xl text-[11px] font-bold text-cyan-300 transition-all duration-75 flex items-center gap-1.5"
-          style={{
-            left: `${Math.min(tooltipPos.x + 14, (containerRef.current?.clientWidth || 800) - 130)}px`,
-            top: `${Math.min(tooltipPos.y + 14, (containerRef.current?.clientHeight || 600) - 40)}px`,
-          }}
-        >
-          <span>🎯</span>
-          <span>Click to guess</span>
-        </div>
-      )}
+      {/* Spotter Challenge Blind Crosshair Hint (Zero spoilers for unreached, green confirmed for conquered) */}
+      {tooltipPos && isSpotterActive && (hoveredCountry || hoveredName) && (() => {
+        const isAlreadyGuessed = Boolean(
+          spotterGuessedIds && (
+            (hoveredCountry && spotterGuessedIds.includes(hoveredCountry.id)) ||
+            (hoveredCountry && hoveredCountry.code && spotterGuessedIds.includes(hoveredCountry.code.toLowerCase())) ||
+            (hoveredCountry && spotterGuessedIds.includes(hoveredCountry.name.toLowerCase())) ||
+            spotterGuessedIds.includes(hoveredName.toLowerCase())
+          )
+        );
+
+        return (
+          <div
+            id="spotter-cursor-indicator"
+            className={`pointer-events-none absolute z-40 backdrop-blur-md rounded-xl px-2.5 py-1.5 shadow-2xl text-[11px] font-bold transition-all duration-75 flex items-center gap-1.5 border ${
+              isAlreadyGuessed
+                ? 'bg-emerald-950/95 border-emerald-500/60 text-emerald-300'
+                : 'bg-slate-950/95 border-cyan-500/50 text-cyan-300'
+            }`}
+            style={{
+              left: `${Math.min(tooltipPos.x + 14, (containerRef.current?.clientWidth || 800) - 150)}px`,
+              top: `${Math.min(tooltipPos.y + 14, (containerRef.current?.clientHeight || 600) - 40)}px`,
+            }}
+          >
+            {isAlreadyGuessed ? (
+              <>
+                <span className="text-emerald-400">✓</span>
+                <span>Conquered: {hoveredCountry?.name || hoveredName}</span>
+              </>
+            ) : (
+              <>
+                <span>🎯</span>
+                <span>Click to guess</span>
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Feature Detail Modal for Hotspots, Peaks, Tectonic, Biomes */}
       <FeatureDetailModal
