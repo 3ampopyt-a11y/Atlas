@@ -127,6 +127,13 @@ export default function App() {
           return;
         }
 
+        // In continent-specific Spotter mode, ignore clicks outside that continent
+        if (spotterContinent && spotterContinent !== 'All') {
+          if (country.continent.toLowerCase() !== spotterContinent.toLowerCase()) {
+            return;
+          }
+        }
+
         const isMatch =
           country.id === target.id ||
           country.name.toLowerCase() === target.name.toLowerCase() ||
@@ -215,6 +222,7 @@ export default function App() {
       spotterStreak,
       spotterLives,
       spotterPlayWithLives,
+      spotterContinent,
       spotterFeedback,
     ]
   );
@@ -255,6 +263,7 @@ export default function App() {
         onSelectCountry={handleSelectCountry}
         metricMode={metricMode}
         isSpotterActive={isSpotterActive}
+        spotterContinent={spotterContinent}
         spotterFeedback={spotterFeedback}
         spotterGuessedIds={spotterGuessedIds}
       />

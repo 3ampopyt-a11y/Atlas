@@ -1,5 +1,5 @@
 import React from 'react';
-import { CountryData, MapMetricMode } from '../types.ts';
+import { CountryData, MapMetricMode, ContinentFilter } from '../types.ts';
 import { getCountryFillColor } from '../utils/mapColors.ts';
 import { getOwnFlagUrl, ownFlagPatternId } from '../utils/ownFlags.ts';
 
@@ -22,6 +22,7 @@ interface CountryLayerProps {
   flagCodes: Set<string>;
   climateFilter?: string;
   isSpotterActive: boolean;
+  spotterContinent?: ContinentFilter;
   spotterFeedback: {
     status: 'correct' | 'wrong' | 'revealed';
     countryName: string;
@@ -47,6 +48,7 @@ export const CountryLayer = React.memo(function CountryLayer({
   flagCodes,
   climateFilter,
   isSpotterActive,
+  spotterContinent,
   spotterFeedback,
   spotterGuessedIds,
   isMoving,
@@ -82,6 +84,17 @@ export const CountryLayer = React.memo(function CountryLayer({
       {items.map((item) => {
         if (!item.paths || item.paths.length === 0) return null;
         const country = item.countryData;
+
+        // In Globe Spotter Challenge for a specific continent (e.g. Europe, Africa),
+        // only render and show that specific part of the world!
+        if (isSpotterActive && spotterContinent && spotterContinent !== 'All') {
+          const belongsToContinent =
+            country && country.continent.toLowerCase() === spotterContinent.toLowerCase();
+          if (!belongsToContinent) {
+            return null;
+          }
+        }
+
         const isSelected = selectedCountry?.id === item.id || selectedCountry?.name === item.name;
         const isHovered = hoveredCountryId === item.id || hoveredName === item.name;
 

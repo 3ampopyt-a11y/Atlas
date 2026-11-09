@@ -6,7 +6,7 @@ import {
   geoGraticule10,
   geoDistance,
 } from 'd3-geo';
-import { CountryData, MapMetricMode } from '../types.ts';
+import { CountryData, MapMetricMode, ContinentFilter } from '../types.ts';
 import { worldFeatures50, worldBorders50, worldFeaturesLite, worldBordersLite } from '../data/worldMapData.ts';
 import { countryMapPoints, isCoordOnFrontHemisphere } from '../utils/geoCentroids.ts';
 import { CountryLayer } from './CountryLayer.tsx';
@@ -54,6 +54,7 @@ interface WorldMapProps {
   onSelectCountry: (country: CountryData) => void;
   metricMode: MapMetricMode;
   isSpotterActive?: boolean;
+  spotterContinent?: ContinentFilter;
   spotterFeedback?: {
     status: 'correct' | 'wrong' | 'revealed';
     countryName: string;
@@ -97,6 +98,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   onSelectCountry,
   metricMode,
   isSpotterActive = false,
+  spotterContinent,
   spotterFeedback = null,
   spotterGuessedIds,
 }) => {
@@ -703,6 +705,13 @@ export const WorldMap: React.FC<WorldMapProps> = ({
     }
   };
 
+  // Auto-focus and zoom to the active Spotter Continent when in Spotter Challenge
+  useEffect(() => {
+    if (isSpotterActive && spotterContinent) {
+      focusContinent(spotterContinent);
+    }
+  }, [isSpotterActive, spotterContinent, projectionMode]);
+
   // Border style helper
   const getBorderMeshClasses = () => {
     if (borderMode === 'contrast') {
@@ -923,6 +932,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           flagCodes={flagCodeSet}
           climateFilter={climateFilter}
           isSpotterActive={isSpotterActive}
+          spotterContinent={spotterContinent}
           spotterFeedback={spotterFeedback}
           spotterGuessedIds={spotterGuessedIds}
           isMoving={isMoving}
@@ -931,8 +941,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({
           onSelect={handleCountrySelect}
         />
 
-        {/* International Borders Overlay Line Mesh */}
-        {bordersPath && (
+        {/* International Borders Overlay Line Mesh (Hidden in continent-specific Spotter mode) */}
+        {bordersPath && (!isSpotterActive || !spotterContinent || spotterContinent === 'All') && (
           <>
             <path
               d={bordersPath}
@@ -2267,6 +2277,12 @@ export const WorldMap: React.FC<WorldMapProps> = ({
 
       {/* Spotter Challenge Blind Crosshair Hint (Zero spoilers for unreached, green confirmed for conquered) */}
       {tooltipPos && isSpotterActive && (hoveredCountry || hoveredName) && (() => {
+        if (spotterContinent && spotterContinent !== 'All' && hoveredCountry) {
+          if (hoveredCountry.continent.toLowerCase() !== spotterContinent.toLowerCase()) {
+            return null;
+          }
+        }
+
         const isAlreadyGuessed = Boolean(
           spotterGuessedIds && (
             (hoveredCountry && spotterGuessedIds.includes(hoveredCountry.id)) ||
