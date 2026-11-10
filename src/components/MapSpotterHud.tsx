@@ -116,7 +116,7 @@ export const MapSpotterHud: React.FC<MapSpotterHudProps> = ({
                   }!`
                 : `You conquered ${guessedCount} of ${totalRounds} countries in ${
                     continent === 'All' ? 'the world' : continent
-                  }.`}
+                  }. ${totalRounds - guessedCount} failed — good luck next time!`}
             </p>
           </div>
 

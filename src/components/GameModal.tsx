@@ -57,6 +57,159 @@ interface Question {
   explanation: string;
 }
 
+function buildQuestionForCountry(
+  target: CountryData,
+  idx: number,
+  category: QuizCategory,
+  pool: CountryData[]
+): Question {
+  // Determine question category
+  let cat: 'flags' | 'capitals' | 'trivia' = 'flags';
+  if (category === 'flags') cat = 'flags';
+  else if (category === 'capitals') cat = 'capitals';
+  else if (category === 'trivia') cat = 'trivia';
+  else {
+    // Mixed Grand Prix: cycle through categories
+    const mod = idx % 3;
+    cat = mod === 0 ? 'flags' : mod === 1 ? 'capitals' : 'trivia';
+  }
+
+  // Pick 3 plausible distractors from the filtered pool
+  const distractors = pool
+    .filter((c) => c.id !== target.id)
+    .sort((a, b) => {
+      const sameContA = a.continent === target.continent ? 1 : 0;
+      const sameContB = b.continent === target.continent ? 1 : 0;
+      return sameContB - sameContA + (0.5 - Math.random());
+    })
+    .slice(0, 3);
+
+  if (cat === 'flags') {
+    const options = [
+      { label: target.name, isCorrect: true, countryData: target },
+      ...distractors.map((d) => ({ label: d.name, isCorrect: false, countryData: d })),
+    ].sort(() => 0.5 - Math.random());
+
+    return {
+      id: `q-flag-${target.id}-${idx}`,
+      category: 'flags',
+      prompt: 'Which country has this national flag?',
+      subPrompt: `Continent: ${target.continent}`,
+      targetCountry: target,
+      flagCode: target.code,
+      options,
+      explanation: `${target.name} (Capital: ${target.capital}) is located in ${target.continent} with a population of ${target.demographics.population.toLocaleString()}.`,
+    };
+  }
+
+  if (cat === 'capitals') {
+    const isCountryToCapital = Math.random() > 0.5;
+
+    if (isCountryToCapital) {
+      const options = [
+        { label: target.capital, isCorrect: true, countryData: target },
+        ...distractors.map((d) => ({
+          label: d.capital,
+          isCorrect: false,
+          countryData: d,
+        })),
+      ].sort(() => 0.5 - Math.random());
+
+      return {
+        id: `q-cap-${target.id}-${idx}`,
+        category: 'capitals',
+        prompt: `What is the capital city of ${target.name}?`,
+        subPrompt: `Geographic Challenge • ${target.continent}`,
+        targetCountry: target,
+        capitalTarget: target.capital,
+        options,
+        explanation: `The capital of ${target.name} is ${target.capital}.`,
+      };
+    } else {
+      const options = [
+        { label: target.name, isCorrect: true, countryData: target },
+        ...distractors.map((d) => ({
+          label: d.name,
+          isCorrect: false,
+          countryData: d,
+        })),
+      ].sort(() => 0.5 - Math.random());
+
+      return {
+        id: `q-cap-rev-${target.id}-${idx}`,
+        category: 'capitals',
+        prompt: `${target.capital} is the capital city of which country?`,
+        subPrompt: `Geographic Challenge • Located in ${target.continent}`,
+        targetCountry: target,
+        capitalTarget: target.capital,
+        options,
+        explanation: `${target.capital} is the capital city of ${target.name}.`,
+      };
+    }
+  }
+
+  // Trivia / Geography Facts
+  const triviaType = Math.floor(Math.random() * 3);
+  if (triviaType === 0) {
+    const options = [
+      { label: target.name, isCorrect: true, countryData: target },
+      ...distractors.map((d) => ({ label: d.name, isCorrect: false, countryData: d })),
+    ].sort(() => 0.5 - Math.random());
+
+    return {
+      id: `q-triv-cont-${target.id}-${idx}`,
+      category: 'trivia',
+      prompt: `Which of these nations is situated in ${target.continent}?`,
+      subPrompt: `Continental Geography Challenge`,
+      targetCountry: target,
+      options,
+      explanation: `${target.name} is situated in ${target.continent}.`,
+    };
+  } else if (triviaType === 1) {
+    const allCandidates = [target, ...distractors].sort(
+      (a, b) => b.demographics.population - a.demographics.population
+    );
+    const topPopCountry = allCandidates[0];
+
+    const options = allCandidates.map((c) => ({
+      label: c.name,
+      isCorrect: c.id === topPopCountry.id,
+      countryData: c,
+    }));
+
+    return {
+      id: `q-triv-pop-${target.id}-${idx}`,
+      category: 'trivia',
+      prompt: 'Which of these countries has the highest population?',
+      subPrompt: 'Demographic Comparison Challenge',
+      targetCountry: topPopCountry,
+      options,
+      explanation: `${topPopCountry.name} has the largest population with ${topPopCountry.demographics.population.toLocaleString()} people.`,
+    };
+  } else {
+    const allCandidates = [target, ...distractors].sort(
+      (a, b) => b.longevity.yearsAlive - a.longevity.yearsAlive
+    );
+    const oldestCountry = allCandidates[0];
+
+    const options = allCandidates.map((c) => ({
+      label: c.name,
+      isCorrect: c.id === oldestCountry.id,
+      countryData: c,
+    }));
+
+    return {
+      id: `q-triv-long-${target.id}-${idx}`,
+      category: 'trivia',
+      prompt: 'Which country has the longest continuous sovereign history?',
+      subPrompt: 'Ancient Civilization & Sovereignty Challenge',
+      targetCountry: oldestCountry,
+      options,
+      explanation: `${oldestCountry.name} has an enduring continuity of ${oldestCountry.longevity.yearsAlive.toLocaleString()} years (${oldestCountry.longevity.foundationEvent}).`,
+    };
+  }
+}
+
 export const GameModal: React.FC<GameModalProps> = ({
   isOpen,
   onClose,
@@ -80,6 +233,7 @@ export const GameModal: React.FC<GameModalProps> = ({
   const [hasAnswered, setHasAnswered] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(gameAudio.enabled);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [solvedCountryIds, setSolvedCountryIds] = useState<string[]>([]);
 
   // Review of missed questions
   const [missedQuestions, setMissedQuestions] = useState<{
@@ -104,7 +258,7 @@ export const GameModal: React.FC<GameModalProps> = ({
     setSoundEnabled(gameAudio.enabled);
   };
 
-  // Filter pool of countries by selected continent AND difficulty level
+  // Filter pool of countries by selected continent
   const eligibleCountries = useMemo(() => {
     const continentPool = countryList.filter((c) => {
       if (!c.name || !c.capital) return false;
@@ -112,8 +266,14 @@ export const GameModal: React.FC<GameModalProps> = ({
       return c.continent.toLowerCase() === selectedContinent.toLowerCase();
     });
 
+    // In 'infinite' mode ("All Countries"), the player wants to conquer EVERY country in the region/world!
+    // Never filter out countries by difficulty when playing Infinite mode!
+    if (gameModeType === 'infinite') {
+      return continentPool;
+    }
+
     return filterCountriesByDifficulty(continentPool, difficulty);
-  }, [selectedContinent, difficulty]);
+  }, [selectedContinent, difficulty, gameModeType]);
 
   // Generate question set
   const generateQuestions = useCallback((): Question[] => {
@@ -132,164 +292,9 @@ export const GameModal: React.FC<GameModalProps> = ({
         : pool.length; // 'infinite': ALL countries in the eligible pool!
     const selectedTargets = shuffledPool.slice(0, Math.min(count, shuffledPool.length));
 
-    return selectedTargets.map((target, idx) => {
-      // Determine question category
-      let cat: 'flags' | 'capitals' | 'trivia' = 'flags';
-      if (selectedCategory === 'flags') cat = 'flags';
-      else if (selectedCategory === 'capitals') cat = 'capitals';
-      else if (selectedCategory === 'trivia') cat = 'trivia';
-      else {
-        // Mixed Grand Prix: cycle through categories
-        const mod = idx % 3;
-        cat = mod === 0 ? 'flags' : mod === 1 ? 'capitals' : 'trivia';
-      }
-
-      // Pick 3 plausible distractors from the filtered pool
-      const distractors = pool
-        .filter((c) => c.id !== target.id)
-        .sort((a, b) => {
-          const sameContA = a.continent === target.continent ? 1 : 0;
-          const sameContB = b.continent === target.continent ? 1 : 0;
-          return sameContB - sameContA + (0.5 - Math.random());
-        })
-        .slice(0, 3);
-
-      if (cat === 'flags') {
-        const options = [
-          { label: target.name, isCorrect: true, countryData: target },
-          ...distractors.map((d) => ({ label: d.name, isCorrect: false, countryData: d })),
-        ].sort(() => 0.5 - Math.random());
-
-        return {
-          id: `q-flag-${idx}`,
-          category: 'flags',
-          prompt: 'Which country has this national flag?',
-          subPrompt: `Continent: ${target.continent}`,
-          targetCountry: target,
-          flagCode: target.code,
-          options,
-          explanation: `${target.name} (Capital: ${target.capital}) is located in ${target.continent} with a population of ${target.demographics.population.toLocaleString()}.`,
-        };
-      }
-
-      if (cat === 'capitals') {
-        // 50% chance: Country -> Capital, 50% chance: Capital -> Country
-        const isCountryToCapital = Math.random() > 0.5;
-
-        if (isCountryToCapital) {
-          // Question: What is the capital of [Country]?
-          // Options: Pure capital cities (NO spoilers!)
-          const options = [
-            { label: target.capital, isCorrect: true, countryData: target },
-            ...distractors.map((d) => ({
-              label: d.capital,
-              isCorrect: false,
-              countryData: d,
-            })),
-          ].sort(() => 0.5 - Math.random());
-
-          return {
-            id: `q-cap-${idx}`,
-            category: 'capitals',
-            prompt: `What is the capital city of ${target.name}?`,
-            subPrompt: `Geographic Challenge • ${target.continent}`,
-            targetCountry: target,
-            capitalTarget: target.capital,
-            options,
-            explanation: `The capital of ${target.name} is ${target.capital}.`,
-          };
-        } else {
-          // Question: [Capital] is the capital city of which country?
-          // CRITICAL: Options are PURE country names.
-          // UNDER NO CIRCUMSTANCES should subLabel state the capital!
-          const options = [
-            { label: target.name, isCorrect: true, countryData: target },
-            ...distractors.map((d) => ({
-              label: d.name,
-              isCorrect: false,
-              countryData: d,
-            })),
-          ].sort(() => 0.5 - Math.random());
-
-          return {
-            id: `q-cap-rev-${idx}`,
-            category: 'capitals',
-            prompt: `${target.capital} is the capital city of which country?`,
-            subPrompt: `Geographic Challenge • Located in ${target.continent}`,
-            targetCountry: target,
-            capitalTarget: target.capital,
-            options,
-            explanation: `${target.capital} is the capital city of ${target.name}.`,
-          };
-        }
-      }
-
-      // Trivia / Geography Facts
-      const triviaType = Math.floor(Math.random() * 3);
-      if (triviaType === 0) {
-        // Continent Location
-        const options = [
-          { label: target.name, isCorrect: true, countryData: target },
-          ...distractors.map((d) => ({ label: d.name, isCorrect: false, countryData: d })),
-        ].sort(() => 0.5 - Math.random());
-
-        return {
-          id: `q-triv-cont-${idx}`,
-          category: 'trivia',
-          prompt: `Which of these nations is situated in ${target.continent}?`,
-          subPrompt: `Continental Geography Challenge`,
-          targetCountry: target,
-          options,
-          explanation: `${target.name} is situated in ${target.continent}.`,
-        };
-      } else if (triviaType === 1) {
-        // Largest Population among group
-        const allCandidates = [target, ...distractors].sort(
-          (a, b) => b.demographics.population - a.demographics.population
-        );
-        const topPopCountry = allCandidates[0];
-
-        // Do NOT spoil population numbers before guessing!
-        const options = allCandidates.map((c) => ({
-          label: c.name,
-          isCorrect: c.id === topPopCountry.id,
-          countryData: c,
-        }));
-
-        return {
-          id: `q-triv-pop-${idx}`,
-          category: 'trivia',
-          prompt: 'Which of these countries has the highest population?',
-          subPrompt: 'Demographic Comparison Challenge',
-          targetCountry: topPopCountry,
-          options,
-          explanation: `${topPopCountry.name} has the largest population with ${topPopCountry.demographics.population.toLocaleString()} people.`,
-        };
-      } else {
-        // Longest Sovereign History
-        const allCandidates = [target, ...distractors].sort(
-          (a, b) => b.longevity.yearsAlive - a.longevity.yearsAlive
-        );
-        const oldestCountry = allCandidates[0];
-
-        // Do NOT spoil years before guessing!
-        const options = allCandidates.map((c) => ({
-          label: c.name,
-          isCorrect: c.id === oldestCountry.id,
-          countryData: c,
-        }));
-
-        return {
-          id: `q-triv-long-${idx}`,
-          category: 'trivia',
-          prompt: 'Which country has the longest continuous sovereign history?',
-          subPrompt: 'Ancient Civilization & Sovereignty Challenge',
-          targetCountry: oldestCountry,
-          options,
-          explanation: `${oldestCountry.name} has an enduring continuity of ${oldestCountry.longevity.yearsAlive.toLocaleString()} years (${oldestCountry.longevity.foundationEvent}).`,
-        };
-      }
-    });
+    return selectedTargets.map((target, idx) =>
+      buildQuestionForCountry(target, idx, selectedCategory, pool)
+    );
   }, [eligibleCountries, gameModeType, selectedCategory]);
 
   // Start new game
@@ -313,6 +318,7 @@ export const GameModal: React.FC<GameModalProps> = ({
     setSelectedAnswerIndex(null);
     setHasAnswered(false);
     setIsFinished(false);
+    setSolvedCountryIds([]);
     setMissedQuestions([]);
     setIsPlaying(true);
     gameAudio.playClick();
@@ -353,19 +359,23 @@ export const GameModal: React.FC<GameModalProps> = ({
     });
   }, [score, selectedCategory, selectedContinent]);
 
-  const advanceToNext = useCallback((fromIndex: number) => {
-    if (autoAdvanceTimerRef.current) {
-      clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    if (fromIndex + 1 < questions.length) {
-      setCurrentQuestionIndex(fromIndex + 1);
-      setSelectedAnswerIndex(null);
-      setHasAnswered(false);
-    } else {
-      finishGame();
-    }
-  }, [questions.length, finishGame]);
+  const advanceToNext = useCallback(
+    (fromIndex: number) => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      }
+
+      if (fromIndex + 1 < questions.length) {
+        setCurrentQuestionIndex(fromIndex + 1);
+        setSelectedAnswerIndex(null);
+        setHasAnswered(false);
+      } else {
+        finishGame();
+      }
+    },
+    [questions.length, finishGame]
+  );
 
   // Exit quiz and return to game menu
   const handleExitQuiz = useCallback(() => {
@@ -408,6 +418,11 @@ export const GameModal: React.FC<GameModalProps> = ({
     const isCorrect = currentQ.options[index]?.isCorrect;
 
     if (isCorrect) {
+      // Record this country as mastered / conquered!
+      setSolvedCountryIds((prev) =>
+        prev.includes(currentQ.targetCountry.id) ? prev : [...prev, currentQ.targetCountry.id]
+      );
+
       const newStreak = streak + 1;
       setStreak(newStreak);
       setBestStreak((prev) => Math.max(prev, newStreak));
@@ -432,6 +447,8 @@ export const GameModal: React.FC<GameModalProps> = ({
     } else {
       gameAudio.playWrong();
       setStreak(0);
+
+      // Record missed question (failed, no repeat: good luck next time)
 
       // Record missed question
       setMissedQuestions((prev) => [
@@ -766,7 +783,9 @@ export const GameModal: React.FC<GameModalProps> = ({
                   >
                     <div className="text-base font-black text-emerald-400">♾️</div>
                     <div className="text-[10px] uppercase font-mono font-bold text-emerald-300">Infinite</div>
-                    <div className="text-[8.5px] text-slate-400">All Countries</div>
+                    <div className="text-[8.5px] text-emerald-400/90 font-semibold">
+                      {selectedContinent === 'All' ? 'All 240+ Countries' : `All ${eligibleCountries.length} Countries`}
+                    </div>
                   </button>
 
                   <button
@@ -846,15 +865,23 @@ export const GameModal: React.FC<GameModalProps> = ({
 
               <div>
                 <span className="text-[11px] font-mono uppercase tracking-widest text-amber-400 font-bold">
-                  QUIZ COMPLETE
+                  {missedQuestions.length === 0
+                    ? '100% PERFECT SCORE'
+                    : 'QUIZ COMPLETE'}
                 </span>
                 <h2 className="text-3xl font-black text-slate-100 mt-1">
-                  {getRankBadge().title}
+                  {missedQuestions.length === 0
+                    ? '👑 Grand Cartographer of All Nations!'
+                    : getRankBadge().title}
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  {score >= 800
-                    ? 'Exceptional mastery of world flags, nations, and sovereign capitals!'
-                    : 'Great effort! Practice more to climb the Global Geographer ranks.'}
+                  {missedQuestions.length === 0
+                    ? `Astonishing feat! You correctly answered all ${questions.length} countries in ${
+                        selectedContinent === 'All' ? 'the entire world' : selectedContinent
+                      }!`
+                    : `You completed the tour! You got ${questions.length - missedQuestions.length} of ${questions.length} countries correct in ${
+                        selectedContinent === 'All' ? 'the entire world' : selectedContinent
+                      }. ${missedQuestions.length} failed — good luck next time!`}
                 </p>
               </div>
 
@@ -865,18 +892,17 @@ export const GameModal: React.FC<GameModalProps> = ({
                   <div className="text-2xl font-black text-amber-300 font-mono mt-0.5">{score}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-mono text-slate-400">Accuracy</div>
+                  <div className="text-[10px] uppercase font-mono text-slate-400">Correct</div>
                   <div className="text-2xl font-black text-emerald-400 font-mono mt-0.5">
-                    {Math.round(
-                      ((questions.length - missedQuestions.length) / (questions.length || 1)) * 100
-                    )}
-                    %
+                    {questions.length - missedQuestions.length} / {questions.length}
                   </div>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-mono text-slate-400">Best Streak</div>
+                  <div className="text-[10px] uppercase font-mono text-slate-400">Accuracy</div>
                   <div className="text-2xl font-black text-cyan-300 font-mono mt-0.5">
-                    {bestStreak} 🔥
+                    {Math.round(
+                      ((questions.length - missedQuestions.length) / (questions.length || 1)) * 100
+                    )}%
                   </div>
                 </div>
               </div>
@@ -884,8 +910,8 @@ export const GameModal: React.FC<GameModalProps> = ({
               {/* Missed Questions Review */}
               {missedQuestions.length > 0 && (
                 <div className="space-y-2 text-left">
-                  <div className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">
-                    Review Questions to Learn ({missedQuestions.length})
+                  <div className="text-xs font-mono uppercase tracking-wider text-rose-400 font-bold">
+                    Failed Questions ({missedQuestions.length}) — Good luck next time!
                   </div>
                   <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
                     {missedQuestions.map((m, i) => (
@@ -955,53 +981,81 @@ export const GameModal: React.FC<GameModalProps> = ({
             /* ========================================================================= */
             /* 3. ACTIVE QUIZ QUESTION SCREEN                                           */
             /* ========================================================================= */
-            <div className="space-y-5 animate-in fade-in duration-200">
+            <div className="space-y-4 animate-in fade-in duration-200">
               {/* Question Header & Live Progress */}
-              <div className="flex items-center justify-between gap-3 text-xs border-b border-slate-800 pb-3">
-                <div className="flex items-center gap-2 font-mono font-bold">
-                  <span className="px-2.5 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    Question {currentQuestionIndex + 1} of {questions.length}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-xl text-[10.5px] font-mono font-bold border ${DIFFICULTY_CONFIGS[difficulty].bgClass} ${DIFFICULTY_CONFIGS[difficulty].borderClass} ${DIFFICULTY_CONFIGS[difficulty].textClass}`}>
-                    {DIFFICULTY_CONFIGS[difficulty].badge} {DIFFICULTY_CONFIGS[difficulty].name}
-                  </span>
-
-                  {gameModeType === 'survival' && (
-                    <span className="flex items-center gap-1">
-                      {Array.from({ length: 3 }).map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-sm transition-opacity ${
-                            i < lives ? 'opacity-100' : 'opacity-20 grayscale'
-                          }`}
-                        >
-                          ❤️
-                        </span>
-                      ))}
+              <div className="space-y-2.5 border-b border-slate-800 pb-3">
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 font-mono font-bold flex-wrap">
+                    <span className="px-2.5 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      Question {currentQuestionIndex + 1} of {questions.length}
                     </span>
-                  )}
 
-                  {gameModeType === 'infinite' && (
-                    <span className="px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-mono font-bold flex items-center gap-1">
-                      <span>♾️</span>
-                      <span>All Countries</span>
+                    {gameModeType === 'infinite' && (
+                      <span className="px-2 py-0.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10.5px] font-mono font-bold flex items-center gap-1.5">
+                        <span className="text-emerald-400">✅ {solvedCountryIds.length} Got</span>
+                        {missedQuestions.length > 0 && (
+                          <span className="text-rose-400">❌ {missedQuestions.length} Failed</span>
+                        )}
+                      </span>
+                    )}
+
+                    <span className={`px-2 py-0.5 rounded-xl text-[10.5px] font-mono font-bold border ${DIFFICULTY_CONFIGS[difficulty].bgClass} ${DIFFICULTY_CONFIGS[difficulty].borderClass} ${DIFFICULTY_CONFIGS[difficulty].textClass}`}>
+                      {DIFFICULTY_CONFIGS[difficulty].badge} {DIFFICULTY_CONFIGS[difficulty].name}
                     </span>
-                  )}
+
+                    {gameModeType === 'survival' && (
+                      <span className="flex items-center gap-1">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className={`text-sm transition-opacity ${
+                              i < lives ? 'opacity-100' : 'opacity-20 grayscale'
+                            }`}
+                          >
+                            ❤️
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {streak > 1 && (
+                      <div className="flex items-center gap-1 text-amber-400 font-bold font-mono">
+                        <span>🔥 {streak} Streak</span>
+                        {streak >= 3 && (
+                          <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px]">
+                            {streak >= 5 ? '3x PTS' : '2x PTS'}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="text-cyan-300 font-mono font-bold bg-cyan-950/60 px-2.5 py-1 rounded-xl border border-cyan-800/60">
+                      {score} PTS
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {streak > 1 && (
-                    <div className="flex items-center gap-1 text-amber-400 font-bold font-mono">
-                      <span>🔥 {streak} Streak</span>
-                      {streak >= 3 && (
-                        <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[10px]">
-                          {streak >= 5 ? '3x PTS' : '2x PTS'}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div className="text-cyan-300 font-mono font-bold bg-cyan-950/60 px-2.5 py-1 rounded-xl border border-cyan-800/60">
-                    {score} PTS
+                {/* Question Progress Bar across all countries */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                    <span className="text-slate-300 font-semibold">
+                      Progress: {currentQuestionIndex + 1} / {questions.length} Countries
+                    </span>
+                    <span className="text-cyan-300 font-bold">
+                      {Math.round(((currentQuestionIndex + 1) / (questions.length || 1)) * 100)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden border border-slate-800">
+                    <div
+                      className="h-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 transition-all duration-300 shadow-[0_0_8px_rgba(52,211,153,0.8)]"
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(((currentQuestionIndex + 1) / (questions.length || 1)) * 100)
+                        )}%`,
+                      }}
+                    />
                   </div>
                 </div>
               </div>

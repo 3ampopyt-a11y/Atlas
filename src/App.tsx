@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { CountryData, MapMetricMode, ContinentFilter } from './types.ts';
 import { countryList, getCountryByName } from './data/countriesData.ts';
 import { WorldMap } from './components/WorldMap.tsx';
@@ -93,9 +93,11 @@ export default function App() {
         return c.continent.toLowerCase() === continent.toLowerCase();
       });
 
-      const filteredPool = filterCountriesByDifficulty(pool, difficulty);
-      // Infinite / Full Region Conquest: Include all countries in the pool (no 10-cap limit)
-      const shuffled = [...filteredPool].sort(() => 0.5 - Math.random());
+      // Infinite Mode: include EVERY SINGLE country in the continent/world (e.g. all 52 in Europe)!
+      // No difficulty filter should cut the pool down in Infinite mode!
+      const isInfinite = withLives !== undefined ? !withLives : !spotterPlayWithLives;
+      const targetPool = isInfinite ? pool : filterCountriesByDifficulty(pool, difficulty);
+      const shuffled = [...targetPool].sort(() => 0.5 - Math.random());
       setSpotterContinent(continent);
       setSpotterDifficulty(difficulty);
       setSpotterTargets(shuffled);
@@ -112,7 +114,7 @@ export default function App() {
       setIsSpotterActive(true);
       setSelectedCountry(null); // Deselect any open country
     },
-    []
+    [spotterPlayWithLives]
   );
 
   // Interactive country selection (intercepted during Map Spotting mode)
@@ -253,6 +255,33 @@ export default function App() {
     setSelectedCountry(null);
   }, []);
 
+  // Compute accurate unique conquered count and total countries for MapSpotterHud
+  const spotterConqueredCount = useMemo(() => {
+    const uniqueIds = Array.from(new Set(spotterTargets.map((t) => t.id)));
+    return uniqueIds.filter(
+      (id) =>
+        spotterGuessedIds.includes(id) ||
+        spotterTargets.some(
+          (t) =>
+            t.id === id &&
+            (spotterGuessedIds.includes(t.code.toLowerCase()) ||
+              spotterGuessedIds.includes(t.name.toLowerCase()))
+        )
+    ).length;
+  }, [spotterTargets, spotterGuessedIds]);
+
+  const spotterTotalUniqueCount = useMemo(() => {
+    if (!spotterPlayWithLives) {
+      const fullPool = countryList.filter((c) => {
+        if (!c.name || !c.capital) return false;
+        if (spotterContinent === 'All') return true;
+        return c.continent.toLowerCase() === spotterContinent.toLowerCase();
+      });
+      return fullPool.length;
+    }
+    return new Set(spotterTargets.map((t) => t.id)).size;
+  }, [spotterTargets, spotterPlayWithLives, spotterContinent]);
+
   const spotterTarget = spotterTargets[spotterCurrentIndex] || null;
 
   return (
@@ -293,14 +322,30 @@ export default function App() {
           targetCountry={spotterTarget}
           score={spotterScore}
           streak={spotterStreak}
-          guessedCount={spotterGuessedIds.length}
-          totalRounds={spotterTargets.length}
+          guessedCount={spotterConqueredCount}
+          totalRounds={spotterTotalUniqueCount}
           continent={spotterContinent}
           onChangeContinent={(cont) => handleStartMapSpotter(cont, spotterDifficulty, spotterPlayWithLives)}
           playWithLives={spotterPlayWithLives}
           onToggleLivesMode={(enabled) => {
             setSpotterPlayWithLives(enabled);
-            if (enabled) setSpotterLives(3);
+            if (enabled) {
+              setSpotterLives(3);
+            } else {
+              // Switched to Infinite mode: expand targets to include ALL countries in this continent!
+              const fullPool = countryList.filter((c) => {
+                if (!c.name || !c.capital) return false;
+                if (spotterContinent === 'All') return true;
+                return c.continent.toLowerCase() === spotterContinent.toLowerCase();
+              });
+              setSpotterTargets((prev) => {
+                const existingIds = new Set(prev.map((t) => t.id));
+                const missing = fullPool.filter((c) => !existingIds.has(c.id));
+                return missing.length > 0
+                  ? [...prev, ...missing.sort(() => 0.5 - Math.random())]
+                  : prev;
+              });
+            }
           }}
           lives={spotterLives}
           difficulty={spotterDifficulty}
