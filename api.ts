@@ -837,8 +837,58 @@ Respond strictly in valid JSON with this exact schema:
       .replace(/\s+/g, ' ')
       .trim();
 
+  const generateDefaultRelatedQuestions = (q: string, targetCountry?: string | null, topic?: string | null): string[] => {
+    const lower = q.toLowerCase();
+    if (lower.includes('morocco') || lower.includes('western sahara') || lower.includes('sahrawi')) {
+      return [
+        'What is the Polisario Front?',
+        'Which countries recognize Moroccan sovereignty over Western Sahara?',
+        'What is the 2,700 km Western Sahara Berm sand wall?',
+        'What is the role of the UN MINURSO peacekeeping mission?'
+      ];
+    }
+    if (lower.includes('c-17') || lower.includes('c17') || lower.includes('airlifter') || lower.includes('transport plane')) {
+      return [
+        'What strategic transport planes does Russia use?',
+        'Which countries operate the Boeing C-17 Globemaster III?',
+        'How much cargo can the C-17 Globemaster carry?',
+        'How does the Ilyushin Il-76 compare to the C-17?'
+      ];
+    }
+    if (lower.includes('biggest plane') || lower.includes('an-225') || lower.includes('antonov')) {
+      return [
+        'What was the Antonov An-225 used for before its destruction?',
+        'What is the largest operational aircraft in the US Air Force?',
+        'What is the Stratolaunch Roc aircraft?',
+        'How does the C-5 Galaxy compare to the Antonov An-124?'
+      ];
+    }
+    if (targetCountry) {
+      return [
+        `What is the military strength and rank of ${targetCountry}?`,
+        `What is the population and economic output of ${targetCountry}?`,
+        `What are the major territorial borders or disputes of ${targetCountry}?`,
+        `Who is the current leader of ${targetCountry}?`
+      ];
+    }
+    if (lower.includes('navy') || lower.includes('naval') || lower.includes('fleet')) {
+      return [
+        'What are the top 10 naval forces in the world?',
+        'Which country has the most aircraft carriers?',
+        'Which country has the largest submarine fleet in service?',
+        'What rank is Portugal in naval force?'
+      ];
+    }
+    return [
+      'What are the top 10 military superpowers in the world?',
+      'What are the most active armed conflicts right now?',
+      'What is the largest country in the world by land area?',
+      'Which countries possess nuclear weapons?'
+    ];
+  };
+
   app.post('/api/ask-search', async (req, res) => {
-    const { query } = req.body;
+    const { query, conversationHistory } = req.body;
     const cleanQuery = typeof query === 'string' ? query.trim() : '';
 
     if (!cleanQuery) {
@@ -849,7 +899,9 @@ Respond strictly in valid JSON with this exact schema:
     }
 
     // High-speed memory cache check (0ms response time for repeat/similar queries)
-    const cacheKey = normalizeKey(cleanQuery);
+    const hasHistory = Array.isArray(conversationHistory) && conversationHistory.length > 0;
+    const historySuffix = hasHistory ? conversationHistory.map((h: any) => h.query || h.question || '').slice(-2).join('::') : '';
+    const cacheKey = normalizeKey(cleanQuery + (historySuffix ? `__ctx_${historySuffix}` : ''));
     const cached = SERVER_QUERY_CACHE.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
       return res.json({
@@ -915,6 +967,12 @@ Respond strictly in valid JSON with this exact schema:
             'Payload: 250 tonnes (550,000 lb / capable of transporting up to four main battle tanks).',
             'Stratolaunch Roc: Holds current wingspan record (117m / 385 ft) as a dual-fuselage rocket carrier aircraft.',
           ],
+          relatedQuestions: [
+            'What was the Antonov An-225 used for before its destruction?',
+            'What is the largest operational aircraft in the US Air Force?',
+            'What is the Stratolaunch Roc aircraft?',
+            'How does the C-5 Galaxy compare to the Antonov An-124?'
+          ],
           source: 'intelligence-registry',
           media: LOCAL_VISUAL_ASSETS[0].media,
         };
@@ -933,8 +991,65 @@ Respond strictly in valid JSON with this exact schema:
             "Russia's primary strategic airlifters are the Ilyushin Il-76 and the giant Antonov An-124.",
             'Russia has never purchased, operated, or been supplied with C-17 aircraft.',
           ],
+          relatedQuestions: [
+            'What strategic transport planes does Russia use?',
+            'Which countries operate the Boeing C-17 Globemaster III?',
+            'How much cargo can the C-17 Globemaster carry?',
+            'How does the Ilyushin Il-76 compare to the C-17?'
+          ],
           source: 'intelligence-registry',
           media: LOCAL_VISUAL_ASSETS[1].media,
+        };
+      }
+
+      // Example 3: Does Morocco control Western Sahara?
+      if (
+        (has('western sahara') || has('sahrawi') || has('morocco') || has('moroccan')) &&
+        (has('control') || has('own') || has('rule') || has('annex') || has('dispute') || has('belong') || (has('morocco') && has('western sahara')))
+      ) {
+        return {
+          answer:
+            "Morocco administers and de facto controls approximately 80% of Western Sahara (the Southern Provinces), fortified behind a 2,700-kilometer sand wall known as the Moroccan Berm. The Sahrawi nationalist movement, the Polisario Front (governing the Sahrawi Arab Democratic Republic / SADR), controls the remaining 20% eastern inland strip ('Free Zone') from bases and refugee camps in Tindouf, Algeria. The United States and Israel officially recognize Moroccan sovereignty over Western Sahara, with broad international backing for Morocco's Autonomy Plan from nations like France and Spain, while the United Nations officially considers Western Sahara a Non-Self-Governing Territory pending a self-determination referendum overseen by MINURSO.",
+          targetCountry: 'Morocco',
+          targetCountryCode: 'MA',
+          otherCountries: ['Western Sahara', 'Algeria', 'Mauritania', 'United States'],
+          keyFacts: [
+            'Morocco controls ~80% of the territory, including the Atlantic coastline, major cities (Laayoune, Dakhla), and the Bou Craa phosphate mines.',
+            'The Polisario Front controls ~20% of the territory in the inland eastern desert ("Free Zone") and operates from refugee camps in Tindouf, Algeria.',
+            'The 2,700 km (1,700 mi) Moroccan Berm (sand wall) is one of the world\'s longest active military fortifications and minefields.',
+            'The UN mission MINURSO was established in 1991 to monitor the ceasefire and organize a referendum on self-determination.',
+          ],
+          relatedQuestions: [
+            'What is the Polisario Front?',
+            'Which countries recognize Moroccan sovereignty over Western Sahara?',
+            'What is the Western Sahara Berm sand wall?',
+            'What is the role of the United Nations MINURSO mission?',
+          ],
+          source: 'intelligence-registry',
+        };
+      }
+
+      // Example 4: What is the Polisario Front?
+      if (has('polisario') || (has('sadr') && (has('sahrawi') || has('front') || has('who')))) {
+        return {
+          answer:
+            "The Polisario Front (Frente Popular de Liberación de Saguía el Hamra y Río de Oro) is a Sahrawi nationalist politico-military movement formed in 1973 to fight for the self-determination and independence of Western Sahara. In 1976, it proclaimed the Sahrawi Arab Democratic Republic (SADR), which is a full member state of the African Union (AU). Led by Secretary-General Brahim Ghali, the movement maintains headquarters in the refugee camps of Tindouf, Algeria, and commands the Sahrawi Popular Liberation Army (SPLA), which controls the eastern 20% of Western Sahara beyond the Moroccan Wall.",
+          targetCountry: 'Western Sahara',
+          targetCountryCode: 'EH',
+          otherCountries: ['Morocco', 'Algeria', 'Mauritania'],
+          keyFacts: [
+            'Formed in May 1973 initially to wage guerrilla resistance against Spanish colonial rule in Spanish Sahara.',
+            'Proclaimed the Sahrawi Arab Democratic Republic (SADR) in February 1976, which is recognized by the African Union.',
+            'Commands the Sahrawi Popular Liberation Army (SPLA), armed with mobile armor, rocket artillery, and MANPADS.',
+            'Governs over 100,000 Sahrawi refugees residing in five major camps near Tindouf, Algeria.',
+          ],
+          relatedQuestions: [
+            'Does Morocco control Western Sahara?',
+            'Why does Algeria back the Polisario Front?',
+            'What is the Moroccan Berm sand wall?',
+            'Which countries recognize the Sahrawi Republic (SADR)?',
+          ],
+          source: 'intelligence-registry',
         };
       }
 
@@ -1807,8 +1922,16 @@ Respond strictly in valid JSON with this exact schema:
         },
       });
 
+      let conversationContext = '';
+      if (Array.isArray(conversationHistory) && conversationHistory.length > 0) {
+        conversationContext = `\n\nPREVIOUS CONVERSATION THREAD (Context for follow-up question):\n` +
+          conversationHistory.slice(-4).map((h: any, idx: number) => `User asked: "${h.query || h.question}"\nAnswer provided: "${h.answer}"`).join('\n\n') +
+          `\n\nThe user's current question is a follow-up to this conversation. Answer accurately in light of this context (resolving pronouns, acronyms, or references to the subject previously discussed).`;
+      }
+
       const prompt = `You are an expert global intelligence officer and world atlas assistant.
 The user is asking a factual question about a country, world geography, military equipment, airlifters, tanks, navy, weapons, territory, borders, leaders, history, location, or world facts.
+${conversationContext}
 User question: "${cleanQuery}"
 
 CRITICAL INSTRUCTIONS:
@@ -1821,6 +1944,7 @@ CRITICAL INSTRUCTIONS:
      AND populate the "directRank" JSON field.
    - For "what is the biggest plane in the world", state definitively that the Antonov An-225 Mriya was the heaviest and largest cargo transport aircraft ever built (up to its 2022 destruction), while the Stratolaunch Roc currently holds the operational wingspan record (117m / 385 ft).
    - For "does russia have c 17", answer clearly that No, Russia does not have or operate the Boeing C-17 Globemaster III, and mention Russia's heavy strategic equivalents (Ilyushin Il-76 and Antonov An-124).
+   - For "does morocco control western sahara", explain that Morocco administers approximately 80% behind the 2,700 km sand berm, while the Polisario Front controls the eastern 20% strip, and explain the international recognition status.
    - For "where is australia", describe its hemisphere, continent, surrounding oceans, capital Canberra, and position.
    - For "who is the president of france", state that the president of France is Emmanuel Macron.
 
@@ -1839,9 +1963,16 @@ CRITICAL INSTRUCTIONS:
 
 3. Identify the primary entity ("subjectTitle"), Wikipedia lookup ("wikiQuery"), target country name ("targetCountry"), ISO code ("targetCountryCode"), "otherCountries", and 2-4 "keyFacts".
 
+4. ALWAYS PROVIDE 3 TO 4 RELEVANT FOLLOW-UP QUESTIONS ("relatedQuestions"):
+   Supply an array of 3 or 4 engaging, highly relevant follow-up questions that a user can ask next about this subject.
+   For example:
+   - If user asks about Western Sahara: ["What is the Polisario Front?", "Which countries recognize Moroccan sovereignty?", "What is the Western Sahara Berm sand wall?", "What is the role of UN MINURSO?"]
+   - If user asks about the biggest plane: ["What was the Antonov An-225 used for?", "What is the largest transport plane in the US Air Force?", "What is the Stratolaunch Roc aircraft?", "How does the C-5 Galaxy compare to the An-124?"]
+
 Respond STRICTLY in valid JSON matching this schema:
 {
   "answer": "string (clear, direct, informative answer without fluff)",
+  "relatedQuestions": ["string", "string", "string", "string"],
   "directRank": {
     "rank": "string (e.g. #23)",
     "subRank": "string or null (e.g. #44 Overall GFP)",
@@ -1908,6 +2039,7 @@ Respond STRICTLY in valid JSON matching this schema:
           targetCountryCode: null,
           otherCountries: [],
           keyFacts: [],
+          relatedQuestions: generateDefaultRelatedQuestions(cleanQuery),
         };
       }
 
@@ -1917,6 +2049,9 @@ Respond STRICTLY in valid JSON matching this schema:
       return sendCachedResponse({
         mediaQuery: resolvedMedia ? null : parsed.wikiQuery || parsed.subjectTitle || parsed.targetCountry || cleanQuery,
         answer: parsed.answer || 'Answer generated.',
+        relatedQuestions: Array.isArray(parsed.relatedQuestions) && parsed.relatedQuestions.length > 0
+          ? parsed.relatedQuestions
+          : generateDefaultRelatedQuestions(cleanQuery, parsed.targetCountry, parsed.subjectTitle),
         targetCountry: parsed.targetCountry || null,
         targetCountryCode: parsed.targetCountryCode || null,
         otherCountries: Array.isArray(parsed.otherCountries) ? parsed.otherCountries : [],
@@ -1941,9 +2076,30 @@ Respond STRICTLY in valid JSON matching this schema:
       }
       return sendCachedResponse({
         ...fallback,
+        relatedQuestions:
+          fallback.relatedQuestions || generateDefaultRelatedQuestions(cleanQuery, fallback.targetCountry),
         source: 'intelligence-registry',
       });
     }
+  });
+
+  // Dynamic conflicts status endpoint: supplies active vs concluded wars status
+  app.get('/api/conflicts-status', (_req, res) => {
+    return res.json({
+      success: true,
+      lastUpdated: '2026-03-31',
+      stoppedWarsRemovedByDefault: true,
+      concludedConflicts: [
+        {
+          id: 'nagorno-karabakh',
+          name: 'Nagorno-Karabakh Conflict',
+          status: 'Concluded & Ceased (Jan 2024)',
+          resolution: 'Dissolution of the Republic of Artsakh; sovereign territorial control restored to Azerbaijan.',
+          isEnded: true,
+        },
+      ],
+      notice: 'Active wars only are displayed on the map. Concluded conflicts are removed from live combat flashpoints.',
+    });
   });
 
   return app;

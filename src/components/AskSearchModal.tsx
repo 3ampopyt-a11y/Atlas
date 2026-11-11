@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { CountryData, AskSearchResponse, AskSearchHistoryItem, VisualMedia, RankedListItem } from '../types.ts';
+import { CountryData, AskSearchResponse, AskSearchHistoryItem, VisualMedia, RankedListItem, ConversationTurn } from '../types.ts';
 import { countryList, getCountryByName } from '../data/countriesData.ts';
 import { findVisualMedia, fetchWikiMediaFor } from '../utils/visualMediaRegistry.ts';
 import { getOwnFlagUrl } from '../utils/ownFlags.ts';
@@ -31,6 +31,8 @@ import {
   Award,
   Crown,
   ChevronRight,
+  MessageSquare,
+  CornerDownRight,
 } from 'lucide-react';
 
 interface AskSearchModalProps {
@@ -72,6 +74,8 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [currentResult, setCurrentResult] = useState<AskSearchHistoryItem | null>(null);
   const [history, setHistory] = useState<AskSearchHistoryItem[]>([]);
+  const [thread, setThread] = useState<ConversationTurn[]>([]);
+  const [followUpInput, setFollowUpInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [imgLoadError, setImgLoadError] = useState(false);
   const [rankFilterTab, setRankFilterTab] = useState<'all' | 'top10' | '11-25' | '26-50'>('all');
@@ -190,6 +194,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
       success: true,
       query: trimmed,
       answer: data.answer,
+      relatedQuestions: data.relatedQuestions || [],
       targetCountry: data.targetCountry || matched?.name || null,
       targetCountryCode: data.targetCountryCode || matched?.code || null,
       otherCountries: data.otherCountries || [],
@@ -207,14 +212,29 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
     setHistory((prev) => [historyItem, ...prev.filter((h) => h.query !== trimmed).slice(0, 8)]);
   };
 
-  const handleAsk = async (searchQuery: string) => {
+  const handleAsk = async (searchQuery: string, isFollowUp: boolean = false) => {
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
 
+    if (!isFollowUp) {
+      setThread([]);
+      setQuery(trimmed);
+    } else {
+      setFollowUpInput('');
+    }
+
+    // Build context thread for follow-up questions
+    const conversationHistory = isFollowUp && currentResult
+      ? [...thread, { query: currentResult.query, answer: currentResult.answer, timestamp: currentResult.timestamp }]
+      : [];
+
     // Instant client-side cache return (0ms latency)
-    const cacheKey = normalizeQueryStr(trimmed);
+    const cacheKey = normalizeQueryStr(trimmed) + (isFollowUp && conversationHistory.length > 0 ? `__ctx_${conversationHistory.length}` : '');
     const cachedData = CLIENT_QUERY_CACHE.get(cacheKey);
     if (cachedData) {
+      if (isFollowUp && currentResult) {
+        setThread((prev) => [...prev, { query: currentResult.query, answer: currentResult.answer, keyFacts: currentResult.keyFacts, timestamp: currentResult.timestamp }]);
+      }
       presentResult({ source: 'intelligence-registry', ...cachedData }, trimmed, 'cached');
       setLoading(false);
       setError(null);
@@ -224,14 +244,15 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
     setError(null);
     setImgLoadError(false);
 
-    // Facts the atlas already holds (capitals, leaders, populations, areas, rankings...) are
-    // answered on the spot, without a round trip to the server or Gemini
-    const localAnswer = answerFromLocalData(trimmed);
-    if (localAnswer) {
-      CLIENT_QUERY_CACHE.set(cacheKey, localAnswer);
-      setLoading(false);
-      presentResult(localAnswer, trimmed, 'local');
-      return;
+    // If standalone query, check instant local facts
+    if (!isFollowUp) {
+      const localAnswer = answerFromLocalData(trimmed);
+      if (localAnswer) {
+        CLIENT_QUERY_CACHE.set(cacheKey, localAnswer);
+        setLoading(false);
+        presentResult(localAnswer, trimmed, 'local');
+        return;
+      }
     }
 
     setLoading(true);
@@ -242,7 +263,7 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ query: trimmed }),
+        body: JSON.stringify({ query: trimmed, conversationHistory }),
       });
 
       if (!res.ok) {
@@ -255,6 +276,10 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
         setError(data.error);
         setLoading(false);
         return;
+      }
+
+      if (isFollowUp && currentResult) {
+        setThread((prev) => [...prev, { query: currentResult.query, answer: currentResult.answer, keyFacts: currentResult.keyFacts, timestamp: currentResult.timestamp }]);
       }
 
       // Store in client cache for immediate 0ms future returns
@@ -534,6 +559,51 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
           {/* Current Answer Result */}
           {currentResult && !loading && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              {/* Prior Conversation Thread History (if user asked related questions) */}
+              {thread.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-cyan-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Previous Related Questions ({thread.length})</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setThread([]);
+                        setQuery('');
+                        inputRef.current?.focus();
+                      }}
+                      className="text-[11px] text-slate-400 hover:text-white font-semibold transition-colors"
+                    >
+                      Clear Thread &amp; Start Fresh
+                    </button>
+                  </div>
+                  <div className="space-y-1.5">
+                    {thread.map((turn, tIdx) => (
+                      <div
+                        key={tIdx}
+                        className="p-2 rounded-xl bg-slate-900/90 border border-slate-800 text-xs flex items-center justify-between gap-3 group"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shrink-0">
+                            Q{tIdx + 1}
+                          </span>
+                          <span className="text-slate-300 truncate font-medium">&ldquo;{turn.query}&rdquo;</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleAsk(turn.query)}
+                          className="text-[10.5px] text-cyan-400 hover:text-cyan-200 shrink-0 font-medium"
+                        >
+                          View Answer ↺
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Question Badge */}
               <div className="flex items-center justify-between text-xs text-slate-400 pb-1 border-b border-slate-800/60">
                 <div className="flex items-center gap-2">
@@ -719,6 +789,110 @@ export const AskSearchModal: React.FC<AskSearchModalProps> = ({
                   <span className="text-[11px] text-slate-400">
                     Scroll down for full details & map
                   </span>
+                </div>
+              </div>
+
+              {/* Ask a Related Question & Follow-Up Section */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-cyan-950/40 via-slate-900 to-indigo-950/40 border-2 border-cyan-500/40 shadow-xl space-y-3.5 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-slate-800/80">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        <span>Ask a Related Question</span>
+                        <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/30">
+                          Connected Intel
+                        </span>
+                      </h4>
+                      <p className="text-[11px] text-cyan-200/80">
+                        Continue the conversation — ask related questions or explore connected facts
+                      </p>
+                    </div>
+                  </div>
+                  {thread.length > 0 && (
+                    <span className="self-start sm:self-center text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                      Thread #{thread.length + 1}
+                    </span>
+                  )}
+                </div>
+
+                {/* Clickable Suggested Related Questions Chips */}
+                {currentResult.relatedQuestions && currentResult.relatedQuestions.length > 0 && (
+                  <div className="space-y-2">
+                    <span className="text-[10.5px] font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Suggested Related Questions (Click to Ask):</span>
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {currentResult.relatedQuestions.map((rq, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleAsk(rq, true)}
+                          disabled={loading}
+                          className="p-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 hover:border-cyan-400 text-left transition-all group flex items-start justify-between gap-2 shadow-sm hover:shadow-cyan-950/40 active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+                        >
+                          <div className="flex items-start gap-2 flex-1 min-w-0">
+                            <span className="text-cyan-400 font-bold text-sm leading-none mt-0.5">↳</span>
+                            <span className="text-xs text-slate-200 group-hover:text-cyan-200 font-semibold leading-snug">
+                              {rq}
+                            </span>
+                          </div>
+                          <div className="w-5 h-5 rounded-md bg-cyan-500/10 group-hover:bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0 border border-cyan-500/20 group-hover:border-cyan-500/40 transition-colors mt-0.5">
+                            <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Interactive Follow-Up Input Field */}
+                <div className="pt-2 border-t border-slate-800/80 space-y-1.5">
+                  <div className="flex items-center justify-between text-[10.5px]">
+                    <span className="font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                      <MessageSquare className="w-3 h-3 text-cyan-400" />
+                      <span>Ask Your Own Follow-Up Question:</span>
+                    </span>
+                    <span className="text-slate-500 text-[10px]">Maintains context of this topic</span>
+                  </div>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (followUpInput.trim()) {
+                        handleAsk(followUpInput.trim(), true);
+                        setFollowUpInput('');
+                      }
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={followUpInput}
+                        onChange={(e) => setFollowUpInput(e.target.value)}
+                        placeholder={`Ask another question related to this (e.g. "Who is their leader?", "What does the UN say?")...`}
+                        className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/30 shadow-inner"
+                      />
+                      <CornerDownRight className="w-4 h-4 text-cyan-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading || !followUpInput.trim()}
+                      className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-40 disabled:pointer-events-none shrink-0 shadow-md flex items-center gap-1.5 active:scale-95 cursor-pointer"
+                    >
+                      {loading ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <span>Ask Related</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
+                  </form>
                 </div>
               </div>
 

@@ -264,6 +264,14 @@ export interface AskSearchResponse {
   rankedList?: RankedList | null;
   // Photo search term to fetch in the background, so answers don't wait on Wikipedia
   mediaQuery?: string | null;
+  relatedQuestions?: string[];
+}
+
+export interface ConversationTurn {
+  query: string;
+  answer: string;
+  keyFacts?: string[];
+  timestamp: number;
 }
 
 export interface AskSearchHistoryItem extends AskSearchResponse {
@@ -271,4 +279,5 @@ export interface AskSearchHistoryItem extends AskSearchResponse {
   query: string;
   timestamp: number;
   matchedCountry?: CountryData | null;
+  thread?: ConversationTurn[];
 }

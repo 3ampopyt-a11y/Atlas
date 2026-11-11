@@ -578,6 +578,35 @@ const rankCountries = (q: string, continent: CountryData['continent'] | null): A
 
 // ---------- Entry point ----------
 
+function attachRelatedQuestions(res: AskSearchResponse | null, query: string, country?: CountryData): AskSearchResponse | null {
+  if (!res) return null;
+  if (res.relatedQuestions && res.relatedQuestions.length > 0) return res;
+
+  if (country) {
+    res.relatedQuestions = [
+      `What is the military rank of ${country.name}?`,
+      `What is the population and capital of ${country.name}?`,
+      `What are the national dishes and foods of ${country.name}?`,
+      `Who is the current leader of ${country.name}?`
+    ];
+  } else if (res.targetCountry) {
+    res.relatedQuestions = [
+      `What is the military strength of ${res.targetCountry}?`,
+      `What is the population of ${res.targetCountry}?`,
+      `What are the major cities in ${res.targetCountry}?`,
+      `Who leads ${res.targetCountry}?`
+    ];
+  } else {
+    res.relatedQuestions = [
+      'What are the top 10 military powers in the world?',
+      'What are the largest countries by land area?',
+      'What are the most populous countries in the world?',
+      'What are the most active conflict zones today?'
+    ];
+  }
+  return res;
+}
+
 export function answerFromLocalData(query: string): AskSearchResponse | null {
   const q = normalize(query);
   if (q.trim().length < 3 || has(q, NEEDS_REASONING)) return null;
@@ -585,11 +614,11 @@ export function answerFromLocalData(query: string): AskSearchResponse | null {
   const { countries, continent, rest } = findEntities(q);
 
   if (countries.length === 0) {
-    return rankCountries(q, continent);
+    return attachRelatedQuestions(rankCountries(q, continent), query);
   }
 
   if (countries.length === 2 && has(q, COMPARE)) {
-    return compareCountries(countries[0], countries[1], q);
+    return attachRelatedQuestions(compareCountries(countries[0], countries[1], q), query, countries[0]);
   }
 
   if (countries.length !== 1) return null;
@@ -597,8 +626,8 @@ export function answerFromLocalData(query: string): AskSearchResponse | null {
 
   const intents = detectIntents(q);
   if (intents.length > 0) {
-    return answerForCountry(country, intents);
+    return attachRelatedQuestions(answerForCountry(country, intents), query, country);
   }
 
-  return isBareCountryQuery(rest) ? overviewForCountry(country) : null;
+  return isBareCountryQuery(rest) ? attachRelatedQuestions(overviewForCountry(country), query, country) : null;
 }

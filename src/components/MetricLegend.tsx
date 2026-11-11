@@ -247,7 +247,7 @@ export const MetricLegend: React.FC<MetricLegendProps> = ({ metricMode, onChange
               <div className="flex items-center gap-2 sm:gap-3">
                 <span className="flex items-center gap-1 text-slate-200 font-semibold">
                   <span className="w-2 h-2 rounded-full bg-red-500 inline-block animate-ping" />
-                  <span>32 Active Wars, Civil Conflicts &amp; Small Insurgencies</span>
+                  <span>Active Wars &amp; Flashpoints (Stopped/Concluded Wars Removed)</span>
                 </span>
                 <span className="text-slate-500">•</span>
                 <span className="text-amber-300 font-semibold">Click any dot on the map for full troop numbers, tactics &amp; context</span>

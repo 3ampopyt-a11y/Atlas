@@ -234,21 +234,27 @@ export const WorldMap: React.FC<WorldMapProps> = ({
   // Altitude & Peaks mode interactive state & filters
   const [altitudeFilter, setAltitudeFilter] = useState<'all' | 'seven-summits' | 'peaks' | 'depressions'>('all');
   const [isAltitudeHudExpanded, setIsAltitudeHudExpanded] = useState<boolean>(true);
+  const [hideStoppedWars, setHideStoppedWars] = useState<boolean>(true);
+
+  const activeHotspots = useMemo(() => {
+    return hideStoppedWars ? MILITARY_HOTSPOTS.filter((h) => !h.isEnded && h.statusCategory !== 'ended') : MILITARY_HOTSPOTS;
+  }, [hideStoppedWars]);
 
   const filteredHotspots = useMemo(() => {
-    if (warFilter === 'all') return MILITARY_HOTSPOTS;
-    if (warFilter === 'major') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Major Interstate War');
-    if (warFilter === 'civil') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Civil War');
-    if (warFilter === 'small') return MILITARY_HOTSPOTS.filter((h) => h.conflictType === 'Insurgency & Guerrilla War');
+    let list = activeHotspots;
+    if (warFilter === 'all') return list;
+    if (warFilter === 'major') return list.filter((h) => h.conflictType === 'Major Interstate War');
+    if (warFilter === 'civil') return list.filter((h) => h.conflictType === 'Civil War');
+    if (warFilter === 'small') return list.filter((h) => h.conflictType === 'Insurgency & Guerrilla War');
     if (warFilter === 'border')
-      return MILITARY_HOTSPOTS.filter(
+      return list.filter(
         (h) =>
           h.conflictType === 'Territorial & Border Dispute' ||
           h.conflictType === 'Strategic Maritime Chokepoint' ||
           h.conflictType === 'Frozen Conflict & Armistice'
       );
-    return MILITARY_HOTSPOTS;
-  }, [warFilter]);
+    return list;
+  }, [warFilter, activeHotspots]);
 
   // Animation frame throttled drag rotation for 60fps/120fps performance
   const dragRafId = useRef<number | null>(null);
@@ -1930,7 +1936,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                       : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
                   }`}
                 >
-                  All (32)
+                  All ({activeHotspots.length})
                 </button>
                 <button
                   onClick={() => setWarFilter('major')}
@@ -1979,6 +1985,21 @@ export const WorldMap: React.FC<WorldMapProps> = ({
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
                   Standoffs
+                </button>
+              </div>
+
+              {/* Dynamic Stopped Wars Status & Filter Toggle */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px] text-slate-400 px-1">
+                <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{hideStoppedWars ? 'Stopped wars removed (Active combat only)' : 'Showing all including concluded wars'}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setHideStoppedWars(!hideStoppedWars)}
+                  className="text-[10px] font-mono text-cyan-400 hover:text-cyan-200 underline cursor-pointer transition-colors"
+                >
+                  {hideStoppedWars ? 'View Archive' : 'Active Only'}
                 </button>
               </div>
             </div>

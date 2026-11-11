@@ -66,7 +66,8 @@ export const DossierMilitaryTab: React.FC<DossierMilitaryTabProps> = ({
 
   const countryConflicts = useMemo(() => {
     const qName = country.name.toLowerCase();
-    return MILITARY_HOTSPOTS.filter((h) => {
+    // Exclude stopped / concluded wars so they don't show as active wars anymore
+    return MILITARY_HOTSPOTS.filter((h) => !h.isEnded && h.statusCategory !== 'ended').filter((h) => {
       const matchText = `${h.name} ${h.description} ${h.primaryForces.join(' ')} ${h.historicalContext} ${h.geopoliticalSignificance}`.toLowerCase();
       if (matchText.includes(qName)) return true;
       if (country.code === 'UA' && h.id === 'eastern-europe') return true;

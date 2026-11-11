@@ -22,6 +22,10 @@ export interface MilitaryHotspot {
   coordinates: [number, number]; // [lng, lat]
   threatLevel: 'Critical' | 'High' | 'Elevated';
   status: string;
+  isEnded?: boolean; // When true, the war has stopped/concluded
+  endedDate?: string; // Date or year the war stopped
+  statusCategory?: 'active' | 'ceasefire' | 'frozen' | 'ended';
+  resolution?: string; // Resolution context
   startDate: string;
   primaryForces: string[];
   description: string;
@@ -39,6 +43,13 @@ export interface MilitaryHotspot {
   geopoliticalSignificance: string;
   notableFrontlines: string[];
 }
+
+/**
+ * Returns only ongoing active wars and conflicts.
+ * If a war stopped or concluded, it is filtered out so it doesn't show anymore.
+ */
+export const getActiveHotspots = (hotspots: MilitaryHotspot[] = MILITARY_HOTSPOTS): MilitaryHotspot[] =>
+  hotspots.filter((h) => !h.isEnded && h.statusCategory !== 'ended');
 
 export const MILITARY_HOTSPOTS: MilitaryHotspot[] = [
   // ==========================================
@@ -808,10 +819,14 @@ export const MILITARY_HOTSPOTS: MilitaryHotspot[] = [
     region: 'Central Asia',
     coordinates: [46.75, 39.82],
     threatLevel: 'High',
-    status: 'Tense Border Standoff & Demarcation Disputes',
-    startDate: '1988 (Azerbaijan reconquest September 2023)',
+    status: 'Concluded War & Dissolution of Artsakh (Active War Ceased Jan 2024)',
+    isEnded: true,
+    endedDate: 'January 1, 2024',
+    statusCategory: 'ended',
+    resolution: 'The self-proclaimed Republic of Artsakh officially ceased to exist on January 1, 2024 following Azerbaijan restoring sovereign territorial control. Active warfare has concluded, transitioning to bilateral peace treaty negotiations.',
+    startDate: '1988 (Ended January 2024)',
     primaryForces: ['Azerbaijani Armed Forces', 'Armenian Armed Forces', 'EU Mission in Armenia (EUMA Civilian Monitors)'],
-    description: 'Post-war standoff along the high-altitude mountainous frontier between Armenia and Azerbaijan following the complete dissolution of the self-proclaimed Republic of Artsakh (Nagorno-Karabakh).',
+    description: 'Historical 3-decade war concluded in late 2023 with the dissolution of Artsakh. Tensions now transition to diplomatic border demarcation between Armenia and Azerbaijan.',
     keyAssets: 'Bayraktar TB2 & Harop Loitering Munitions, LORA Quasi-Ballistic Missiles, French CAESAR Howitzers, S-300 Air Defense',
     totalTroopCommitment: '~120,000 Border Troops & Armed Forces',
     troopBreakdown: [
